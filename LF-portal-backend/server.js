@@ -11,7 +11,7 @@ dotenv.config();
 
 const app = express();
 
-// Enable CORS - Use environment variable for production
+// Enable CORS
 app.use(cors({
   origin: process.env.FRONTEND_URL || 'http://localhost:3000',
   credentials: true
@@ -33,13 +33,11 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
-// Serve static files from uploads directory with proper CORS headers
+// Serve static files from uploads directory
 app.use('/uploads', (req, res, next) => {
   res.header('Access-Control-Allow-Origin', process.env.FRONTEND_URL || 'http://localhost:3000');
   res.header('Access-Control-Allow-Methods', 'GET, OPTIONS');
   res.header('Access-Control-Allow-Headers', 'Content-Type');
-  res.header('Cross-Origin-Resource-Policy', 'cross-origin');
-  res.header('Cross-Origin-Embedder-Policy', 'require-corp');
   
   const filePath = path.join(__dirname, 'uploads', req.path);
   if (fs.existsSync(filePath)) {
@@ -74,7 +72,6 @@ app.use((err, req, res, next) => {
 // Server initialization
 const PORT = process.env.PORT || 5000;
 
-// Don't sync on startup - use sync-db.js separately
 sequelize.sync().then(() => {
   app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
