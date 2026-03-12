@@ -1,0 +1,37 @@
+# Node modules
+node_modules/
+
+# Environment files
+.env
+.env.local
+.env.production
+
+# Uploads (images stored on server)
+uploads/
+
+# Build files
+build/
+dist/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Database files
+*.db
+*.sqlite
+
+# Temporary files
+*.tmp
+*.temp
