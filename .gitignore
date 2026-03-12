@@ -1,6 +1,9 @@
 node_modules/
 .env
-*.log
-.DS_Store
+.env.local
+.env.production
+uploads/
 build/
 dist/
+.DS_Store
+Thumbs.db
