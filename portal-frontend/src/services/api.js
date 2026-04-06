@@ -1,22 +1,31 @@
 import axios from 'axios';
 
-// Update this to match your deployment URL
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
 const api = axios.create({
   baseURL: API_URL,
-  headers: {
-    'Content-Type': 'application/json'
-  }
+  headers: { 'Content-Type': 'application/json' }
 });
 
+// JWT Token interceptor
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
+  if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
+
+// Handle 401 errors (auto-logout)
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.location.href = '/login';
+    }
+    return Promise.reject(error);
+  }
+);
 
 export const authService = {
   register: (data) => api.post('/auth/register', data),
@@ -26,16 +35,11 @@ export const authService = {
 
 export const itemService = {
   getItems: () => api.get('/items'),
-  createItem: (data) => {
-    const config = {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      }
-    };
-    return api.post('/items', data, config);
-  },
+  createItem: (data) => api.post('/items', data, { 
+    headers: { 'Content-Type': 'multipart/form-data' } 
+  }),
   claimItem: (data) => api.post('/items/claim', data),
-  getMyItems: () => api.get('/items/my')
+  getMyItems: () => api.get('/items/my-items')
 };
 
 export const messageService = {
@@ -52,5 +56,11 @@ export const appointmentService = {
 
 export const adminService = {
   getAllItems: () => api.get('/admin/items'),
+  getStats: () => api.get('/admin/stats'),
+  getLocationStats: () => api.get('/admin/location-stats'),
   approveItem: (id) => api.put(`/admin/items/${id}/approve`),
-  updateItemStatus: (id, status)
+  updateItemStatus: (id, status) => api.put(`/admin/items/${id}/status`, { status }),
+  deleteItem: (id) => api.delete(`/admin/items/${id}`),
+  getPendingClaims: () => api.get('/admin/claims/pending'),
+  approveClaim: (data) => api.post('/admin/claims/approve', data)
+};
