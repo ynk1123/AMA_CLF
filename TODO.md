@@ -1,10 +1,7 @@
-# Admin Claims Tab Integration TODO
+# Reset Password Email Fix TODO
 
-## Steps:
-1. [ ] Update portal-frontend/src/services/api.js - Add getPendingClaims and approveClaim to adminService
-2. [ ] Update portal-frontend/src/pages/Admin.js - Add states, functions, update tabs, add Claims tab content, cleanup duplicates
-3. [ ] Test frontend - Check claims tab loads data, approve/reject works
-4. [ ] Verify backend integration - Status updates reflect in items table
-
-Current progress: Step 1 complete (api.js updated). Step 2 in progress (Admin.js)
-
+- [x] Review and harden SMTP transporter in `LF-portal-backend/routes/auth.js`
+- [x] Improve reset email send payload and diagnostics in `LF-portal-backend/routes/auth.js`
+- [x] Improve standalone email tester in `LF-portal-backend/test-email.js`
+- [ ] Run email test script to validate SMTP authentication and sending
+- [ ] Summarize findings and exact fixes applied

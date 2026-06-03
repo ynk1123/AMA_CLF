@@ -46,12 +46,20 @@ const handleStudentLogin = async (e) => {
     e.preventDefault();
     setForgotLoading(true);
     setForgotMessage('');
+
     try {
-const response = await authService.forgotPassword({ email: forgotInput });
+      const value = forgotInput.trim();
+      const isEmail = value.includes('@');
+      const payload = isEmail ? { email: value } : { studentId: value };
+
+      const response = await authService.forgotPassword(payload);
       let msg = response.data.message;
       if (response.data.resetLink && !response.data.emailSent) msg += ' Link: ' + response.data.resetLink;
       setForgotMessage(msg);
-    } catch (err) { setForgotMessage(err.response?.data?.message || 'Failed'); }
+    } catch (err) {
+      setForgotMessage(err.response?.data?.message || 'Failed');
+    }
+
     setForgotLoading(false);
   };
 

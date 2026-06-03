@@ -11,23 +11,37 @@ const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'mysecretkey123';
 
 // Email Transporter
-var transporter = null;
+let transporter = null;
+const emailUser = (process.env.EMAIL_USER || '').trim();
+const emailPass = (process.env.EMAIL_PASS || '').trim();
+
 try {
-  if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
+  if (emailUser && emailPass) {
     transporter = nodemailer.createTransport({
-      service: 'gmail',
+      host: 'smtp.gmail.com',
+      port: 587,
+      secure: false, // TLS via STARTTLS
       auth: {
-        user: process.env.EMAIL_USER,
-pass: (process.env.EMAIL_PASS ?? '').trim()
+        user: emailUser,
+        pass: emailPass
       },
       tls: {
         rejectUnauthorized: false
       }
     });
-    console.log('✅ Email ready');
+
+    transporter.verify((verifyErr) => {
+      if (verifyErr) {
+        console.log('❌ SMTP verify failed:', verifyErr.message);
+      } else {
+        console.log('✅ Email transporter ready');
+      }
+    });
+  } else {
+    console.log('⚠️ EMAIL_USER / EMAIL_PASS missing. Reset emails will not be sent.');
   }
 } catch (err) {
-  console.log('⚠️ Email error:', err.message);
+  console.log('⚠️ Email transporter init error:', err.message);
 }
 
 // REQUEST PASSWORD RESET
@@ -52,21 +66,28 @@ router.post('/requestPasswordReset', async (req, res) => {
       { expiresIn: '1h' }
     );
 
-    const resetURL = 'http://localhost:3000/reset-password/' + user.id + '/' + token;
+    const resetURL = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/reset-password/${user.id}/${token}`;
 
     if (transporter) {
       try {
-        // Use authenticated sender explicitly as per Gmail requirements
         await transporter.sendMail({
-          from: process.env.EMAIL_USER,
+          from: `"LF Portal" <${emailUser}>`,
           to: user.email,
-          subject: 'Password Reset',
-          text: 'Reset link: ' + resetURL
+          subject: 'LF Portal Password Reset',
+          text: `You requested a password reset.\n\nUse this link to reset your password:\n${resetURL}\n\nThis link expires in 1 hour.`,
+          html: `
+            <p>You requested a password reset.</p>
+            <p>Click this link to reset your password:</p>
+            <p><a href="${resetURL}">${resetURL}</a></p>
+            <p>This link expires in 1 hour.</p>
+          `
         });
-        console.log('✅ Email sent!');
+        console.log(`✅ Reset email sent to ${user.email}`);
         return res.status(200).json({ message: 'Reset link sent to email!' });
       } catch (emailErr) {
-        console.log('❌ Email error:', emailErr.message);
+        console.log('❌ Email send error:', emailErr.message);
+        if (emailErr.code) console.log('SMTP code:', emailErr.code);
+        if (emailErr.response) console.log('SMTP response:', emailErr.response);
         return res.status(200).json({ message: 'Error sending email', resetLink: resetURL });
       }
     }
