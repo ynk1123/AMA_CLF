@@ -65,9 +65,36 @@
       setNewItem({ ...newItem, [e.target.name]: e.target.value });
     };
 
-    const handleFileChange = (e) => {
+  const handleFileChange = (e) => {
       setNewItem({ ...newItem, image: e.target.files[0] });
     };
+
+    // Standardized dropdown location options
+    const locationOptions = [
+      'Library',
+      'Computer Laboratory',
+      'Science Laboratory',
+      'Classroom',
+      'Cafeteria',
+      'Student Lounge',
+      'Registrar Office',
+      'Admissions Office',
+      'Guidance Office',
+      "Dean's Office",
+      'Faculty Room',
+      'Administration Building',
+      'IT Department',
+      'Conference Room',
+      'Auditorium',
+      'Parking Area',
+      'Main Gate',
+      'Security Office',
+      'Elevator Area',
+      'Emergency Stairs',
+      'Hallway',
+      'Restroom',
+      'Clinic'
+    ];
 
     const handleSubmit = async (e) => {
   e.preventDefault();
@@ -408,31 +435,7 @@
                 margin="normal"
                 required
               >
-                {[
-                  'Library',
-                  'Computer Laboratory',
-                  'Science Laboratory',
-                  'Classroom',
-                  'Cafeteria',
-                  'Student Lounge',
-                  'Registrar Office',
-                  'Admissions Office',
-                  'Guidance Office',
-                  "Dean's Office",
-                  'Faculty Room',
-                  'Administration Building',
-                  'IT Department',
-                  'Conference Room',
-                  'Auditorium',
-                  'Parking Area',
-                  'Main Gate',
-                  'Security Office',
-                  'Elevator Area',
-                  'Emergency Stairs',
-                  'Hallway',
-                  'Restroom',
-                  'Clinic'
-                ].map((loc) => (
+                {locationOptions.map((loc) => (
                   <MenuItem key={loc} value={loc}>{loc}</MenuItem>
                 ))}
               </TextField>
