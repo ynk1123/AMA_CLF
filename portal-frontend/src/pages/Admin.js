@@ -17,6 +17,12 @@ const Admin = () => {
 
   useEffect(() => { loadData(); }, []);
   useEffect(() => { if (tabValue === 1) loadPendingClaims(); }, [tabValue]);
+  useEffect(() => {
+  if (tabValue === 2) {
+    // Reload data when clicking Locations tab
+    loadData();
+  }
+}, [tabValue]);
 
   const loadData = async () => {
     try {
@@ -136,7 +142,7 @@ const Admin = () => {
 
       {tabValue === 2 && (
         <>
-          <Typography variant="h5" gutterBottom>📊 Lost Items by Location</Typography>
+<Typography variant="h5" gutterBottom>Lost Items by Location</Typography>
           <Typography variant="body2" color="text.secondary" gutterBottom>Most common locations where items are lost</Typography>
           
           {/* Bar Chart */}
@@ -180,7 +186,7 @@ const Admin = () => {
           </Paper>
 
           {/* Stats Table */}
-          <Typography variant="h6" gutterBottom sx={{ mt: 3 }}>📍 Location Statistics</Typography>
+          <Typography variant="h6" gutterBottom sx={{ mt: 3 }}> Location Statistics</Typography>
           <TableContainer component={Paper}>
             <Table size="small">
               <TableHead>
@@ -210,7 +216,7 @@ const Admin = () => {
 
           {/* Top 3 Hotspots */}
           <Paper sx={{ p: 3, mt: 3, bgcolor: '#fff3e0' }}>
-            <Typography variant="h6" gutterBottom>🏆 Top 3 Hotspot Locations</Typography>
+            <Typography variant="h6" gutterBottom> Top 3 Hotspot Locations</Typography>
             <Grid container spacing={2}>
               {locationStats.slice(0, 3).map((stat, index) => (
                 <Grid item xs={12} md={4} key={index}>
