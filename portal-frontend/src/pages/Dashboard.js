@@ -196,7 +196,7 @@
     return (
       <Box sx={{ mt: 4, px: 4 }}>
         <Typography variant="h4" gutterBottom>
-          Welcome, {user?.studentId}
+          Welcome, {user?.displayName || user?.studentId}
         </Typography>
 
         <Box sx={{ mb: 4 }}>
@@ -400,13 +400,42 @@
               />
               <TextField
                 fullWidth
+                select
                 label="Location"
                 name="location"
                 value={newItem.location}
                 onChange={handleTextChange}
                 margin="normal"
                 required
-              />
+              >
+                {[
+                  'Library',
+                  'Computer Laboratory',
+                  'Science Laboratory',
+                  'Classroom',
+                  'Cafeteria',
+                  'Student Lounge',
+                  'Registrar Office',
+                  'Admissions Office',
+                  'Guidance Office',
+                  "Dean's Office",
+                  'Faculty Room',
+                  'Administration Building',
+                  'IT Department',
+                  'Conference Room',
+                  'Auditorium',
+                  'Parking Area',
+                  'Main Gate',
+                  'Security Office',
+                  'Elevator Area',
+                  'Emergency Stairs',
+                  'Hallway',
+                  'Restroom',
+                  'Clinic'
+                ].map((loc) => (
+                  <MenuItem key={loc} value={loc}>{loc}</MenuItem>
+                ))}
+              </TextField>
               <TextField
                 fullWidth
                 label="Date"
