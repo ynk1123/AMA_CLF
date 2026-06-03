@@ -47,7 +47,7 @@ const Admin = () => {
   const handleApprove = async (id) => { await adminService.approveItem(id); loadData(); };
   const handleStatusChange = async (id, status) => { await adminService.updateItemStatus(id, status); loadData(); };
   const handleDeleteItem = async (id) => { await adminService.deleteItem(id); loadData(); };
-  const handleClaimApproval = async (id, status) => { await adminService.approveClaim({ id, status }); loadPendingClaims(); loadData(); };
+const handleClaimApproval = async (id, status) => { await adminService.approveClaim({ id, status }); loadPendingClaims(); };
   const handleViewItem = (item) => { setSelectedItem(item); setOpenItemDialog(true); };
   const handleAppointmentStatusChange = async (id, status) => { await appointmentService.updateStatus(id, status); loadData(); };
 
