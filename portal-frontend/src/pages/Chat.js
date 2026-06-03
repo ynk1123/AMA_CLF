@@ -21,10 +21,11 @@ const Chat = () => {
   useEffect(() => {
     if (selectedItem) {
       loadMessages(selectedItem.id);
-      const interval = setInterval(() => {
-        loadMessages(selectedItem.id);
-      }, 5000);
-      return () => clearInterval(interval);
+      // Disabled polling to avoid flooding the API while debugging send failures.
+      // const interval = setInterval(() => {
+      //   loadMessages(selectedItem.id);
+      // }, 5000);
+      // return () => clearInterval(interval);
     }
   }, [selectedItem]);
 

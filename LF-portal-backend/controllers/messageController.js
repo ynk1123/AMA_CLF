@@ -22,26 +22,53 @@ exports.getMessages = async (req, res) => {
 exports.createMessage = async (req, res) => {
   try {
     const { content, itemId } = req.body;
-    const userId = req.user.id;
-    
+
+    // req.user is normalized in middleware/auth.js
+    const resolvedUserId = req.user?.role === 'admin' ? 0 : req.user?.id;
+
+    // Validate inputs explicitly so frontend gets a clear error (not just 400)
+    if (resolvedUserId == null) {
+      return res.status(401).json({ message: 'Missing/invalid token (no user id)' });
+    }
+    if (!content || typeof content !== 'string' || !content.trim()) {
+      return res.status(400).json({ message: 'Invalid content' });
+    }
+    if (!itemId) {
+      return res.status(400).json({ message: 'Missing itemId' });
+    }
+
+    // For admin messages we use userId = 0, but DB has FK constraint to Users.
+    // Ensure we attach to a real admin user row (role='admin') if available.
+    let finalUserId = resolvedUserId;
+    if (req.user?.role === 'admin') {
+      const adminUser = await User.findOne({ where: { role: 'admin' } });
+      if (adminUser) finalUserId = adminUser.id;
+    }
+
     const message = await Message.create({
-      content,
+      content: content.trim(),
       itemId,
-      userId,
+      userId: finalUserId,
       timestamp: new Date()
     });
-    
+
     const messageWithUser = await Message.findOne({
       where: { id: message.id },
-      include: [
-        { model: User, as: 'User', attributes: ['studentId', 'displayName'] }
-      ]
+      include: [{ model: User, as: 'User', attributes: ['studentId', 'displayName'] }]
     });
-    
-    res.status(201).json(messageWithUser);
+
+    return res.status(201).json(messageWithUser);
   } catch (err) {
     console.error('Error in createMessage:', err);
-    res.status(400).json({ message: 'Failed to create message', error: err.message });
+
+    // Provide richer error details for admin/student debugging.
+    // Sequelize errors can have: err.errors, err.parent, etc.
+    return res.status(400).json({
+      message: 'Failed to create message',
+      error: err.message,
+      name: err.name,
+      details: err.errors || err.parent || null
+    });
   }
 };
 

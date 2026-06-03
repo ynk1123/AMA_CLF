@@ -10,7 +10,20 @@ const authenticate = (req, res, next) => {
 
   try {
     const verified = jwt.verify(token, jwtSecret);
-    req.user = verified;
+
+    // Normalize payloads so controllers can reliably use req.user.id and req.user.role.
+    // Student login JWTs are signed with: { id: user.id, ... }
+    // Admin login JWTs are signed with: { role: 'admin', ... } (may omit id)
+
+    if (verified?.role === 'admin') {
+      req.user = { id: verified.id ?? 0, role: 'admin' };
+    } else if (verified?.id != null) {
+      req.user = { id: verified.id, role: verified.role || 'student' };
+    } else {
+      // If token has neither role nor id, treat as invalid for our app.
+      return res.status(401).json({ message: 'Invalid token payload' });
+    }
+
     next();
   } catch (err) {
     return res.status(401).json({ message: 'Invalid token' });
