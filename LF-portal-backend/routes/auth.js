@@ -1,7 +1,7 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const User = require('../models/User');
+const User = require('../models/user');
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
 
@@ -18,7 +18,7 @@ try {
       service: 'gmail',
       auth: {
         user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
+pass: (process.env.EMAIL_PASS ?? '').trim()
       },
       tls: {
         rejectUnauthorized: false

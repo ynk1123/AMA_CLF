@@ -20,7 +20,15 @@ const upload = multer({ storage });
 // Create item - defaults to 'pending' status
 router.post('/', authenticate, upload.single('image'), async (req, res) => {
   try {
-    const { title, category, color, brand, description, location, date, type } = req.body;
+    const { title, category, color, brand, description, location, date } = req.body;
+
+
+    // Dashboard uses <input type="date" />, which should send YYYY-MM-DD.
+    // If the field is missing or invalid, PostgreSQL DATE will reject it.
+    let normalizedDate = date;
+    if (typeof normalizedDate !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(normalizedDate)) {
+      normalizedDate = null;
+    }
     
     let imageUrl = null;
     if (req.file) {
@@ -34,7 +42,7 @@ router.post('/', authenticate, upload.single('image'), async (req, res) => {
       brand,
       description,
       location,
-      date,
+      date: normalizedDate,
       status: 'pending', // Default to pending for admin approval
       imageUrl,
       userId: req.user.id
@@ -43,7 +51,11 @@ router.post('/', authenticate, upload.single('image'), async (req, res) => {
     res.status(201).json(item);
   } catch (err) {
     console.error('Error creating item:', err);
-    res.status(400).json({ message: 'Failed to create item', error: err.message });
+    res.status(400).json({
+      message: 'Failed to create item',
+      error: err.message,
+      details: err.errors || err
+    });
   }
 });
 
