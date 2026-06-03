@@ -4,23 +4,31 @@ import { useNavigate } from 'react-router-dom';
 import { authService } from '../services/api';
 
 const Register = () => {
-  const [formData, setFormData] = useState({ studentId: '', displayName: '', password: '' });
+  const [formData, setFormData] = useState({
+    studentId: '',
+    displayName: '',
+    email: '',
+    password: ''
+  });
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState(false);
+  const [success, setSuccess] = useState('');
   const navigate = useNavigate();
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault();
+    setError('');
+    setSuccess('');
+
     try {
       await authService.register(formData);
-      setSuccess(true);
-      setTimeout(() => navigate('/login'), 2000);
+      setSuccess('Registration successful! Redirecting to login...');
+      setTimeout(() => navigate('/'), 2000);
     } catch (err) {
-      setError('Registration failed. Student ID may already be registered.');
+      setError(err.response?.data?.message || 'Registration failed');
     }
   };
 
@@ -30,14 +38,14 @@ const Register = () => {
         <Typography variant="h4" align="center" gutterBottom>
           Register
         </Typography>
-        
-        {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
-        {success && <Alert severity="success" sx={{ mb: 2 }}>Registration successful! Redirecting to login...</Alert>}
 
-        <Box component="form" onSubmit={handleSubmit}>
+        {error && <Alert severity="error" sx={{ mt: 2 }}>{error}</Alert>}
+        {success && <Alert severity="success" sx={{ mt: 2 }}>{success}</Alert>}
+
+        <Box component="form" onSubmit={handleRegister} sx={{ mt: 3 }}>
           <TextField
             fullWidth
-            label="Student ID (USN)"
+            label="Student ID"
             name="studentId"
             value={formData.studentId}
             onChange={handleChange}
@@ -55,6 +63,17 @@ const Register = () => {
           />
           <TextField
             fullWidth
+            label="Email Address"
+            name="email"
+            type="email"
+            value={formData.email}
+            onChange={handleChange}
+            margin="normal"
+            required
+            placeholder="yourname@gmail.com"
+          />
+          <TextField
+            fullWidth
             label="Password"
             name="password"
             type="password"
@@ -67,7 +86,7 @@ const Register = () => {
             type="submit"
             fullWidth
             variant="contained"
-            sx={{ mt: 3, mb: 2 }}
+            sx={{ mt: 3 }}
           >
             Register
           </Button>

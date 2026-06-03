@@ -61,4 +61,8 @@ const Item = sequelize.define('Item', {
   },
 });
 
+// Association for admin claims include (Item -> User)
+const User = require('./user');
+Item.belongsTo(User, { foreignKey: 'userId', as: 'User' });
+
 module.exports = Item;

@@ -3,77 +3,53 @@ const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const path = require('path');
-const fs = require('fs');
-const dotenv = require('dotenv');
+const dotenv = require('dotenv');  // ← FIXED: require('dotenv')
 const { sequelize } = require('./config/database');
 
 dotenv.config();
 
 const app = express();
 
-// Enable CORS
+// CORS FIRST
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  origin: ['http://localhost:3000', 'http://localhost:5173'],
   credentials: true
 }));
 
-// Security middleware
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// ⭐ STATIC IMAGES - SIMPLE & WORKING
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+// Security
 app.use(helmet({
-  contentSecurityPolicy: false,
-  crossOriginEmbedderPolicy: false
+  contentSecurityPolicy: false
 }));
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
 // Rate limiting
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, 
-  max: 100 
-});
+const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 100 });
 app.use(limiter);
 
-// Serve static files from uploads directory
-app.use('/uploads', (req, res, next) => {
-  res.header('Access-Control-Allow-Origin', process.env.FRONTEND_URL || 'http://localhost:3000');
-  res.header('Access-Control-Allow-Methods', 'GET, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type');
-  
-  const filePath = path.join(__dirname, 'uploads', req.path);
-  if (fs.existsSync(filePath)) {
-    res.sendFile(filePath);
-  } else {
-    next();
-  }
-});
-
 // Routes
-const authRoutes = require('./routes/auth');
-app.use('/api/auth', authRoutes);
+app.use('/api/auth', require('./routes/auth'));
+app.use('/api/items', require('./routes/item'));
+app.use('/api/messages', require('./routes/message'));
+app.use('/api/appointments', require('./routes/appointment'));
+app.use('/api/admin', require('./routes/admin'));
 
-const itemRoutes = require('./routes/item');
-app.use('/api/items', itemRoutes);
-
-const messageRoutes = require('./routes/message');
-app.use('/api/messages', messageRoutes);
-
-const appointmentRoutes = require('./routes/appointment');
-app.use('/api/appointments', appointmentRoutes);
-
-const adminRoutes = require('./routes/admin');
-app.use('/api/admin', adminRoutes);
-
-// Error handling middleware
+// Error handler
 app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({ message: 'Something went wrong!' });
+  console.error('ERROR:', err);
+  res.status(500).json({ message: err.message });
 });
 
-// Server initialization
 const PORT = process.env.PORT || 5000;
 
 sequelize.sync().then(() => {
+  console.log('✅ Database connected');
   app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+    console.log(`🚀 Server: http://localhost:${PORT}`);
+    console.log(`📁 Images: http://localhost:${PORT}/uploads`);
   });
-}).catch(err => console.log(err));
+}).catch(err => console.error('DB Error:', err));

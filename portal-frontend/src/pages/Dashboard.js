@@ -186,18 +186,11 @@
     const getImageUrl = (url) => {
   if (!url) return '';
   
-  // If it already has full URL, return as is
+  // Full URL already
   if (url.startsWith('http')) return url;
   
-  // Remove any existing base URL if somehow stored
-  let filename = url.replace('http://localhost:5000/', '').replace('http://localhost:5000', '');
-  
-  // Ensure it starts with /uploads/
-  if (!filename.startsWith('/uploads/')) {
-    filename = '/uploads/' + filename.replace('/uploads', '');
-  }
-  
-  return `http://localhost:5000${filename}`;
+  // Backend format: /uploads/filename.jpg
+  return `http://localhost:5000${url}`;
 };
 
     return (

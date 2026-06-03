@@ -1,7 +1,7 @@
-const Item = require('../models/Item');
-const User = require('../models/User');
+const Item = require('../models/item');
+const User = require('../models/user');
 const Appointment = require('../models/appointment');
-const { Op } = require('sequelize');
+
 
 exports.getAllItems = async (req, res) => {
   try {

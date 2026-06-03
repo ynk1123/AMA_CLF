@@ -27,11 +27,23 @@ api.interceptors.response.use(
   }
 );
 
+
+
+
+
+
 export const authService = {
+
   register: (data) => api.post('/auth/register', data),
   login: (data) => api.post('/auth/login', data),
-  adminLogin: (data) => api.post('/auth/admin-login', data)
+  adminLogin: (data) => api.post('/auth/admin-login', data),
+  forgotPassword: (data) => api.post('/auth/requestPasswordReset', data),
+
+  // Backend expects: POST /api/auth/resetPassword/:id/:token with body { password }
+  resetPassword: ({ id, token, password }) =>
+    api.post(`/auth/resetPassword/${id}/${token}`, { password })
 };
+
 
 export const itemService = {
   getItems: () => api.get('/items'),
@@ -64,3 +76,6 @@ export const adminService = {
   getPendingClaims: () => api.get('/admin/claims/pending'),
   approveClaim: (data) => api.post('/admin/claims/approve', data)
 };
+
+// NOTE: authService already contains request/reset endpoints in this file.
+
