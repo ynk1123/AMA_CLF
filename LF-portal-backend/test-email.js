@@ -1,19 +1,23 @@
 const nodemailer = require('nodemailer');
 require('dotenv').config();
 
-const emailUser = (process.env.EMAIL_USER || '').trim();
-const emailPass = (process.env.EMAIL_PASS || '').trim();
+// Use Gmail app password
+const emailUser = 'campuslostandfoundama@gmail.com';
+const emailPass = 'epje cstg rdvd wnzr';
 const to = process.argv[2] || emailUser;
 
-if (!emailUser || !emailPass) {
-  console.error('❌ Missing EMAIL_USER or EMAIL_PASS in .env');
-  process.exit(1);
-}
+const smtpHost = 'smtp.gmail.com';
+const smtpPort = 587;
+
+console.log('Using Gmail SMTP');
+console.log('Email User:', emailUser);
+console.log('SMTP Host:', smtpHost, 'Port:', smtpPort);
 
 const transporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com',
-  port: 587,
+  host: smtpHost,
+  port: smtpPort,
   secure: false,
+  requireTLS: true,
   auth: {
     user: emailUser,
     pass: emailPass
@@ -30,7 +34,7 @@ transporter.verify((verifyErr) => {
     return;
   }
 
-  console.log('✅ SMTP verified. Sending test email...');
+  console.log(`✅ SMTP verified (${smtpHost}:${smtpPort}). Sending test email...`);
   transporter.sendMail({
     from: `"LF Portal" <${emailUser}>`,
     to,

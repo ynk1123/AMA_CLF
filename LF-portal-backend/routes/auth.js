@@ -12,15 +12,20 @@ const JWT_SECRET = process.env.JWT_SECRET || 'mysecretkey123';
 
 // Email Transporter
 let transporter = null;
-const emailUser = (process.env.EMAIL_USER || '').trim();
-const emailPass = (process.env.EMAIL_PASS || '').trim();
+// Use Gmail app password
+const emailUser = 'campuslostandfoundama@gmail.com';
+const emailPass = 'epje cstg rdvd wnzr';
+const smtpHost = 'smtp.gmail.com';
+const smtpPort = 587;
+const smtpSecure = false;
 
 try {
   if (emailUser && emailPass) {
     transporter = nodemailer.createTransport({
-      host: 'smtp.gmail.com',
-      port: 587,
-      secure: false, // TLS via STARTTLS
+      host: smtpHost,
+      port: smtpPort,
+      secure: false,
+      requireTLS: true,
       auth: {
         user: emailUser,
         pass: emailPass
@@ -33,8 +38,9 @@ try {
     transporter.verify((verifyErr) => {
       if (verifyErr) {
         console.log('❌ SMTP verify failed:', verifyErr.message);
+        if (verifyErr.code) console.log('SMTP code:', verifyErr.code);
       } else {
-        console.log('✅ Email transporter ready');
+        console.log(`✅ Email transporter ready (${smtpHost}:${smtpPort}, secure=${smtpSecure})`);
       }
     });
   } else {
@@ -46,17 +52,28 @@ try {
 
 // REQUEST PASSWORD RESET
 router.post('/requestPasswordReset', async (req, res) => {
-  const { email, studentId } = req.body;
-  
+  const { email, studentId } = req.body || {};
+
   try {
+    const normalizedEmail = typeof email === 'string' ? email.trim().toLowerCase() : '';
+    const normalizedStudentId = typeof studentId === 'string' ? studentId.trim() : '';
+
+    if (!normalizedEmail && !normalizedStudentId) {
+      return res.status(400).json({ message: 'Please provide email or studentId' });
+    }
+
     const where = {};
-    if (email) where.email = email;
-    if (!email && studentId) where.studentId = studentId;
+    if (normalizedEmail) where.email = normalizedEmail;
+    else where.studentId = normalizedStudentId;
 
     const user = await User.findOne({ where });
-    
+
     if (!user) {
       return res.status(404).json({ message: "User doesn't exist" });
+    }
+
+    if (!user.email || !String(user.email).includes('@')) {
+      return res.status(400).json({ message: 'User email is missing or invalid' });
     }
 
     const secret = JWT_SECRET + user.password;
@@ -114,12 +131,16 @@ router.post('/resetPassword/:id/:token', async (req, res) => {
     const secret = JWT_SECRET + user.password;
     
     try {
-      const verify = jwt.verify(token, secret);
+      jwt.verify(token, secret);
     } catch (e) {
       return res.status(400).json({ message: "Invalid or expired token!" });
     }
 
-    const encryptedPassword = await bcrypt.hash(password, 12);
+    if (typeof password !== 'string' || password.trim().length < 6) {
+      return res.status(400).json({ message: 'Password must be at least 6 characters' });
+    }
+
+    const encryptedPassword = await bcrypt.hash(password.trim(), 12);
     user.password = encryptedPassword;
     await user.save();
 
