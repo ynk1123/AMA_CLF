@@ -31,10 +31,47 @@ const ensureAdminUser = async () => {
   console.log('✅ Seeded initial admin user row');
 };
 
+const cleanupDuplicateEmails = async () => {
+  try {
+    // Find all users with non-null emails
+    const users = await User.findAll({ 
+      where: { 
+        email: { 
+          [require('sequelize').Op.ne]: null 
+        } 
+      } 
+    });
+    
+    const emailCounts = {};
+    for (const user of users) {
+      if (user.email) {
+        if (emailCounts[user.email]) {
+          // Duplicate found - clear the email for the later user
+          console.log(`Clearing duplicate email: ${user.email} for user ${user.studentId}`);
+          await user.update({ email: null });
+        } else {
+          emailCounts[user.email] = true;
+        }
+      }
+    }
+    console.log('Cleaned up duplicate emails');
+  } catch (err) {
+    console.error('Error cleaning up emails:', err);
+  }
+};
+
 const syncDatabase = async () => {
   try {
     console.log('Syncing database...');
+    // First sync without constraints to clean duplicate emails
     await sequelize.sync({ alter: true });
+    
+    // Now clean up duplicates
+    await cleanupDuplicateEmails();
+    
+    // Force sync again to add the unique constraint after cleanup
+    await sequelize.sync({ alter: true });
+    
     await ensureAdminUser();
     console.log('Database synced successfully!');
     process.exit(0);

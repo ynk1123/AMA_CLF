@@ -1,0 +1,194 @@
+import React, { useState, useEffect } from 'react';
+import { Box, Typography, Grid, Card, CardContent, TextField, MenuItem, Chip, IconButton, Dialog, DialogTitle, DialogContent, DialogActions, Alert } from '@mui/material';
+import { useAuth } from '../context/AuthContext';
+import { itemService } from '../services/api';
+import CloseIcon from '@mui/icons-material/Close';
+import LocationOnIcon from '@mui/icons-material/LocationOn';
+import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
+
+const Browse = () => {
+  const { user } = useAuth();
+  const [items, setItems] = useState([]);
+  const [openItemDialog, setOpenItemDialog] = useState(false);
+  const [selectedItem, setSelectedItem] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterCategory, setFilterCategory] = useState('');
+  const [filterLocation, setFilterLocation] = useState('');
+  const [filterStatus, setFilterStatus] = useState('');
+
+  useEffect(() => { loadItems(); }, []);
+  useEffect(() => {
+    // Stagger animation on mount
+    const timer = setTimeout(() => {
+      document.querySelectorAll('.fade-in').forEach(el => el.style.opacity = '1');
+    }, 100);
+    return () => clearTimeout(timer);
+  }, []);
+
+  const loadItems = async () => {
+    try {
+      const response = await itemService.getItems();
+      setItems(response.data || []);
+    } catch (err) { console.error('Failed to load items', err); }
+  };
+
+  const handleItemClick = (item) => {
+    setSelectedItem(item);
+    setOpenItemDialog(true);
+  };
+
+  const filteredItems = items.filter(item => {
+    const matchesSearch = item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          item.description.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory = !filterCategory || item.category === filterCategory;
+    const matchesLocation = !filterLocation || item.location.toLowerCase().includes(filterLocation.toLowerCase());
+    const matchesStatus = !filterStatus || item.status === filterStatus;
+    return matchesSearch && matchesCategory && matchesLocation && matchesStatus;
+  });
+
+const getStatusColor = (status) => {
+    switch (status) {
+      case 'lost': return 'warning';
+      case 'found': return 'success';
+      case 'under_verification': return 'error';
+      case 'claimed': return 'info';
+      case 'archived': return 'default';
+      default: return 'default';
+    }
+  };
+
+  const getImageUrl = (url) => {
+    if (!url) return '';
+    if (url.startsWith('http')) return url;
+    return `http://localhost:5000${url}`;
+  };
+
+  return (
+    <Box sx={{ minHeight: '100vh', py: 3 }}>
+      <Box className="fade-in" sx={{ px: 4, mt: 4 }}>
+        <Typography variant="h3" sx={{ fontWeight: 700, color: '#DC2626', mb: 1 }}>
+          Browse Items
+        </Typography>
+        <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
+          Find lost items or report found items
+        </Typography>
+
+        {/* Filters */}
+        <Box sx={{ mb: 4, p: 3, backgroundColor: '#fff', borderRadius: 2, border: '2px solid #FEE2E2' }}>
+          <Typography variant="h6" sx={{ fontWeight: 700, color: '#DC2626', mb: 2 }}>
+            🔍 Filter Items
+          </Typography>
+          <Grid container spacing={2}>
+            <Grid item xs={12} md={3}>
+              <TextField fullWidth label="Search" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} size="small" placeholder="Search items..." />
+            </Grid>
+            <Grid item xs={12} md={3}>
+              <TextField fullWidth select label="Category" value={filterCategory} onChange={(e) => setFilterCategory(e.target.value)} size="small">
+                <MenuItem value="">All</MenuItem>
+                <MenuItem value="ID">ID</MenuItem>
+                <MenuItem value="Gadget">Gadget</MenuItem>
+                <MenuItem value="Wallet">Wallet</MenuItem>
+                <MenuItem value="Bag">Bag</MenuItem>
+                <MenuItem value="Other">Other</MenuItem>
+              </TextField>
+            </Grid>
+            <Grid item xs={12} md={3}>
+              <TextField fullWidth label="Location" value={filterLocation} onChange={(e) => setFilterLocation(e.target.value)} size="small" placeholder="Filter by location..." />
+            </Grid>
+            <Grid item xs={12} md={3}>
+              <TextField fullWidth select label="Status" value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} size="small">
+                <MenuItem value="">All</MenuItem>
+                <MenuItem value="lost">Lost</MenuItem>
+                <MenuItem value="found">Found</MenuItem>
+                <MenuItem value="under_verification">Under Verification</MenuItem>
+                <MenuItem value="claimed">Claimed</MenuItem>
+                <MenuItem value="archived">Archived</MenuItem>
+              </TextField>
+            </Grid>
+          </Grid>
+        </Box>
+
+        <Typography variant="h6" sx={{ fontWeight: 700, color: '#1A1A2E', mb: 2 }}>
+          📦 {filteredItems.length} Items Found
+        </Typography>
+
+        <Grid container spacing={3}>
+          {filteredItems.map((item, index) => (
+            <Grid item xs={12} sm={6} md={3} key={item.id}>
+              <Card
+                className={`card-hover fade-in stagger-${Math.min(index + 1, 4)}`}
+                onClick={() => handleItemClick(item)}
+                sx={{ cursor: 'pointer' }}
+              >
+                <CardContent>
+                  <Typography variant="h6" sx={{ fontWeight: 700, mb: 1 }}>
+                    {item.title}
+                  </Typography>
+                  {item.imageUrl && (
+                    <Box component="img" src={getImageUrl(item.imageUrl)} alt={item.title} sx={{ width: '100%', height: 150, objectFit: 'cover', borderRadius: 1, mb: 1.5 }} />
+                  )}
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5 }}>
+                    <LocationOnIcon sx={{ fontSize: 16, color: '#DC2626' }} />
+                    <Typography variant="body2" color="text.secondary">{item.location}</Typography>
+                  </Box>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 1 }}>
+                    <CalendarTodayIcon sx={{ fontSize: 16, color: '#DC2626' }} />
+                    <Typography variant="body2" color="text.secondary">{new Date(item.date).toLocaleDateString()}</Typography>
+                  </Box>
+                  <Chip label={item.status} color={getStatusColor(item.status)} size="small" sx={{ fontWeight: 600 }} />
+                </CardContent>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
+
+        {filteredItems.length === 0 && (
+          <Box className="fade-in" sx={{ textAlign: 'center', py: 8 }}>
+            <Typography variant="h5" color="text.secondary">No items found</Typography>
+            <Typography variant="body1" color="text.secondary" sx={{ mt: 1 }}>Try adjusting your filters</Typography>
+          </Box>
+        )}
+      </Box>
+
+      {/* Item Detail Dialog */}
+      <Dialog open={openItemDialog} onClose={() => setOpenItemDialog(false)} maxWidth="md" fullWidth>
+        <DialogTitle sx={{ pr: 6, fontWeight: 700, color: '#DC2626' }}>
+          {selectedItem?.title}
+          <IconButton onClick={() => setOpenItemDialog(false)} sx={{ position: 'absolute', right: 8, top: 8 }}>
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent dividers>
+          {selectedItem && (
+            <Grid container spacing={3}>
+              <Grid item xs={12} md={6}>
+                {selectedItem.imageUrl && (
+                  <Box component="img" src={getImageUrl(selectedItem.imageUrl)} alt={selectedItem.title} sx={{ width: '100%', borderRadius: 2 }} />
+                )}
+              </Grid>
+<Grid item xs={12} md={6}>
+                <Typography variant="h6" sx={{ fontWeight: 700, color: '#DC2626', mb: 2 }}>Details</Typography>
+                <Typography variant="body1" sx={{ mb: 1 }}><strong>Category:</strong> {selectedItem.category}</Typography>
+                <Typography variant="body1" sx={{ mb: 1 }}><strong>Location:</strong> {selectedItem.location}</Typography>
+                <Typography variant="body1" sx={{ mb: 1 }}><strong>Date:</strong> {new Date(selectedItem.date).toLocaleDateString()}</Typography>
+                <Typography variant="body1" sx={{ mb: 1 }}><strong>Posted by:</strong> {selectedItem.User?.displayName || selectedItem.User?.studentId || 'Unknown'}</Typography>
+                <Typography variant="body1" sx={{ mb: 2 }}><strong>Status:</strong> <Chip label={selectedItem.status} color={getStatusColor(selectedItem.status)} /></Typography>
+                <Typography variant="h6" sx={{ fontWeight: 700, mt: 2, mb: 1 }}>Description</Typography>
+                <Box sx={{ p: 2, backgroundColor: '#FEE2E2', borderRadius: 1 }}>
+                  <Typography variant="body1">{selectedItem.description || 'No description provided.'}</Typography>
+                </Box>
+              </Grid>
+            </Grid>
+          )}
+        </DialogContent>
+        <DialogActions sx={{ p: 2 }}>
+          {!user ? <Alert severity="info">Login to claim items</Alert> : 
+            selectedItem?.status === 'lost' || selectedItem?.status === 'found' ? 
+              <Typography variant="body2" color="text.secondary">Claim from Dashboard</Typography> : null}
+        </DialogActions>
+      </Dialog>
+    </Box>
+  );
+};
+
+export default Browse;

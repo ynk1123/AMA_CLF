@@ -2,7 +2,8 @@ const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 const path = require('path');
-const Item = require('../models/Item');
+const Item = require('../models/item');
+const User = require('../models/user');
 const { authenticate } = require('../middleware/auth');
 
 // Configure multer for file uploads
@@ -64,10 +65,18 @@ router.get('/', async (req, res) => {
   try {
     const items = await Item.findAll({
       where: { status: ['lost', 'found', 'under_verification', 'claimed', 'archived'] },
+      include: [
+        {
+          model: User,
+          as: 'User',
+          attributes: ['id', 'displayName', 'studentId']
+        }
+      ],
       order: [['createdAt', 'DESC']]
     });
     res.json(items);
   } catch (err) {
+    console.error('Error fetching items:', err);
     res.status(400).json({ message: 'Failed to fetch items' });
   }
 });

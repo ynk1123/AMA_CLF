@@ -5,6 +5,7 @@ import { itemService, messageService } from '../services/api';
 import SendIcon from '@mui/icons-material/Send';
 import DeleteIcon from '@mui/icons-material/Delete';
 import ForumIcon from '@mui/icons-material/Forum';
+import SearchIcon from '@mui/icons-material/Search';
 
 const Chat = () => {
   const { user } = useAuth();
@@ -21,11 +22,6 @@ const Chat = () => {
   useEffect(() => {
     if (selectedItem) {
       loadMessages(selectedItem.id);
-      // Disabled polling to avoid flooding the API while debugging send failures.
-      // const interval = setInterval(() => {
-      //   loadMessages(selectedItem.id);
-      // }, 5000);
-      // return () => clearInterval(interval);
     }
   }, [selectedItem]);
 
@@ -52,30 +48,29 @@ const Chat = () => {
   };
 
   const handleSendMessage = async () => {
-  if (!newMessage.trim() || !selectedItem) {
-    console.log('No message or no item selected');
-    return;
-  }
+    if (!newMessage.trim() || !selectedItem) {
+      console.log('No message or no item selected');
+      return;
+    }
   
-  try {
-    console.log('Sending message:', { content: newMessage, itemId: selectedItem.id });
-    const response = await messageService.createMessage({
-      content: newMessage,
-      itemId: selectedItem.id
-    });
-    console.log('Message sent successfully:', response.data);
-    setNewMessage('');
-    loadMessages(selectedItem.id);
-  } catch (err) {
-    console.error('Failed to send message:', err.response?.data || err.message);
-    alert('Failed to send message. Please try again.');
-  }
-};
+    try {
+      console.log('Sending message:', { content: newMessage, itemId: selectedItem.id });
+      const response = await messageService.createMessage({
+        content: newMessage,
+        itemId: selectedItem.id
+      });
+      console.log('Message sent successfully:', response.data);
+      setNewMessage('');
+      loadMessages(selectedItem.id);
+    } catch (err) {
+      console.error('Failed to send message:', err.response?.data || err.message);
+      alert('Failed to send message. Please try again.');
+    }
+  };
 
   const handleDeleteMessage = async (messageId) => {
     if (user.role !== 'admin') return;
     try {
-      // You'll need to add this endpoint to your backend
       await messageService.deleteMessage(messageId);
       loadMessages(selectedItem.id);
     } catch (err) {
@@ -98,53 +93,61 @@ const Chat = () => {
   };
 
   return (
-    <Box sx={{ minHeight: '100vh', backgroundColor: '#36393f' }}>
+    <Box sx={{ minHeight: '100vh', backgroundColor: '#FAFAFA' }}>
       <Container maxWidth="xl" sx={{ py: 4 }}>
-        <Typography variant="h4" sx={{ color: '#fff', mb: 4, fontWeight: 700 }}>
-          <ForumIcon sx={{ mr: 2, verticalAlign: 'middle' }} />
-          Inquiry & Chat System
-        </Typography>
+        <Box className="fade-in" sx={{ mb: 4 }}>
+          <Typography variant="h4" sx={{ color: '#DC2626', mb: 1, fontWeight: 700 }}>
+            <ForumIcon sx={{ mr: 2, verticalAlign: 'middle', color: '#DC2626' }} />
+            Inquiry & Chat
+          </Typography>
+          <Typography variant="body1" sx={{ color: '#4B5563' }}>
+            Ask questions about lost and found items
+          </Typography>
+        </Box>
 
         <Grid container spacing={3}>
           {/* Items List */}
           <Grid item xs={12} md={4}>
-            <Paper sx={{ backgroundColor: '#2f3136', borderRadius: 2, overflow: 'hidden' }}>
-              <Box sx={{ p: 2, backgroundColor: '#202225', borderBottom: '1px solid #202225' }}>
+            <Paper className="card-hover fade-in" sx={{ borderRadius: 2, overflow: 'hidden', border: '2px solid #FEE2E2' }}>
+              <Box sx={{ p: 2, backgroundColor: '#DC2626', borderBottom: '2px solid #B91C1C' }}>
                 <Typography variant="h6" sx={{ color: '#fff', fontWeight: 600 }}>
+                  <SearchIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
                   Items
                 </Typography>
               </Box>
               <List sx={{ maxHeight: 600, overflow: 'auto' }}>
-                {items.map((item) => (
+                {items.map((item, index) => (
                   <React.Fragment key={item.id}>
                     <ListItem
                       button
                       onClick={() => setSelectedItem(item)}
+                      className={`card-hover fade-in stagger-${Math.min(index + 1, 4)}`}
                       sx={{
-                        backgroundColor: selectedItem?.id === item.id ? '#393c43' : 'transparent',
-                        '&:hover': { backgroundColor: '#393c43' },
-                        py: 2
+                        backgroundColor: selectedItem?.id === item.id ? '#FEE2E2' : 'transparent',
+                        '&:hover': { backgroundColor: '#FEE2E2' },
+                        py: 2,
+                        cursor: 'pointer'
                       }}
                     >
                       <ListItemAvatar>
-                        <Avatar sx={{ backgroundColor: '#5865f2' }}>
+                        <Avatar sx={{ backgroundColor: '#DC2626', fontWeight: 700 }}>
                           {item.title.charAt(0)}
                         </Avatar>
                       </ListItemAvatar>
                       <ListItemText
                         primary={
-                          <Typography variant="subtitle1" sx={{ color: '#fff', fontWeight: 600 }}>
+                          <Typography variant="subtitle1" sx={{ color: '#1A1A2E', fontWeight: 600 }}>
                             {item.title}
                           </Typography>
                         }
                         secondary={
-                          <Typography variant="body2" sx={{ color: '#b9bbbe' }}>
+                          <Typography variant="body2" sx={{ color: '#4B5563' }}>
                             {item.category} • {item.location}
                           </Typography>
                         }
                       />
                     </ListItem>
-                    <Divider sx={{ backgroundColor: '#202225' }} />
+                    <Divider sx={{ backgroundColor: '#FEE2E2' }} />
                   </React.Fragment>
                 ))}
               </List>
@@ -154,51 +157,51 @@ const Chat = () => {
           {/* Chat Area */}
           <Grid item xs={12} md={8}>
             {selectedItem ? (
-              <Paper sx={{ backgroundColor: '#2f3136', borderRadius: 2, overflow: 'hidden', display: 'flex', flexDirection: 'column', height: 700 }}>
+              <Paper className="card-hover fade-in" sx={{ borderRadius: 2, overflow: 'hidden', display: 'flex', flexDirection: 'column', height: 700, border: '2px solid #FEE2E2' }}>
                 {/* Chat Header */}
-                <Box sx={{ p: 2, backgroundColor: '#202225', borderBottom: '1px solid #202225' }}>
+                <Box sx={{ p: 2, backgroundColor: '#DC2626', borderBottom: '2px solid #B91C1C' }}>
                   <Typography variant="h6" sx={{ color: '#fff', fontWeight: 600 }}>
                     {selectedItem.title}
                   </Typography>
-                  <Typography variant="body2" sx={{ color: '#b9bbbe' }}>
+                  <Typography variant="body2" sx={{ color: '#FEE2E2' }}>
                     {selectedItem.category} • {selectedItem.location}
                   </Typography>
                 </Box>
 
                 {/* Messages */}
-                <Box sx={{ flexGrow: 1, overflow: 'auto', p: 2, backgroundColor: '#2f3136' }}>
+                <Box sx={{ flexGrow: 1, overflow: 'auto', p: 2, backgroundColor: '#fff' }}>
                   {messages.length === 0 ? (
                     <Box sx={{ textAlign: 'center', mt: 4 }}>
-                      <Typography variant="body1" sx={{ color: '#b9bbbe' }}>
+                      <Typography variant="body1" sx={{ color: '#4B5563' }}>
                         No messages yet. Start the conversation!
                       </Typography>
                     </Box>
                   ) : (
                     messages.map((message, index) => (
-                      <Box key={message.id || index} sx={{ mb: 3 }}>
+                      <Box key={message.id || index} sx={{ mb: 3 }} className={`fade-in stagger-${Math.min(index + 1, 4)}`}>
                         <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
-                          <Avatar sx={{ backgroundColor: '#5865f2', mr: 2, width: 40, height: 40 }}>
+                          <Avatar sx={{ backgroundColor: '#DC2626', mr: 2, width: 40, height: 40, fontWeight: 700 }}>
                             {message.User?.studentId?.charAt(0) || '?'}
                           </Avatar>
                           <Box sx={{ flexGrow: 1 }}>
                             <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
-                              <Typography variant="subtitle1" sx={{ color: '#fff', fontWeight: 700, mr: 2 }}>
+                              <Typography variant="subtitle1" sx={{ color: '#1A1A2E', fontWeight: 700, mr: 2 }}>
                                 {message.User?.studentId || 'Unknown'}
                               </Typography>
-                              <Typography variant="caption" sx={{ color: '#b9bbbe' }}>
+                              <Typography variant="caption" sx={{ color: '#4B5563' }}>
                                 {formatDateTime(message.timestamp)}
                               </Typography>
                               {user.role === 'admin' && (
                                 <IconButton
                                   size="small"
                                   onClick={() => handleDeleteMessage(message.id)}
-                                  sx={{ ml: 'auto', color: '#ed4245' }}
+                                  sx={{ ml: 'auto', color: '#DC2626' }}
                                 >
                                   <DeleteIcon fontSize="small" />
                                 </IconButton>
                               )}
                             </Box>
-                            <Typography variant="body1" sx={{ color: '#dcddde', whiteSpace: 'pre-wrap' }}>
+                            <Typography variant="body1" sx={{ color: '#1A1A2E', whiteSpace: 'pre-wrap' }}>
                               {message.content}
                             </Typography>
                           </Box>
@@ -210,11 +213,11 @@ const Chat = () => {
                 </Box>
 
                 {/* Message Input */}
-                <Box sx={{ p: 2, backgroundColor: '#36393f', borderTop: '1px solid #202225' }}>
+                <Box sx={{ p: 2, backgroundColor: '#FEE2E2', borderTop: '2px solid #DC2626' }}>
                   <Box sx={{ display: 'flex', gap: 1 }}>
                     <TextField
                       fullWidth
-                      placeholder={`Message #${selectedItem.title}`}
+                      placeholder={`Message about ${selectedItem.title}...`}
                       value={newMessage}
                       onChange={(e) => setNewMessage(e.target.value)}
                       onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
@@ -222,18 +225,17 @@ const Chat = () => {
                       size="small"
                       sx={{
                         '& .MuiOutlinedInput-root': {
-                          backgroundColor: '#40444b',
-                          color: '#dcddde',
-                          '& fieldset': { borderColor: '#202225' },
-                          '&:hover fieldset': { borderColor: '#202225' },
-                          '&.Mui-focused fieldset': { borderColor: '#5865f2' }
+                          backgroundColor: '#fff',
+                          '& fieldset': { borderColor: '#DC2626' },
+                          '&:hover fieldset': { borderColor: '#B91C1C' },
+                          '&.Mui-focused fieldset': { borderColor: '#DC2626' }
                         }
                       }}
                     />
                     <Button
                       variant="contained"
                       onClick={handleSendMessage}
-                      sx={{ backgroundColor: '#5865f2', '&:hover': { backgroundColor: '#4752c4' } }}
+                      sx={{ backgroundColor: '#DC2626', '&:hover': { backgroundColor: '#B91C1C' } }}
                     >
                       <SendIcon />
                     </Button>
@@ -241,12 +243,12 @@ const Chat = () => {
                 </Box>
               </Paper>
             ) : (
-              <Paper sx={{ backgroundColor: '#2f3136', borderRadius: 2, p: 4, textAlign: 'center', height: 700, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
-                <ForumIcon sx={{ fontSize: 80, color: '#b9bbbe', mb: 2 }} />
-                <Typography variant="h5" sx={{ color: '#fff', fontWeight: 600, mb: 2 }}>
+              <Paper className="fade-in" sx={{ backgroundColor: '#fff', borderRadius: 2, p: 4, textAlign: 'center', height: 700, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', border: '2px solid #FEE2E2' }}>
+                <ForumIcon sx={{ fontSize: 80, color: '#DC2626', mb: 2 }} />
+                <Typography variant="h5" sx={{ color: '#1A1A2E', fontWeight: 600, mb: 2 }}>
                   Welcome to Inquiry & Chat
                 </Typography>
-                <Typography variant="body1" sx={{ color: '#b9bbbe' }}>
+                <Typography variant="body1" sx={{ color: '#4B5563' }}>
                   Select an item from the list to view and send messages.
                 </Typography>
               </Paper>

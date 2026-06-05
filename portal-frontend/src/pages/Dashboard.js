@@ -200,10 +200,11 @@
       return matchesSearch && matchesCategory && matchesLocation && matchesStatus;
     });
 
-    const getStatusColor = (status) => {
+const getStatusColor = (status) => {
       switch (status) {
-        case 'lost': return 'success';
-        case 'under_verification': return 'warning';
+        case 'lost': return 'warning';
+        case 'found': return 'success';
+        case 'under_verification': return 'error';
         case 'claimed': return 'info';
         case 'archived': return 'default';
         default: return 'default';
@@ -280,8 +281,9 @@
                 onChange={(e) => setFilterStatus(e.target.value)}
                 size="small"
               >
-                <MenuItem value="">All</MenuItem>
+<MenuItem value="">All</MenuItem>
                 <MenuItem value="lost">Lost</MenuItem>
+                <MenuItem value="found">Found</MenuItem>
                 <MenuItem value="under_verification">Under Verification</MenuItem>
                 <MenuItem value="claimed">Claimed</MenuItem>
                 <MenuItem value="archived">Archived</MenuItem>

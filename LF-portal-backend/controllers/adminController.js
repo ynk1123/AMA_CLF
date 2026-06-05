@@ -6,6 +6,13 @@ const Appointment = require('../models/appointment');
 exports.getAllItems = async (req, res) => {
   try {
     const items = await Item.findAll({
+      include: [
+        {
+          model: User,
+          as: 'User',
+          attributes: ['id', 'studentId', 'displayName']
+        }
+      ],
       order: [['createdAt', 'DESC']]
     });
     res.json(items);
@@ -146,5 +153,31 @@ exports.getPendingClaims = async (req, res) => {
     res.json(items);
   } catch (err) {
     res.status(400).json({ message: 'Failed to fetch pending claims' });
+  }
+};
+
+// Delete user (Admin only)
+exports.deleteUser = async (req, res) => {
+  try {
+    const userId = req.params.id;
+    
+    // Prevent admin from deleting themselves
+    if (parseInt(req.params.id) === req.user.id) {
+      return res.status(400).json({ message: 'Cannot delete your own account' });
+    }
+    
+    const user = await User.findByPk(userId);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    
+    // Prevent deleting other admins
+    if (user.role === 'admin') {
+      return res.status(403).json({ message: 'Cannot delete admin accounts' });
+    }
+    
+    await user.destroy();
+    res.json({ message: 'User deleted successfully' });
+  } catch (err) {
+    console.error('Error deleting user:', err);
+    res.status(400).json({ message: 'Failed to delete user', error: err.message });
   }
 };

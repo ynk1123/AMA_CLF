@@ -37,17 +37,17 @@ try {
 
     transporter.verify((verifyErr) => {
       if (verifyErr) {
-        console.log('❌ SMTP verify failed:', verifyErr.message);
+        console.log('❁ESMTP verify failed:', verifyErr.message);
         if (verifyErr.code) console.log('SMTP code:', verifyErr.code);
       } else {
-        console.log(`✅ Email transporter ready (${smtpHost}:${smtpPort}, secure=${smtpSecure})`);
+        console.log(`✁EEmail transporter ready (${smtpHost}:${smtpPort}, secure=${smtpSecure})`);
       }
     });
   } else {
-    console.log('⚠️ EMAIL_USER / EMAIL_PASS missing. Reset emails will not be sent.');
+    console.log('⚠�E�EEMAIL_USER / EMAIL_PASS missing. Reset emails will not be sent.');
   }
 } catch (err) {
-  console.log('⚠️ Email transporter init error:', err.message);
+  console.log('⚠�E�EEmail transporter init error:', err.message);
 }
 
 // REQUEST PASSWORD RESET
@@ -66,21 +66,24 @@ router.post('/requestPasswordReset', async (req, res) => {
     if (normalizedEmail) where.email = normalizedEmail;
     else where.studentId = normalizedStudentId;
 
-    const user = await User.findOne({ where });
+const user = await User.findOne({ where });
 
     if (!user) {
       return res.status(404).json({ message: "User doesn't exist" });
     }
 
-    if (!user.email || !String(user.email).includes('@')) {
-      return res.status(400).json({ message: 'User email is missing or invalid' });
+    // Allow reset by studentId even without email
+    // If email is missing, use studentId@campus.edu as fallback
+    let userEmail = user.email;
+    if (!userEmail || !String(userEmail).includes('@')) {
+      userEmail = user.studentId + '@campus.edu';
     }
 
-    const secret = JWT_SECRET + user.password;
+const secret = JWT_SECRET + user.password;
     const token = jwt.sign(
-      { id: user.id, email: user.email }, 
+      { id: user.id, email: userEmail }, 
       secret, 
-      { expiresIn: '1h' }
+      { expiresIn: '30m' }
     );
 
     const resetURL = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/reset-password/${user.id}/${token}`;
@@ -89,20 +92,20 @@ router.post('/requestPasswordReset', async (req, res) => {
       try {
         await transporter.sendMail({
           from: `"LF Portal" <${emailUser}>`,
-          to: user.email,
+          to: userEmail,
           subject: 'LF Portal Password Reset',
-          text: `You requested a password reset.\n\nUse this link to reset your password:\n${resetURL}\n\nThis link expires in 1 hour.`,
+          text: `You requested a password reset.\n\nUse this link to reset your password:\n${resetURL}\n\nThis link expires in 30 minutes.`,
           html: `
             <p>You requested a password reset.</p>
             <p>Click this link to reset your password:</p>
             <p><a href="${resetURL}">${resetURL}</a></p>
-            <p>This link expires in 1 hour.</p>
+            <p>This link expires in 30 minutes.</p>
           `
         });
-        console.log(`✅ Reset email sent to ${user.email}`);
+        console.log(`✁EReset email sent to ${user.email}`);
         return res.status(200).json({ message: 'Reset link sent to email!' });
       } catch (emailErr) {
-        console.log('❌ Email send error:', emailErr.message);
+        console.log('❁EEmail send error:', emailErr.message);
         if (emailErr.code) console.log('SMTP code:', emailErr.code);
         if (emailErr.response) console.log('SMTP response:', emailErr.response);
         return res.status(200).json({ message: 'Error sending email', resetLink: resetURL });
@@ -121,18 +124,24 @@ router.post('/resetPassword/:id/:token', async (req, res) => {
   const { id, token } = req.params;
   const { password } = req.body;
 
+  console.log('🔐 Reset attempt - ID:', id, 'Token:', token ? 'present' : 'MISSING', 'Password:', password ? 'present' : 'MISSING');
+
   try {
     const user = await User.findByPk(id);
     
     if (!user) {
+      console.log('❌ User not found:', id);
       return res.status(400).json({ message: "User not found!" });
     }
 
     const secret = JWT_SECRET + user.password;
+    console.log('🔑 Secret check - User password hash:', user.password.substring(0, 20));
     
     try {
       jwt.verify(token, secret);
+      console.log('✅ Token verified successfully');
     } catch (e) {
+      console.log('❌ Token verification failed:', e.message);
       return res.status(400).json({ message: "Invalid or expired token!" });
     }
 
@@ -141,12 +150,14 @@ router.post('/resetPassword/:id/:token', async (req, res) => {
     }
 
     const encryptedPassword = await bcrypt.hash(password.trim(), 12);
+    console.log('🔒 New password hash:', encryptedPassword.substring(0, 20));
     user.password = encryptedPassword;
     await user.save();
+    console.log('✅ Password reset successful for user:', user.studentId);
 
     res.status(200).json({ message: 'Password has been reset successfully!' });
   } catch (error) {
-    console.log('Error:', error);
+    console.log('❌ Reset error:', error);
     res.status(500).json({ message: 'Something went wrong' });
   }
 });
@@ -177,8 +188,9 @@ router.post('/register', async (req, res) => {
 router.post('/login', async (req, res) => {
   try {
     const { studentId, password } = req.body;
+    const trimmedPassword = typeof password === 'string' ? password.trim() : password;
     let user = await User.findOne({ where: { studentId } }) || await User.findOne({ where: { email: studentId } });
-    if (!user || !await bcrypt.compare(password, user.password)) {
+    if (!user || !await bcrypt.compare(trimmedPassword, user.password)) {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
     const token = jwt.sign({ id: user.id }, JWT_SECRET, { expiresIn: '7d' });

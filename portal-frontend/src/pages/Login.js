@@ -18,20 +18,19 @@ const Login = () => {
 
   const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
-const handleStudentLogin = async (e) => {
-  e.preventDefault();
-  try {
-    const response = await authService.login(formData);
-    // Use displayName from backend response
-    login({ 
-      studentId: response.data.user.studentId, 
-      displayName: response.data.user.displayName,
-      email: response.data.user.email,
-      role: 'student' 
-    }, response.data.token);
-    navigate('/dashboard');
-  } catch (err) { setError('Invalid Student ID/Email or Password'); }
-};
+  const handleStudentLogin = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await authService.login(formData);
+      login({ 
+        studentId: response.data.user.studentId, 
+        displayName: response.data.user.displayName,
+        email: response.data.user.email,
+        role: 'student' 
+      }, response.data.token);
+      navigate('/dashboard');
+    } catch (err) { setError('Invalid Student ID/Email or Password'); }
+  };
 
   const handleAdminLogin = async (e) => {
     e.preventDefault();
@@ -46,12 +45,10 @@ const handleStudentLogin = async (e) => {
     e.preventDefault();
     setForgotLoading(true);
     setForgotMessage('');
-
     try {
       const value = forgotInput.trim();
       const isEmail = value.includes('@');
       const payload = isEmail ? { email: value } : { studentId: value };
-
       const response = await authService.forgotPassword(payload);
       let msg = response.data.message;
       if (response.data.resetLink && !response.data.emailSent) msg += ' Link: ' + response.data.resetLink;
@@ -59,35 +56,133 @@ const handleStudentLogin = async (e) => {
     } catch (err) {
       setForgotMessage(err.response?.data?.message || 'Failed');
     }
-
     setForgotLoading(false);
   };
 
   return (
-    <Container maxWidth="sm" sx={{ mt: 8 }}>
-      <Paper elevation={3} sx={{ p: 4 }}>
-        <Typography variant="h4" align="center" gutterBottom>Login</Typography>
-        <Tabs value={tabValue} onChange={(e, v) => { setTabValue(v); setError(''); }} centered>
-          <Tab label="Student Login" /><Tab label="Admin Login" />
+    <Container maxWidth="sm" sx={{ mt: 10, mb: 10 }}>
+      <Paper 
+        className="fade-in-scale"
+        elevation={0}
+        sx={{ 
+          p: 5,
+          border: '2px solid #DC2626',
+          borderRadius: 3,
+          position: 'relative',
+          overflow: 'hidden',
+        }}
+      >
+        {/* Corner decoration */}
+        <Box sx={{
+          position: 'absolute',
+          top: 0,
+          right: 0,
+          width: 80,
+          height: 80,
+          background: 'linear-gradient(135deg, transparent 50%, #FEE2E2 50%)',
+        }} />
+
+        <Typography 
+          variant="h3" 
+          align="center" 
+          gutterBottom
+          sx={{ 
+            fontWeight: 700,
+            color: '#DC2626',
+            mb: 1,
+          }}
+        >
+          Welcome Back
+        </Typography>
+        <Typography 
+          variant="body1" 
+          align="center" 
+          sx={{ color: '#4B5563', mb: 3 }}
+        >
+          Sign in to continue
+        </Typography>
+
+        <Tabs 
+          value={tabValue} 
+          onChange={(e, v) => { setTabValue(v); setError(''); }} 
+          centered
+          sx={{ mb: 3, '& .MuiTabs-indicator': { backgroundColor: '#DC2626' } }}
+        >
+          <Tab label="Student" sx={{ color: '#4B5563' }} />
+          <Tab label="Admin" sx={{ color: '#4B5563' }} />
         </Tabs>
-        {error && <Alert severity="error" sx={{ mt: 2 }}>{error}</Alert>}
-        <Box component="form" onSubmit={tabValue === 0 ? handleStudentLogin : handleAdminLogin} sx={{ mt: 3 }}>
-          <TextField fullWidth label="Student ID or Email Address" name="studentId" value={formData.studentId} onChange={handleChange} margin="normal" required />
-          <TextField fullWidth label="Password" name="password" type="password" value={formData.password} onChange={handleChange} margin="normal" required />
-          <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 1 }}>Login</Button>
-          <Button fullWidth variant="text" startIcon={<MailOutlineIcon />} onClick={() => setForgotDialog(true)} sx={{ color: 'primary.main' }}>Forgot Password?</Button>
+
+        {error && (
+          <Alert severity="error" sx={{ mb: 3, backgroundColor: '#FEE2E2', color: '#DC2626' }}>
+            {error}
+          </Alert>
+        )}
+
+        <Box component="form" onSubmit={tabValue === 0 ? handleStudentLogin : handleAdminLogin}>
+          <TextField 
+            fullWidth label="Student ID or Email" 
+            name="studentId" 
+            value={formData.studentId} 
+            onChange={handleChange} 
+            margin="normal" 
+            required 
+            sx={{ mb: 2 }}
+          />
+          <TextField 
+            fullWidth label="Password" 
+            name="password" 
+            type="password" 
+            value={formData.password} 
+            onChange={handleChange} 
+            margin="normal" 
+            required
+            sx={{ mb: 2 }}
+          />
+          <Button 
+            type="submit" 
+            fullWidth 
+            variant="contained"
+            className="btn-pulse"
+            sx={{ 
+              mt: 2,
+              mb: 2,
+              backgroundColor: '#DC2626',
+              fontWeight: 700,
+              py: 1.5,
+              fontSize: '1.1rem',
+              boxShadow: '0 4px 14px rgba(220, 38, 38, 0.4)',
+              '&:hover': { 
+                backgroundColor: '#B91C1C',
+                boxShadow: '0 6px 20px rgba(220, 38, 38, 0.5)',
+              }
+            }}
+          >
+            Sign In
+          </Button>
+          <Button 
+            fullWidth 
+            variant="text" 
+            startIcon={<MailOutlineIcon />} 
+            onClick={() => setForgotDialog(true)} 
+            sx={{ color: '#DC2626', fontWeight: 600 }}
+          >
+            Forgot Password?
+          </Button>
         </Box>
       </Paper>
+
       <Dialog open={forgotDialog} onClose={() => setForgotDialog(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>Reset Password</DialogTitle>
+        <DialogTitle sx={{ fontWeight: 700, color: '#DC2626' }}>Reset Password</DialogTitle>
         <DialogContent>
-          <Typography sx={{ mb: 2 }}>Enter your Student ID or Email.</Typography>
+          <Typography sx={{ mb: 2, color: '#4B5563' }}>Enter your Student ID or Email.</Typography>
           <TextField fullWidth label="Student ID or Email" value={forgotInput} onChange={(e) => setForgotInput(e.target.value)} margin="normal" />
-          {forgotMessage && <Alert severity={forgotMessage.includes('✅') ? 'success' : 'info'} sx={{ mt: 2 }}>{forgotMessage}</Alert>}
+          {forgotMessage && <Alert severity="info" sx={{ mt: 2 }}>{forgotMessage}</Alert>}
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setForgotDialog(false)}>Cancel</Button>
-          <Button onClick={handleForgotPassword} variant="contained" disabled={forgotLoading || !forgotInput}>{forgotLoading ? 'Sending...' : 'Send Reset Link'}</Button>
+          <Button onClick={handleForgotPassword} variant="contained" disabled={forgotLoading || !forgotInput} sx={{ backgroundColor: '#DC2626' }}>
+            {forgotLoading ? 'Sending...' : 'Send Reset Link'}
+          </Button>
         </DialogActions>
       </Dialog>
     </Container>

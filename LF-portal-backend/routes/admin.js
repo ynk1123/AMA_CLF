@@ -5,6 +5,7 @@ const {
   updateItemStatus, 
   deleteItem, 
   getAllUsers, 
+  deleteUser,
   getDashboardStats,
   getLocationStats,
   approveClaim,
@@ -21,6 +22,7 @@ router.delete('/items/:id', authenticate, authorizeAdmin, deleteItem);
 
 // User routes
 router.get('/users', authenticate, authorizeAdmin, getAllUsers);
+router.delete('/users/:id', authenticate, authorizeAdmin, deleteUser);
 
 // Stats routes
 router.get('/stats', authenticate, authorizeAdmin, getDashboardStats);

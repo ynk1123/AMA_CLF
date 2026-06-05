@@ -20,9 +20,10 @@ const User = sequelize.define('User', {
     type: DataTypes.STRING,
     allowNull: false,
   },
-    email: {
-    type: DataTypes.STRING,  // NEW ADDED FIELD
+email: {
+    type: DataTypes.STRING,
     allowNull: true,
+    unique: true,
   },
   role: {
     type: DataTypes.ENUM('student', 'admin'),
