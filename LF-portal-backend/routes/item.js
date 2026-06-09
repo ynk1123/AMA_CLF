@@ -21,8 +21,7 @@ const upload = multer({ storage });
 // Create item - defaults to 'pending' status
 router.post('/', authenticate, upload.single('image'), async (req, res) => {
   try {
-    const { title, category, color, brand, description, location, date } = req.body;
-
+const { title, category, color, brand, description, location, date, type } = req.body;
 
     // Dashboard uses <input type="date" />, which should send YYYY-MM-DD.
     // If the field is missing or invalid, PostgreSQL DATE will reject it.
@@ -30,6 +29,9 @@ router.post('/', authenticate, upload.single('image'), async (req, res) => {
     if (typeof normalizedDate !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(normalizedDate)) {
       normalizedDate = null;
     }
+    
+    // Default to 'lost' if not provided
+    const itemType = (type === 'found') ? 'found' : 'lost';
     
     let imageUrl = null;
     if (req.file) {
@@ -44,6 +46,7 @@ router.post('/', authenticate, upload.single('image'), async (req, res) => {
       description,
       location,
       date: normalizedDate,
+      itemType: itemType, // Store the original type (lost/found)
       status: 'pending', // Default to pending for admin approval
       imageUrl,
       userId: req.user.id

@@ -32,8 +32,12 @@ const Item = sequelize.define('Item', {
     type: DataTypes.DATEONLY,
     allowNull: false,
   },
-  imageUrl: {
+imageUrl: {
     type: DataTypes.STRING,
+  },
+  itemType: {
+    type: DataTypes.ENUM('lost', 'found'),
+    defaultValue: 'lost',
   },
   status: {
     type: DataTypes.ENUM('pending', 'lost', 'found', 'under_verification', 'claimed', 'archived'),

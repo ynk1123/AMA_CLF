@@ -57,10 +57,11 @@ const getStatusColor = (status) => {
     }
   };
 
-  const getImageUrl = (url) => {
+const getImageUrl = (url) => {
     if (!url) return '';
     if (url.startsWith('http')) return url;
-    return `http://localhost:5000${url}`;
+    const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+    return `${apiUrl}${url}`;
   };
 
   return (

@@ -27,7 +27,8 @@ exports.approveItem = async (req, res) => {
     const item = await Item.findByPk(req.params.id);
     if (!item) return res.status(404).json({ message: 'Item not found' });
     
-    item.status = 'lost';
+    // Use the original type (lost/found) from itemType field when approving
+    item.status = item.itemType || 'lost';
     await item.save();
     res.json(item);
   } catch (err) {
@@ -133,7 +134,8 @@ exports.approveClaim = async (req, res) => {
     if (status === 'approved') {
       item.status = 'claimed';
     } else if (status === 'rejected') {
-      item.status = 'lost';
+      // Revert to original type (lost/found) instead of hardcoded 'lost'
+      item.status = item.itemType || 'lost';
       item.claimAnswer = null;
       item.claimStatus = 'pending';
     }

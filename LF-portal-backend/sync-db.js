@@ -60,6 +60,40 @@ const cleanupDuplicateEmails = async () => {
   }
 };
 
+// Migrate itemType from existing items
+const migrateItemType = async () => {
+  try {
+    const Item = require('./models/item');
+    // First force sync to ensure column exists
+    await sequelize.sync({ alter: true });
+    
+// Get all items without itemType (null or undefined)
+    const items = await Item.findAll({ 
+      where: { 
+        itemType: { 
+          [require('sequelize').Op.or]: [null, undefined]
+        } 
+      } 
+    });
+    
+    for (const item of items) {
+      // For existing items, determine itemType based on current status
+      let newItemType = 'lost';
+      if (item.status === 'found') {
+        newItemType = 'found';
+      }
+      // Items with status 'lost', 'pending', etc. default to 'lost'
+      await item.update({ itemType: newItemType });
+    }
+    
+    if (items.length > 0) {
+      console.log(`Migrated ${items.length} items to populate itemType field`);
+    }
+  } catch (err) {
+    console.error('Error migrating itemType:', err.message);
+  }
+};
+
 const syncDatabase = async () => {
   try {
     console.log('Syncing database...');
@@ -71,6 +105,9 @@ const syncDatabase = async () => {
     
     // Force sync again to add the unique constraint after cleanup
     await sequelize.sync({ alter: true });
+    
+    // Migrate itemType for existing items
+    await migrateItemType();
     
     await ensureAdminUser();
     console.log('Database synced successfully!');

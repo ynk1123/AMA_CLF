@@ -27,9 +27,26 @@ app.use(helmet({
   contentSecurityPolicy: false
 }));
 
-// Rate limiting
-const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 100 });
-app.use(limiter);
+// Rate limiting - Global limiter for public routes
+const globalLimiter = rateLimit({ 
+  windowMs: 15 * 60 * 1000, 
+  max: 100,
+  message: 'Too many requests, please try again later'
+});
+
+// Apply global rate limit to most routes
+app.use('/api/auth', globalLimiter);
+app.use('/api/items', globalLimiter);
+app.use('/api/messages', globalLimiter);
+app.use('/api/appointments', globalLimiter);
+
+// Admin routes have higher limit (500 requests per 15 minutes) since dashboard makes many API calls
+const adminLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 500,
+  message: 'Admin rate limit exceeded'
+});
+app.use('/api/admin', adminLimiter);
 
 // Routes
 app.use('/api/auth', require('./routes/auth'));

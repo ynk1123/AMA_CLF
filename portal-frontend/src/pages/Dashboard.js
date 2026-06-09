@@ -1,12 +1,11 @@
   import React, { useState, useEffect } from 'react';
-  import { Box, Container, Typography, Grid, Card, CardContent, Button, TextField, MenuItem, Dialog, DialogTitle, DialogContent, DialogActions, Chip, IconButton, Divider, Avatar } from '@mui/material';
+import { Box, Typography, Grid, Card, CardContent, Button, TextField, MenuItem, Dialog, DialogTitle, DialogContent, DialogActions, Chip, IconButton } from '@mui/material';
   import { useAuth } from '../context/AuthContext';
   import { itemService, messageService, appointmentService } from '../services/api';
-  import CloseIcon from '@mui/icons-material/Close';
-  import SendIcon from '@mui/icons-material/Send';
-  import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
+import CloseIcon from '@mui/icons-material/Close';
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 
-  const Dashboard = () => {
+const Dashboard = () => {
     const { user } = useAuth();
     const [items, setItems] = useState([]);
     const [openDialog, setOpenDialog] = useState(false);
@@ -14,7 +13,9 @@
     const [openClaimDialog, setOpenClaimDialog] = useState(false);
     const [openAppointmentDialog, setOpenAppointmentDialog] = useState(false);
     const [selectedItem, setSelectedItem] = useState(null);
+    // eslint-disable-next-line no-unused-vars
     const [messages, setMessages] = useState([]);
+    // eslint-disable-next-line no-unused-vars
     const [newMessage, setNewMessage] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
     const [filterCategory, setFilterCategory] = useState('');
@@ -106,7 +107,7 @@
   formData.append('description', newItem.description);
   formData.append('location', newItem.location);
   formData.append('date', newItem.date);
-  formData.append('status', newItem.type);
+formData.append('type', newItem.type);
   if (newItem.image) {
     formData.append('image', newItem.image);
   }
@@ -131,12 +132,13 @@
   }
 };
 
-    const handleItemClick = (item) => {
+const handleItemClick = (item) => {
       setSelectedItem(item);
       setOpenItemDialog(true);
       loadMessages(item.id);
     };
 
+    // eslint-disable-next-line no-unused-vars
     const handleSendMessage = async () => {
       if (!newMessage.trim() || !selectedItem) return;
       try {
@@ -211,14 +213,15 @@ const getStatusColor = (status) => {
       }
     };
 
-    const getImageUrl = (url) => {
+const getImageUrl = (url) => {
   if (!url) return '';
   
   // Full URL already
   if (url.startsWith('http')) return url;
   
-  // Backend format: /uploads/filename.jpg
-  return `http://localhost:5000${url}`;
+  // Use environment variable or fallback to localhost
+  const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+  return `${apiUrl}${url}`;
 };
 
     return (
