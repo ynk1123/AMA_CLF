@@ -23,26 +23,84 @@ const Landing = () => {
           overflow: 'hidden',
         }}
       >
-        {/* Decorative circles */}
-        <Box sx={{
+{/* Decorative circles - More circles with more movement */}
+        <Box className="float-more" sx={{
           position: 'absolute',
           top: -100,
           right: -100,
-          width: 300,
-          height: 300,
+          width: 350,
+          height: 350,
+          borderRadius: '50%',
+          background: 'rgba(255,255,255,0.12)',
+        }} />
+        <Box className="float-wide" sx={{
+          position: 'absolute',
+          bottom: -80,
+          left: -80,
+          width: 250,
+          height: 250,
           borderRadius: '50%',
           background: 'rgba(255,255,255,0.1)',
-          animation: 'float 4s ease-in-out infinite',
         }} />
-        <Box sx={{
+        <Box className="float-more" sx={{
           position: 'absolute',
-          bottom: -50,
-          left: -50,
-          width: 200,
-          height: 200,
+          top: '15%',
+          left: '3%',
+          width: 150,
+          height: 150,
           borderRadius: '50%',
           background: 'rgba(255,255,255,0.08)',
-          animation: 'float 5s ease-in-out infinite',
+          animationDelay: '1s',
+        }} />
+        <Box className="float-wide" sx={{
+          position: 'absolute',
+          bottom: '25%',
+          right: '2%',
+          width: 100,
+          height: 100,
+          borderRadius: '50%',
+          background: 'rgba(255,255,255,0.09)',
+          animationDelay: '2s',
+        }} />
+        <Box className="float-more" sx={{
+          position: 'absolute',
+          top: '40%',
+          right: '10%',
+          width: 60,
+          height: 60,
+          borderRadius: '50%',
+          background: 'rgba(255,255,255,0.15)',
+          animationDelay: '0.5s',
+        }} />
+        <Box className="float-wide" sx={{
+          position: 'absolute',
+          bottom: '50%',
+          left: '15%',
+          width: 45,
+          height: 45,
+          borderRadius: '50%',
+          background: 'rgba(255,255,255,0.11)',
+          animationDelay: '1.5s',
+        }} />
+        <Box className="float-more" sx={{
+          position: 'absolute',
+          top: '60%',
+          right: '20%',
+          width: 80,
+          height: 80,
+          borderRadius: '50%',
+          background: 'rgba(255,255,255,0.07)',
+          animationDelay: '2.5s',
+        }} />
+        <Box className="float-wide" sx={{
+          position: 'absolute',
+          top: '30%',
+          left: '20%',
+          width: 50,
+          height: 50,
+          borderRadius: '50%',
+          background: 'rgba(255,255,255,0.06)',
+          animationDelay: '3s',
         }} />
 
         <Container maxWidth="md" sx={{ position: 'relative', zIndex: 1 }}>

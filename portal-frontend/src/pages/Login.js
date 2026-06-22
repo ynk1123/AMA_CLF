@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Box, Container, TextField, Button, Typography, Paper, Alert, Tabs, Tab, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 import { authService } from '../services/api';
 import MailOutlineIcon from '@mui/icons-material/MailOutline';
 
@@ -14,6 +15,7 @@ const Login = () => {
   const [forgotLoading, setForgotLoading] = useState(false);
   const [forgotMessage, setForgotMessage] = useState('');
   const { login } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
 
   const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -29,7 +31,14 @@ const Login = () => {
         role: 'student' 
       }, response.data.token);
       navigate('/dashboard');
-    } catch (err) { setError('Invalid Student ID/Email or Password'); }
+    } catch (err) { 
+      // Check for suspended account (403) vs invalid credentials (401)
+      if (err.response?.status === 403) {
+        setError(err.response.data.message || 'Your account has been suspended');
+      } else {
+        setError('Invalid Student ID/Email or Password');
+      }
+    }
   };
 
   const handleAdminLogin = async (e) => {
@@ -92,14 +101,14 @@ const Login = () => {
             mb: 1,
           }}
         >
-          Welcome Back
+          {t('welcomeBack')}
         </Typography>
         <Typography 
           variant="body1" 
           align="center" 
           sx={{ color: '#4B5563', mb: 3 }}
         >
-          Sign in to continue
+          {t('signInToContinue')}
         </Typography>
 
         <Tabs 
@@ -108,8 +117,8 @@ const Login = () => {
           centered
           sx={{ mb: 3, '& .MuiTabs-indicator': { backgroundColor: '#DC2626' } }}
         >
-          <Tab label="Student" sx={{ color: '#4B5563' }} />
-          <Tab label="Admin" sx={{ color: '#4B5563' }} />
+          <Tab label={t('student')} sx={{ color: '#4B5563' }} />
+          <Tab label={t('admin')} sx={{ color: '#4B5563' }} />
         </Tabs>
 
         {error && (
@@ -120,7 +129,7 @@ const Login = () => {
 
         <Box component="form" onSubmit={tabValue === 0 ? handleStudentLogin : handleAdminLogin}>
           <TextField 
-            fullWidth label="Student ID or Email" 
+            fullWidth label={t('studentIdOrEmail')} 
             name="studentId" 
             value={formData.studentId} 
             onChange={handleChange} 
@@ -129,7 +138,7 @@ const Login = () => {
             sx={{ mb: 2 }}
           />
           <TextField 
-            fullWidth label="Password" 
+            fullWidth label={t('password')} 
             name="password" 
             type="password" 
             value={formData.password} 
@@ -157,7 +166,7 @@ const Login = () => {
               }
             }}
           >
-            Sign In
+            {t('signIn')}
           </Button>
           <Button 
             fullWidth 
@@ -166,22 +175,22 @@ const Login = () => {
             onClick={() => setForgotDialog(true)} 
             sx={{ color: '#DC2626', fontWeight: 600 }}
           >
-            Forgot Password?
+            {t('forgotPassword')}
           </Button>
         </Box>
       </Paper>
 
       <Dialog open={forgotDialog} onClose={() => setForgotDialog(false)} maxWidth="sm" fullWidth>
-        <DialogTitle sx={{ fontWeight: 700, color: '#DC2626' }}>Reset Password</DialogTitle>
+        <DialogTitle sx={{ fontWeight: 700, color: '#DC2626' }}>{t('resetPassword')}</DialogTitle>
         <DialogContent>
-          <Typography sx={{ mb: 2, color: '#4B5563' }}>Enter your Student ID or Email.</Typography>
-          <TextField fullWidth label="Student ID or Email" value={forgotInput} onChange={(e) => setForgotInput(e.target.value)} margin="normal" />
+          <Typography sx={{ mb: 2, color: '#4B5563' }}>{t('enterStudentIdOrEmail')}</Typography>
+          <TextField fullWidth label={t('studentIdOrEmail')} value={forgotInput} onChange={(e) => setForgotInput(e.target.value)} margin="normal" />
           {forgotMessage && <Alert severity="info" sx={{ mt: 2 }}>{forgotMessage}</Alert>}
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setForgotDialog(false)}>Cancel</Button>
+          <Button onClick={() => setForgotDialog(false)}>{t('cancel')}</Button>
           <Button onClick={handleForgotPassword} variant="contained" disabled={forgotLoading || !forgotInput} sx={{ backgroundColor: '#DC2626' }}>
-            {forgotLoading ? 'Sending...' : 'Send Reset Link'}
+            {forgotLoading ? t('sending') : t('sendResetLink')}
           </Button>
         </DialogActions>
       </Dialog>

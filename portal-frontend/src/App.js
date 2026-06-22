@@ -1,10 +1,11 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { ThemeProvider, CssBaseline } from '@mui/material';
+import { ThemeProvider, CssBaseline, Box } from '@mui/material';
 import { AuthProvider } from './context/AuthContext';
 import { LanguageProvider } from './context/LanguageContext';
 import theme from './theme';
 import Navbar from './components/Navbar';
+import Footer from './components/Footer';
 import Landing from './pages/Landing';
 import Browse from './pages/Browse';
 import Login from './pages/Login';
@@ -13,6 +14,7 @@ import ResetPassword from './pages/ResetPassword';
 import Dashboard from './pages/Dashboard';
 import Admin from './pages/Admin';
 import Chat from './pages/Chat';
+import ContactUs from './pages/ContactUs';
 
 function App() {
   return (
@@ -20,18 +22,22 @@ function App() {
       <CssBaseline />
       <LanguageProvider>
         <AuthProvider>
-          <Router>
+<Router>
             <Navbar />
-            <Routes>
-              <Route path="/" element={<Landing />} />
-              <Route path="/browse" element={<Browse />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
-              <Route path="/reset-password/:id/:token" element={<ResetPassword />} />
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/admin" element={<Admin />} />
-              <Route path="/chat" element={<Chat />} />
-            </Routes>
+            <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+<Routes>
+                <Route path="/" element={<Landing />} />
+                <Route path="/browse" element={<Browse />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
+                <Route path="/reset-password/:id/:token" element={<ResetPassword />} />
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/admin" element={<Admin />} />
+<Route path="/chat" element={<Chat />} />
+                <Route path="/contact" element={<ContactUs />} />
+              </Routes>
+<Footer />
+            </Box>
           </Router>
         </AuthProvider>
       </LanguageProvider>

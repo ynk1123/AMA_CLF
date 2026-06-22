@@ -16,6 +16,9 @@ const languages = [
   { code: 'ar', name: 'العربية', flag: '🇸🇦' },
   { code: 'fa', name: 'فارسی', flag: '🇮🇷' },
   { code: 'ja', name: '日本語', flag: '🇯🇵' },
+  { code: 'ha', name: 'Hausa', flag: '🇳🇬' },
+  { code: 'yo', name: 'Yoruba', flag: '🇳🇬' },
+  { code: 'ig', name: 'Igbo', flag: '🇳🇬' },
 ];
 
 const Navbar = () => {
@@ -96,7 +99,7 @@ const Navbar = () => {
           ))}
         </Menu>
 
-        <Box>
+<Box>
           {!user ? (
             <>
               <Button 

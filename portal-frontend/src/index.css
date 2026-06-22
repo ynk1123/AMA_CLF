@@ -49,6 +49,20 @@ button { cursor: pointer; font-family: inherit; }
   50% { transform: translateY(-10px); }
 }
 
+@keyframes floatMore {
+  0%, 100% { transform: translate(0, 0); }
+  25% { transform: translate(10px, -15px); }
+  50% { transform: translate(-5px, -20px); }
+  75% { transform: translate(-15px, -10px); }
+}
+
+@keyframes floatWide {
+  0%, 100% { transform: translateX(0) translateY(0); }
+  25% { transform: translateX(20px) translateY(-10px); }
+  50% { transform: translateX(10px) translateY(-25px); }
+  75% { transform: translateX(-10px) translateY(-15px); }
+}
+
 @keyframes pulse {
   0%, 100% { transform: scale(1); }
   50% { transform: scale(1.03); }
@@ -62,6 +76,16 @@ button { cursor: pointer; font-family: inherit; }
 @keyframes bounce {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-8px); }
+}
+
+@keyframes rotate {
+  from { transform: translate(-50%, -50%) rotate(0deg); }
+  to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+@keyframes rotateReverse {
+  from { transform: translate(-50%, -50%) rotate(360deg); }
+  to { transform: translate(-50%, -50%) rotate(0deg); }
 }
 
 /* Animation Classes */
@@ -85,12 +109,28 @@ button { cursor: pointer; font-family: inherit; }
   animation: float 3s ease-in-out infinite;
 }
 
+.float-more {
+  animation: floatMore 4s ease-in-out infinite;
+}
+
+.float-wide {
+  animation: floatWide 5s ease-in-out infinite;
+}
+
 .pulse {
   animation: pulse 2s ease-in-out infinite;
 }
 
 .bounce {
   animation: bounce 1s ease-in-out infinite;
+}
+
+.rotate {
+  animation: rotate 20s linear infinite;
+}
+
+.rotate-reverse {
+  animation: rotateReverse 25s linear infinite;
 }
 
 /* Staggered animations */

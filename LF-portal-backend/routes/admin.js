@@ -6,6 +6,8 @@ const {
   deleteItem, 
   getAllUsers, 
   deleteUser,
+  suspendUser,
+  reactivateUser,
   getDashboardStats,
   getLocationStats,
   approveClaim,
@@ -23,12 +25,14 @@ router.delete('/items/:id', authenticate, authorizeAdmin, deleteItem);
 // User routes
 router.get('/users', authenticate, authorizeAdmin, getAllUsers);
 router.delete('/users/:id', authenticate, authorizeAdmin, deleteUser);
+router.put('/users/:id/suspend', authenticate, authorizeAdmin, suspendUser);
+router.put('/users/:id/reactivate', authenticate, authorizeAdmin, reactivateUser);
 
 // Stats routes
 router.get('/stats', authenticate, authorizeAdmin, getDashboardStats);
 router.get('/stats/locations', authenticate, authorizeAdmin, getLocationStats);
 
-// Claim verification routes (NEW)
+// Claim verification routes
 router.post('/claims/approve', authenticate, authorizeAdmin, approveClaim);
 router.get('/claims/pending', authenticate, authorizeAdmin, getPendingClaims);
 

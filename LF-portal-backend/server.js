@@ -40,7 +40,7 @@ app.use('/api/items', globalLimiter);
 app.use('/api/messages', globalLimiter);
 app.use('/api/appointments', globalLimiter);
 
-// Admin routes have higher limit (500 requests per 15 minutes) since dashboard makes many API calls
+// Admin routes
 const adminLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 500,
@@ -54,6 +54,7 @@ app.use('/api/items', require('./routes/item'));
 app.use('/api/messages', require('./routes/message'));
 app.use('/api/appointments', require('./routes/appointment'));
 app.use('/api/admin', require('./routes/admin'));
+app.use('/api/contact', require('./routes/contact'));
 
 // Error handler
 app.use((err, req, res, next) => {

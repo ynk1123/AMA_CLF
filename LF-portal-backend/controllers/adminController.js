@@ -64,12 +64,15 @@ exports.deleteItem = async (req, res) => {
 
 exports.getAllUsers = async (req, res) => {
   try {
+    console.log('Fetching all users...');
     const users = await User.findAll({
-      attributes: ['id', 'studentId', 'displayName', 'role', 'createdAt']
+      attributes: ['id', 'studentId', 'displayName', 'email', 'role', 'status', 'createdAt']
     });
+    console.log(`Found ${users.length} users`);
     res.json(users);
   } catch (err) {
-    res.status(400).json({ message: 'Failed to fetch users' });
+    console.error('Error fetching users:', err);
+    res.status(400).json({ message: 'Failed to fetch users', error: err.message });
   }
 };
 
@@ -160,6 +163,8 @@ exports.getPendingClaims = async (req, res) => {
 
 // Delete user (Admin only)
 exports.deleteUser = async (req, res) => {
+  const Message = require('../models/message');
+  
   try {
     const userId = req.params.id;
     
@@ -176,10 +181,79 @@ exports.deleteUser = async (req, res) => {
       return res.status(403).json({ message: 'Cannot delete admin accounts' });
     }
     
+    // Delete all items posted by this user first
+    const userItems = await Item.findAll({ where: { userId } });
+    for (const item of userItems) {
+      await item.destroy();
+    }
+    console.log(`Deleted ${userItems.length} items for user ${userId}`);
+    
+    // Delete all messages by this user
+    const userMessages = await Message.findAll({ where: { userId } });
+    for (const msg of userMessages) {
+      await msg.destroy();
+    }
+    console.log(`Deleted ${userMessages.length} messages for user ${userId}`);
+    
+    // Delete the user
     await user.destroy();
-    res.json({ message: 'User deleted successfully' });
+    res.json({ message: 'User, their items, and messages deleted successfully' });
   } catch (err) {
     console.error('Error deleting user:', err);
     res.status(400).json({ message: 'Failed to delete user', error: err.message });
+  }
+};
+
+// Suspend user (Admin only)
+exports.suspendUser = async (req, res) => {
+  try {
+    const userId = req.params.id;
+    
+    // Prevent admin from suspending themselves
+    if (parseInt(req.params.id) === req.user.id) {
+      return res.status(400).json({ message: 'Cannot suspend your own account' });
+    }
+    
+    const user = await User.findByPk(userId);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    
+    // Prevent suspending other admins
+    if (user.role === 'admin') {
+      return res.status(403).json({ message: 'Cannot suspend admin accounts' });
+    }
+    
+    // Check if already suspended
+    if (user.status === 'suspended') {
+      return res.status(400).json({ message: 'User is already suspended' });
+    }
+    
+    user.status = 'suspended';
+    await user.save();
+    res.json({ message: 'User suspended successfully', user });
+  } catch (err) {
+    console.error('Error suspending user:', err);
+    res.status(400).json({ message: 'Failed to suspend user', error: err.message });
+  }
+};
+
+// Reactivate user (Admin only)
+exports.reactivateUser = async (req, res) => {
+  try {
+    const userId = req.params.id;
+    
+    const user = await User.findByPk(userId);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    
+    // Check if already active
+    if (user.status === 'active') {
+      return res.status(400).json({ message: 'User is already active' });
+    }
+    
+    user.status = 'active';
+    await user.save();
+    res.json({ message: 'User reactivated successfully', user });
+  } catch (err) {
+    console.error('Error reactivating user:', err);
+    res.status(400).json({ message: 'Failed to reactivate user', error: err.message });
   }
 };

@@ -193,6 +193,10 @@ router.post('/login', async (req, res) => {
     if (!user || !await bcrypt.compare(trimmedPassword, user.password)) {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
+    // Check if user account is suspended
+    if (user.status === 'suspended') {
+      return res.status(403).json({ message: 'Your account has been suspended. Contact admin for help.' });
+    }
     const token = jwt.sign({ id: user.id }, JWT_SECRET, { expiresIn: '7d' });
     res.json({ token, user: { id: user.id, studentId: user.studentId, displayName: user.displayName, email: user.email, role: 'student' } });
   } catch (err) {
@@ -207,7 +211,7 @@ router.post('/admin-login', async (req, res) => {
     if (username !== process.env.ADMIN_USERNAME || password !== process.env.ADMIN_PASSWORD) {
       return res.status(401).json({ message: 'Invalid admin credentials' });
     }
-    const token = jwt.sign({ role: 'admin' }, JWT_SECRET, { expiresIn: '7d' });
+    const token = jwt.sign({ role: 'admin', id: 0 }, JWT_SECRET, { expiresIn: '7d' });
     res.json({ token, user: { studentId: 'ADMIN', role: 'admin' } });
   } catch (err) {
     res.status(400).json({ message: 'Admin login failed' });

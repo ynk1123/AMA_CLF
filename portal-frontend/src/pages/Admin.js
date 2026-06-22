@@ -11,18 +11,23 @@ const Admin = () => {
   const [locationStats, setLocationStats] = useState([]);
   const [appointments, setAppointments] = useState([]);
   const [pendingClaims, setPendingClaims] = useState([]);
+const [users, setUsers] = useState([]);
   const [tabValue, setTabValue] = useState(0);
   const [selectedItem, setSelectedItem] = useState(null);
   const [openItemDialog, setOpenItemDialog] = useState(false);
+  const [usersLoading, setUsersLoading] = useState(false);
+  const [usersError, setUsersError] = useState(null);
 
   useEffect(() => { loadData(); }, []);
-  useEffect(() => { if (tabValue === 1) loadPendingClaims(); }, [tabValue]);
+useEffect(() => { if (tabValue === 1) loadPendingClaims(); }, [tabValue]);
+  useEffect(() => { if (tabValue === 2) loadUsers(); }, [tabValue]);
   useEffect(() => {
-  if (tabValue === 2) {
+  if (tabValue === 3) {
     // Reload data when clicking Locations tab
     loadData();
   }
 }, [tabValue]);
+  // Appointments data is loaded with loadData() which runs on initial mount
 
   const loadData = async () => {
     try {
@@ -37,19 +42,42 @@ const Admin = () => {
     } catch (err) { console.error('Error:', err); }
   };
 
-  const loadPendingClaims = async () => {
+const loadPendingClaims = async () => {
     try {
       const response = await adminService.getPendingClaims();
       setPendingClaims(response.data);
     } catch (err) { console.error('Error:', err); }
   };
 
-  const handleApprove = async (id) => { await adminService.approveItem(id); loadData(); };
+const loadUsers = async () => {
+    setUsersLoading(true);
+    setUsersError(null);
+    try {
+      console.log('[Admin] Loading users, calling API...');
+      const response = await adminService.getAllUsers();
+      console.log('[Admin] Users response:', response.data);
+      setUsers(response.data);
+    } catch (err) { 
+      console.error('[Admin] Error loading users:', err);
+      console.error('[Admin] Error response:', err.response);
+      const errMsg = err.response?.data?.message || err.message || 'Failed to load users';
+      setUsersError(errMsg);
+    } finally {
+      setUsersLoading(false);
+    }
+  };
+
+const handleApprove = async (id) => { await adminService.approveItem(id); loadData(); };
   const handleStatusChange = async (id, status) => { await adminService.updateItemStatus(id, status); loadData(); };
   const handleDeleteItem = async (id) => { await adminService.deleteItem(id); loadData(); };
 const handleClaimApproval = async (id, status) => { await adminService.approveClaim({ id, status }); loadPendingClaims(); };
   const handleViewItem = (item) => { setSelectedItem(item); setOpenItemDialog(true); };
   const handleAppointmentStatusChange = async (id, status) => { await appointmentService.updateStatus(id, status); loadData(); };
+  
+  // User management handlers
+  const handleSuspendUser = async (id) => { await adminService.suspendUser(id); loadUsers(); };
+  const handleReactivateUser = async (id) => { await adminService.reactivateUser(id); loadUsers(); };
+  const handleDeleteUser = async (id) => { await adminService.deleteUser(id); loadUsers(); };
 
   const getStatusColor = (status) => {
     const colors = { lost: 'success', found: 'success', pending: 'default', under_verification: 'warning', claimed: 'info', archived: 'default' };
@@ -81,10 +109,11 @@ const getImageUrl = (url) => {
         <Grid item xs={6} md={2}><Card sx={{ bgcolor: '#f57c00', color: 'white' }}><CardContent><Typography variant="body2">Pending Apt</Typography><Typography variant="h4">{stats.pendingAppointments || 0}</Typography></CardContent></Card></Grid>
       </Grid>
 
-      <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
+<Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
         <Tabs value={tabValue} onChange={(e, v) => setTabValue(v)}>
           <Tab label="Items" />
           <Tab label="Claims" />
+          <Tab label="Users" />
           <Tab label="Locations" />
           <Tab label="Appointments" />
         </Tabs>
@@ -141,9 +170,65 @@ const getImageUrl = (url) => {
         </>
       )}
 
-      {tabValue === 2 && (
+{tabValue === 2 && (
         <>
-<Typography variant="h5" gutterBottom>Lost Items by Location</Typography>
+          <Typography variant="h5" gutterBottom>All Users</Typography>
+          {usersLoading ? (
+            <Paper sx={{ p: 4, textAlign: 'center' }}>
+              <Typography variant="body1">Loading users...</Typography>
+            </Paper>
+          ) : usersError ? (
+            <Paper sx={{ p: 4, textAlign: 'center', bgcolor: '#ffebee' }}>
+              <Typography variant="h6" color="error">Error loading users</Typography>
+              <Typography variant="body2" color="error" sx={{ mt: 1 }}>{usersError}</Typography>
+              <Button variant="contained" sx={{ mt: 2 }} onClick={() => loadUsers()}>
+                Retry
+              </Button>
+            </Paper>
+          ) : users.length === 0 ? (
+            <Paper sx={{ p: 4, textAlign: 'center' }}>
+              <Typography variant="h6" color="text.secondary">No users found</Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                There are no registered users in the system yet.
+              </Typography>
+              <Button variant="outlined" sx={{ mt: 2 }} onClick={() => loadUsers()}>
+                Refresh
+              </Button>
+            </Paper>
+          ) : (
+            <TableContainer component={Paper}>
+              <Table>
+                <TableHead><TableRow sx={{ bgcolor: '#f5f5f5' }}><TableCell><strong>ID</strong></TableCell><TableCell><strong>Student ID</strong></TableCell><TableCell><strong>Name</strong></TableCell><TableCell><strong>Email</strong></TableCell><TableCell><strong>Role</strong></TableCell><TableCell><strong>Status</strong></TableCell><TableCell><strong>Actions</strong></TableCell></TableRow></TableHead>
+                <TableBody>
+                  {users.map((user) => (
+                    <TableRow key={user.id} hover>
+                      <TableCell>{user.id}</TableCell><TableCell>{user.studentId}</TableCell><TableCell>{user.displayName}</TableCell><TableCell>{user.email}</TableCell>
+                      <TableCell><Chip label={user.role} color={user.role === 'admin' ? 'error' : 'default'} size="small" /></TableCell>
+                      <TableCell><Chip label={user.status || 'active'} color={(user.status || 'active') === 'active' ? 'success' : 'warning'} size="small" /></TableCell>
+                      <TableCell>
+                        {user.role !== 'admin' && (
+                          <>
+                            {(user.status || 'active') === 'active' ? (
+                              <Button size="small" onClick={() => handleSuspendUser(user.id)} color="warning">Suspend</Button>
+                            ) : (
+                              <Button size="small" onClick={() => handleReactivateUser(user.id)} color="success">Reactivate</Button>
+                            )}
+                            <Button size="small" onClick={() => handleDeleteUser(user.id)} color="error">Delete</Button>
+                          </>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          )}
+        </>
+      )}
+
+      {tabValue === 3 && (
+        <>
+          <Typography variant="h5" gutterBottom>Lost Items by Location</Typography>
           <Typography variant="body2" color="text.secondary" gutterBottom>Most common locations where items are lost</Typography>
           
           {/* Bar Chart */}
@@ -240,7 +325,7 @@ const getImageUrl = (url) => {
         </>
       )}
 
-      {tabValue === 3 && (
+{tabValue === 4 && (
         <>
           <Typography variant="h5" gutterBottom>CCTV Review Appointments</Typography>
           <TableContainer component={Paper}>

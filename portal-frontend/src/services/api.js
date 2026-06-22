@@ -74,7 +74,17 @@ export const adminService = {
   updateItemStatus: (id, status) => api.put(`/admin/items/${id}/status`, { status }),
   deleteItem: (id) => api.delete(`/admin/items/${id}`),
   getPendingClaims: () => api.get('/admin/claims/pending'),
-  approveClaim: (data) => api.post('/admin/claims/approve', data)
+  approveClaim: (data) => api.post('/admin/claims/approve', data),
+  // User management
+  getAllUsers: () => api.get('/admin/users'),
+  deleteUser: (id) => api.delete(`/admin/users/${id}`),
+  suspendUser: (id) => api.put(`/admin/users/${id}/suspend`),
+  reactivateUser: (id) => api.put(`/admin/users/${id}/reactivate`)
+};
+
+// Contact service - no auth required
+export const contactService = {
+  submitContact: (data) => api.post('/contact', data)
 };
 
 // NOTE: authService already contains request/reset endpoints in this file.

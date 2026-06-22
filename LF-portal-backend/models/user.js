@@ -25,9 +25,13 @@ email: {
     allowNull: true,
     unique: true,
   },
-  role: {
+role: {
     type: DataTypes.ENUM('student', 'admin'),
     defaultValue: 'student',
+  },
+  status: {
+    type: DataTypes.ENUM('active', 'suspended'),
+    defaultValue: 'active',
   },
 });
 
