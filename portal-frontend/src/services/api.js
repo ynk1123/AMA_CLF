@@ -27,11 +27,6 @@ api.interceptors.response.use(
   }
 );
 
-
-
-
-
-
 export const authService = {
 
   register: (data) => api.post('/auth/register', data),
@@ -51,7 +46,8 @@ export const itemService = {
     headers: { 'Content-Type': 'multipart/form-data' } 
   }),
   claimItem: (data) => api.post('/items/claim', data),
-  getMyItems: () => api.get('/items/my-items')
+  getMyItems: () => api.get('/items/my-items'),
+  getMyClaims: () => api.get('/items/my-claims')
 };
 
 export const messageService = {
@@ -75,6 +71,11 @@ export const adminService = {
   deleteItem: (id) => api.delete(`/admin/items/${id}`),
   getPendingClaims: () => api.get('/admin/claims/pending'),
   approveClaim: (data) => api.post('/admin/claims/approve', data),
+  // New multi-claim endpoints
+  getItemClaims: (itemId) => api.get(`/admin/items/${itemId}/claims`),
+  approveOrRejectClaim: (claimId, status) => api.post(`/admin/claims/${claimId}/decision`, { claimId, status }),
+  getAllPendingClaims: () => api.get('/admin/claims/all-pending'),
+  getAllClaims: () => api.get('/admin/claims/all'),
   // User management
   getAllUsers: () => api.get('/admin/users'),
   deleteUser: (id) => api.delete(`/admin/users/${id}`),

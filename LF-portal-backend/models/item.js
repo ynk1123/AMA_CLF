@@ -28,11 +28,11 @@ const Item = sequelize.define('Item', {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  date: {
+date: {
     type: DataTypes.DATEONLY,
     allowNull: false,
   },
-imageUrl: {
+  imageUrl: {
     type: DataTypes.STRING,
   },
   itemType: {

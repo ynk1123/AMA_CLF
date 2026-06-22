@@ -7,4 +7,4 @@ router.get('/:itemId', authenticate, getMessages);
 router.post('/', authenticate, createMessage);
 router.delete('/:id', authenticate, deleteMessage);
 
-module.exports = router;   
+module.exports = router;
