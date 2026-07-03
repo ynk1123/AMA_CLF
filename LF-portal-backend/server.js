@@ -19,13 +19,26 @@ dotenv.config();
 const app = express();
 
 // CORS FIRST
-const allowedOrigins = (process.env.CORS_ORIGINS || 'http://localhost:3000,http://localhost:5173,https://ama-clf-1.onrender.com')
+const defaultOrigins = [
+  'http://localhost:3000',
+  'http://localhost:5173',
+  'https://ama-clf.onrender.com',
+  'https://ama-clf-1.onrender.com'
+];
+const envOrigins = (process.env.CORS_ORIGINS || '')
   .split(',')
   .map(origin => origin.trim())
   .filter(Boolean);
+const allowedOrigins = Array.from(new Set([...envOrigins, ...defaultOrigins]));
 
 app.use(cors({
-  origin: allowedOrigins,
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error(`CORS origin not allowed: ${origin}`));
+    }
+  },
   credentials: true
 }));
 
