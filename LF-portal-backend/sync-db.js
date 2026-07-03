@@ -2,6 +2,7 @@ const bcrypt = require('bcryptjs');
 const { sequelize } = require('./config/database');
 
 const User = require('./models/user');
+const Claim = require('./models/claim');
 const { ADMIN_USERNAME, ADMIN_PASSWORD } = process.env;
 
 const ensureAdminUser = async () => {
@@ -94,6 +95,26 @@ const migrateItemType = async () => {
   }
 };
 
+// Sync Claim table to ensure it exists
+const syncClaimsTable = async () => {
+  try {
+    console.log('Syncing Claim table...');
+    await sequelize.sync({ alter: true });
+    
+    // Get count of existing claims
+    const claimCount = await Claim.count();
+    console.log(`✅ Claim table synced. Total claims in database: ${claimCount}`);
+    
+    // Show breakdown by status
+    const pendingCount = await Claim.count({ where: { status: 'pending' } });
+    const approvedCount = await Claim.count({ where: { status: 'approved' } });
+    const rejectedCount = await Claim.count({ where: { status: 'rejected' } });
+    console.log(`   - Pending: ${pendingCount}, Approved: ${approvedCount}, Rejected: ${rejectedCount}`);
+  } catch (err) {
+    console.error('Error syncing Claim table:', err.message);
+  }
+};
+
 const syncDatabase = async () => {
   try {
     console.log('Syncing database...');
@@ -106,8 +127,11 @@ const syncDatabase = async () => {
     // Force sync again to add the unique constraint after cleanup
     await sequelize.sync({ alter: true });
     
-    // Migrate itemType for existing items
+// Migrate itemType for existing items
     await migrateItemType();
+    
+    // Sync Claim table to ensure it exists
+    await syncClaimsTable();
     
     await ensureAdminUser();
     console.log('Database synced successfully!');

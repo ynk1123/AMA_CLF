@@ -166,10 +166,21 @@ router.post('/resetPassword/:id/:token', async (req, res) => {
 router.post('/register', async (req, res) => {
   try {
     const { studentId, displayName, password, email } = req.body;
+    
+    // Check if studentId already exists
     const existingUser = await User.findOne({ where: { studentId } });
     if (existingUser) {
       return res.status(400).json({ message: 'Student ID already registered' });
     }
+    
+    // Check if email already exists (if email is provided)
+    if (email) {
+      const existingEmail = await User.findOne({ where: { email } });
+      if (existingEmail) {
+        return res.status(400).json({ message: 'Email already registered' });
+      }
+    }
+    
     const hashedPassword = await bcrypt.hash(password, 12);
     const user = await User.create({
       studentId,

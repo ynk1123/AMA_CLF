@@ -1,6 +1,7 @@
 const Item = require('../models/item');
 const User = require('../models/user');
 const Appointment = require('../models/appointment');
+const Claim = require('../models/claim');
 
 
 exports.getAllItems = async (req, res) => {
@@ -51,14 +52,43 @@ exports.updateItemStatus = async (req, res) => {
 };
 
 exports.deleteItem = async (req, res) => {
+  const itemId = req.params.id;
+  
   try {
-    const item = await Item.findByPk(req.params.id);
+    const item = await Item.findByPk(itemId);
     if (!item) return res.status(404).json({ message: 'Item not found' });
     
+    // Get the Claim model
+    const Claim = require('../models/claim');
+    
+    // Delete claims (ignore errors if table doesn't exist yet)
+    try {
+      await Claim.destroy({ where: { itemId } });
+    } catch (e) {
+      console.log('No claims to delete or table not found');
+    }
+    
+    // Delete appointments (ignore errors if table doesn't exist yet)
+    try {
+      await Appointment.destroy({ where: { itemId } });
+    } catch (e) {
+      console.log('No appointments to delete or table not found');
+    }
+    
+    // Delete messages (ignore errors if table doesn't exist yet)
+    try {
+      const Message = require('../models/message');
+      await Message.destroy({ where: { itemId } });
+    } catch (e) {
+      console.log('No messages to delete or table not found');
+    }
+    
+    // Delete the item
     await item.destroy();
     res.json({ message: 'Item deleted' });
   } catch (err) {
-    res.status(400).json({ message: 'Failed to delete item' });
+    console.error('Error deleting item:', err);
+    res.status(400).json({ message: 'Failed to delete item', error: err.message });
   }
 };
 
@@ -255,5 +285,139 @@ exports.reactivateUser = async (req, res) => {
   } catch (err) {
     console.error('Error reactivating user:', err);
     res.status(400).json({ message: 'Failed to reactivate user', error: err.message });
+  }
+};
+
+// Get all claims for an item (Admin)
+exports.getItemClaims = async (req, res) => {
+  try {
+    const itemId = req.params.id;
+    
+    const claims = await Claim.findAll({
+      where: { itemId },
+      include: [
+        {
+          model: User,
+          as: 'User',
+          attributes: ['id', 'studentId', 'displayName', 'email']
+        }
+      ],
+      order: [['createdAt', 'ASC']]
+    });
+    
+    res.json(claims);
+  } catch (err) {
+    console.error('Error fetching item claims:', err);
+    res.status(400).json({ message: 'Failed to fetch claims', error: err.message });
+  }
+};
+
+// Approve or reject a specific claim (Admin)
+exports.approveOrRejectClaim = async (req, res) => {
+  try {
+    const { claimId, status } = req.body;
+    
+    const claim = await Claim.findByPk(claimId, {
+      include: [{ model: Item, as: 'Item' }]
+    });
+    
+    if (!claim) return res.status(404).json({ message: 'Claim not found' });
+    
+    // Update claim status
+    claim.status = status;
+    await claim.save();
+    
+    const item = claim.Item;
+    
+    if (status === 'approved') {
+      // Approve this claim - mark item as claimed
+      item.status = 'claimed';
+      // Reject all other pending claims for this item
+      await Claim.update(
+        { status: 'rejected' },
+        { where: { itemId: claim.itemId, status: 'pending', id: { [require('sequelize').Op.ne]: claimId } } }
+      );
+    } else if (status === 'rejected') {
+      // Check if there are other pending claims
+      const otherPendingClaims = await Claim.count({
+        where: { itemId: claim.itemId, status: 'pending', id: { [require('sequelize').Op.ne]: claimId } }
+      });
+      
+      if (otherPendingClaims > 0) {
+        // Keep item as under_verification since there are other claims
+        item.status = 'under_verification';
+      } else {
+        // No more pending claims - revert to original type
+        item.status = item.itemType || 'lost';
+      }
+    }
+    
+    await item.save();
+    
+    res.json({ message: `Claim ${status}`, claim, item });
+  } catch (err) {
+    console.error('Error updating claim:', err);
+    res.status(400).json({ message: 'Failed to update claim', error: err.message });
+  }
+};
+
+// Get all pending claims across all items (Admin)
+exports.getAllPendingClaims = async (req, res) => {
+  try {
+    // First check if Claim table has any records at all
+    const totalClaims = await Claim.count();
+    console.log(`[Admin] Total claims in database: ${totalClaims}`);
+    
+    const pendingCount = await Claim.count({ where: { status: 'pending' } });
+    console.log(`[Admin] Pending claims count: ${pendingCount}`);
+    
+    const claims = await Claim.findAll({
+      where: { status: 'pending' },
+      include: [
+        {
+          model: Item,
+          as: 'Item',
+          attributes: ['id', 'title', 'category', 'status', 'imageUrl']
+        },
+        {
+          model: User,
+          as: 'User',
+          attributes: ['id', 'studentId', 'displayName', 'email']
+        }
+      ],
+      order: [['createdAt', 'ASC']]
+    });
+    
+    console.log(`[Admin] Returning ${claims.length} pending claims`);
+    res.json(claims);
+  } catch (err) {
+    console.error('Error fetching all pending claims:', err);
+    res.status(400).json({ message: 'Failed to fetch claims', error: err.message });
+  }
+};
+
+// Get ALL claims across all items (Admin) - including approved/rejected
+exports.getAllClaims = async (req, res) => {
+  try {
+    const claims = await Claim.findAll({
+      include: [
+        {
+          model: Item,
+          as: 'Item',
+          attributes: ['id', 'title', 'category', 'status', 'imageUrl']
+        },
+        {
+          model: User,
+          as: 'User',
+          attributes: ['id', 'studentId', 'displayName', 'email']
+        }
+      ],
+      order: [['createdAt', 'DESC']]
+    });
+    
+    res.json(claims);
+  } catch (err) {
+    console.error('Error fetching all claims:', err);
+    res.status(400).json({ message: 'Failed to fetch all claims', error: err.message });
   }
 };

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Box, Container, Typography, Grid, TextField, Button, List, ListItem, ListItemAvatar, Avatar, ListItemText, Divider, IconButton, Paper } from '@mui/material';
 import { useAuth } from '../context/AuthContext';
+import { useSearchParams } from 'react-router-dom';
 import { itemService, messageService } from '../services/api';
 import SendIcon from '@mui/icons-material/Send';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -9,6 +10,7 @@ import SearchIcon from '@mui/icons-material/Search';
 
 const Chat = () => {
   const { user } = useAuth();
+  const [searchParams] = useSearchParams();
   const [items, setItems] = useState([]);
   const [selectedItem, setSelectedItem] = useState(null);
   const [messages, setMessages] = useState([]);
@@ -19,15 +21,35 @@ const Chat = () => {
     loadItems();
   }, []);
 
+  // Auto-select item from URL parameter
+  useEffect(() => {
+    if (items.length > 0) {
+      const itemIdFromUrl = searchParams.get('itemId');
+      if (itemIdFromUrl) {
+        const item = items.find(i => i.id === parseInt(itemIdFromUrl));
+        if (item) {
+          setSelectedItem(item);
+        }
+      }
+    }
+  }, [items, searchParams]);
+
   useEffect(() => {
     if (selectedItem) {
       loadMessages(selectedItem.id);
     }
   }, [selectedItem]);
 
+// Auto-scroll to center when messages are loaded/updated or item is clicked
   useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+    // Delay to ensure DOM is rendered
+    const timer = setTimeout(() => {
+      if (messagesEndRef.current) {
+        messagesEndRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }, 100);
+    return () => clearTimeout(timer);
+  }, [messages, selectedItem]);
 
   const loadItems = async () => {
     try {
@@ -78,11 +100,7 @@ const Chat = () => {
     }
   };
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
-
-  const formatDateTime = (timestamp) => {
+const formatDateTime = (timestamp) => {
     const date = new Date(timestamp);
     const month = (date.getMonth() + 1).toString().padStart(2, '0');
     const day = date.getDate().toString().padStart(2, '0');
@@ -181,12 +199,15 @@ const Chat = () => {
                       <Box key={message.id || index} sx={{ mb: 3 }} className={`fade-in stagger-${Math.min(index + 1, 4)}`}>
                         <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
                           <Avatar sx={{ backgroundColor: '#DC2626', mr: 2, width: 40, height: 40, fontWeight: 700 }}>
-                            {message.User?.studentId?.charAt(0) || '?'}
+{message.User?.studentId?.charAt(0) || '?'}
                           </Avatar>
                           <Box sx={{ flexGrow: 1 }}>
                             <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
-                              <Typography variant="subtitle1" sx={{ color: '#1A1A2E', fontWeight: 700, mr: 2 }}>
-                                {message.User?.studentId || 'Unknown'}
+                              <Typography variant="subtitle1" sx={{ color: '#1A1A2E', fontWeight: 700, mr: 1 }}>
+                                {message.User?.displayName || 'Unknown'}
+                              </Typography>
+                              <Typography variant="caption" sx={{ color: '#6B7280', mr: 2, fontWeight: 500 }}>
+                                ({message.User?.studentId || '?'})
                               </Typography>
                               <Typography variant="caption" sx={{ color: '#4B5563' }}>
                                 {formatDateTime(message.timestamp)}

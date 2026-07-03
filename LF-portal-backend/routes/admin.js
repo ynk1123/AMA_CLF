@@ -11,7 +11,11 @@ const {
   getDashboardStats,
   getLocationStats,
   approveClaim,
-  getPendingClaims
+  getPendingClaims,
+  getItemClaims,
+  approveOrRejectClaim,
+  getAllPendingClaims,
+  getAllClaims
 } = require('../controllers/adminController');
 const { authenticate, authorizeAdmin } = require('../middleware/auth');
 const router = express.Router();
@@ -35,5 +39,11 @@ router.get('/stats/locations', authenticate, authorizeAdmin, getLocationStats);
 // Claim verification routes
 router.post('/claims/approve', authenticate, authorizeAdmin, approveClaim);
 router.get('/claims/pending', authenticate, authorizeAdmin, getPendingClaims);
+
+// New multi-claim routes
+router.get('/items/:id/claims', authenticate, authorizeAdmin, getItemClaims);
+router.post('/claims/:claimId/decision', authenticate, authorizeAdmin, approveOrRejectClaim);
+router.get('/claims/all-pending', authenticate, authorizeAdmin, getAllPendingClaims);
+router.get('/claims/all', authenticate, authorizeAdmin, getAllClaims);
 
 module.exports = router;

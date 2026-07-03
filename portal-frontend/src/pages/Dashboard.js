@@ -1,12 +1,17 @@
-  import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, Typography, Grid, Card, CardContent, Button, TextField, MenuItem, Dialog, DialogTitle, DialogContent, DialogActions, Chip, IconButton } from '@mui/material';
-  import { useAuth } from '../context/AuthContext';
-  import { itemService, messageService, appointmentService } from '../services/api';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import { itemService, messageService, appointmentService } from '../services/api';
 import CloseIcon from '@mui/icons-material/Close';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
+import MessageIcon from '@mui/icons-material/Message';
+import NotificationsIcon from '@mui/icons-material/Notifications';
+import Badge from '@mui/material/Badge';
 
 const Dashboard = () => {
     const { user } = useAuth();
+    const navigate = useNavigate();
     const [items, setItems] = useState([]);
     const [openDialog, setOpenDialog] = useState(false);
     const [openItemDialog, setOpenItemDialog] = useState(false);
@@ -40,8 +45,254 @@ const Dashboard = () => {
       description: ''
     });
 
-    useEffect(() => {
+    const itemCardStyles = {
+      borderRadius: 3,
+      boxShadow: 3,
+      p: 1.5,
+      cursor: 'pointer',
+      transition: 'all 0.3s ease',
+      '&:hover': {
+        boxShadow: 6,
+        transform: 'translateY(-4px)'
+      }
+    };
+
+    const itemImageStyles = {
+      width: '100%',
+      height: 120,
+      objectFit: 'cover',
+      borderRadius: 2,
+      mb: 1.5
+    };
+
+    // Notification state - real data from API
+    const [notifications, setNotifications] = useState([]);
+    const [notificationCount, setNotificationCount] = useState(0);
+const [openNotificationDialog, setOpenNotificationDialog] = useState(false);
+    const [notificationsViewed, setNotificationsViewed] = useState(false);
+
+    const loadNotificationsViewedFromStorage = () => {
+      try {
+        return localStorage.getItem('lf_notifications_viewed') === 'true';
+      } catch (e) {
+        return false;
+      }
+    };
+
+    const setNotificationsViewedInStorage = (val) => {
+      try {
+        localStorage.setItem('lf_notifications_viewed', val ? 'true' : 'false');
+      } catch (e) {
+        // ignore
+      }
+    }
+
+    const loadNotificationsViewedCountFromStorage = () => {
+      try {
+        return parseInt(localStorage.getItem('lf_notifications_viewed_count'), 10) || 0;
+      } catch (e) {
+        return 0;
+      }
+    };
+
+    const setNotificationsViewedCountInStorage = (count) => {
+      try {
+        localStorage.setItem('lf_notifications_viewed_count', String(count));
+      } catch (e) {
+        // ignore
+      }
+    };
+
+    // Dismissed notifications - persist across sessions
+    const loadDismissedNotificationsFromStorage = () => {
+      try {
+        const stored = localStorage.getItem('lf_notifications_dismissed');
+        return stored ? JSON.parse(stored) : [];
+      } catch (err) {
+        return [];
+      }
+    };
+
+    const saveDismissedNotificationsToStorage = (list) => {
+      try {
+        localStorage.setItem('lf_notifications_dismissed', JSON.stringify(list));
+      } catch (err) {
+        console.error('Failed to save dismissed notifications', err);
+      }
+    };
+
+    const addToDismissedNotifications = (notifIds) => {
+      const dismissed = loadDismissedNotificationsFromStorage();
+      const updated = [...new Set([...dismissed, ...notifIds])];
+      saveDismissedNotificationsToStorage(updated);
+    };
+
+// Save notifications to localStorage
+    const saveNotificationsToStorage = (list) => {
+      try {
+        localStorage.setItem('lf_notifications', JSON.stringify(list));
+      } catch (err) {
+        console.error('Failed to save notifications', err);
+      }
+    };
+
+    // Load notifications from localStorage
+    const loadNotificationsFromStorage = () => {
+      try {
+        const stored = localStorage.getItem('lf_notifications');
+        return stored ? JSON.parse(stored) : [];
+      } catch (err) {
+        return [];
+      }
+    };
+
+    // Load notifications
+    const loadNotifications = async () => {
+      try {
+        // Load dismissed notifications to exclude them
+        const dismissedIds = loadDismissedNotificationsFromStorage();
+        
+        // First load from localStorage for immediate display
+        const storedNotifs = loadNotificationsFromStorage();
+        const isAdmin = user?.role === 'admin';
+        let notifList = storedNotifs
+          .filter(n => !dismissedIds.includes(n.id)) // Filter out dismissed ones
+          .map(n => {
+          if ((n.type === 'item_pending' || n.type === 'item_posted') && n.id.startsWith('item-')) {
+            const message = isAdmin
+              ? 'A user is waiting for approval'
+              : 'Your item is waiting for admin approval';
+            return {
+              ...n,
+              type: isAdmin ? 'item_posted' : 'item_pending',
+              message
+            };
+          }
+          return n;
+        });
+        
+        // 1. Fetch user's own posted items INCLUDING pending items
+        const myPostedItems = await itemService.getMyPostedItems();
+        
+        // Pending items (still waiting for approval)
+        const pendingItems = myPostedItems.data.filter(item => item.status === 'pending');
+        const existingPendingIds = notifList
+          .filter(n => n.type === 'item_pending' || n.type === 'item_posted')
+          .map(n => n.id);
+        
+        pendingItems.forEach(item => {
+          const notifId = `item-${item.id}`;
+          if (!existingPendingIds.includes(notifId) && !dismissedIds.includes(notifId)) {
+            const message = isAdmin 
+              ? 'A user is waiting for approval' 
+              : 'Your item is waiting for admin approval';
+            notifList.push({
+              id: notifId,
+              type: isAdmin ? 'item_posted' : 'item_pending',
+              title: item.title,
+              message: message,
+              time: item.createdAt
+            });
+          }
+        });
+
+        // APPROVED items - only show for non-admin users who can't see their own approved items in the list
+        if (!isAdmin) {
+          const approvedItems = myPostedItems.data.filter(item => item.status === 'lost' || item.status === 'found');
+          const existingApprovedIds = storedNotifs
+            .filter(n => n.type === 'item_approved')
+            .map(n => n.id);
+          
+          approvedItems.forEach(item => {
+            const notifId = `item-approved-${item.id}`;
+            if (!existingApprovedIds.includes(notifId) && !dismissedIds.includes(notifId)) {
+              notifList.push({
+                id: notifId,
+                type: 'item_approved',
+                title: item.title,
+                message: `Your item has been APPROVED! Status: ${item.status}`,
+                time: item.updatedAt
+              });
+            }
+          });
+        }
+
+        // 2. Fetch user's claims
+        const myClaims = await itemService.getMyClaims();
+        const existingClaimIds = storedNotifs
+          .filter(n => n.type === 'claim_approved' || n.type === 'claim_rejected')
+          .map(n => n.id);
+        
+        const processedClaims = myClaims.data.filter(claim => 
+          (claim.status === 'approved' || claim.status === 'rejected') && 
+          !existingClaimIds.includes(`claim-${claim.id}`) &&
+          !dismissedIds.includes(`claim-${claim.id}`)
+        );
+        processedClaims.forEach(claim => {
+          notifList.push({
+            id: `claim-${claim.id}`,
+            type: claim.status === 'approved' ? 'claim_approved' : 'claim_rejected',
+            title: claim.Item?.title || 'Your Claim',
+            message: claim.status === 'approved' ? 'Your claim has been APPROVED!' : 'Your claim has been REJECTED',
+            time: claim.updatedAt
+          });
+        });
+
+        // 3. Fetch user's OWN CCTV appointments only
+        const myAppointments = await appointmentService.getMyAppointments();
+        const existingApptIds = storedNotifs
+          .filter(n => n.type === 'appointment')
+          .map(n => n.id);
+        
+        myAppointments.data.forEach(appt => {
+          const notifId = `appt-${appt.id}`;
+          if (!existingApptIds.includes(notifId) && !dismissedIds.includes(notifId)) {
+            notifList.push({
+              id: notifId,
+              type: 'appointment',
+              title: appt.Item?.title || 'CCTV Review',
+              message: `Appointment: ${appt.status} - ${appt.date} at ${appt.time}`,
+              time: appt.date
+            });
+          }
+        });
+
+        // Save to localStorage for persistence
+        saveNotificationsToStorage(notifList);
+        
+        setNotifications(notifList);
+
+        // If user already viewed notifications, only count new notifications since the last view.
+        const viewed = loadNotificationsViewedFromStorage();
+        const viewedCount = loadNotificationsViewedCountFromStorage();
+        const count = viewed
+          ? Math.max(0, notifList.length - viewedCount)
+          : notifList.length;
+        setNotificationCount(count);
+      } catch (err) {
+        console.error('Failed to load notifications', err);
+      }
+    };
+
+    const deleteAllNotifications = () => {
+      try {
+        // Add all current notifications to dismissed list
+        const notifIds = notifications.map(n => n.id);
+        addToDismissedNotifications(notifIds);
+        localStorage.removeItem('lf_notifications');
+      } catch (err) {
+        console.error('Failed to delete notifications', err);
+      }
+      setNotifications([]);
+      setNotificationCount(0);
+      setNotificationsViewedInStorage(false);
+    };
+
+useEffect(() => {
+      // New page load => allow badge to show again until viewed
+      setNotificationsViewed(loadNotificationsViewedFromStorage());
       loadItems();
+      loadNotifications();
     }, []);
 
     const loadItems = async () => {
@@ -112,7 +363,7 @@ formData.append('type', newItem.type);
     formData.append('image', newItem.image);
   }
 
-  try {
+try {
     await itemService.createItem(formData);
     setOpenDialog(false);
     setNewItem({
@@ -127,6 +378,7 @@ formData.append('type', newItem.type);
       image: null
     });
     loadItems();
+    loadNotifications(); // Reload notifications to show pending item status
   } catch (err) {
     console.error('Failed to create item', err);
   }
@@ -178,7 +430,7 @@ const handleItemClick = (item) => {
   }
 };
 
-    const handleAppointmentSubmit = async () => {
+const handleAppointmentSubmit = async () => {
       if (!selectedItem) return;
       try {
         await appointmentService.createAppointment({
@@ -188,11 +440,24 @@ const handleItemClick = (item) => {
         setOpenAppointmentDialog(false);
         setAppointment({ date: '', time: '', location: '', description: '' });
         alert('Appointment request submitted!');
+        loadNotifications(); // Reload to show new appointment
       } catch (err) {
         console.error('Failed to submit appointment');
       }
     };
 
+    const handleMessageClick = () => {
+      if (!user) {
+        alert('Please login to message');
+        navigate('/login');
+        return;
+      }
+      // Navigate to Chat page with the item pre-selected
+      navigate(`/chat?itemId=${selectedItem.id}`);
+      setOpenItemDialog(false);
+    };
+
+// Filter items for Search and Filters section
     const filteredItems = items.filter(item => {
       const matchesSearch = item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                             item.description.toLowerCase().includes(searchTerm.toLowerCase());
@@ -202,15 +467,28 @@ const handleItemClick = (item) => {
       return matchesSearch && matchesCategory && matchesLocation && matchesStatus;
     });
 
+    // Separate items into two groups: Active vs Claimed/Archived
+    const activeStatuses = ['pending', 'lost', 'found', 'under_verification'];
+    const claimedArchivedStatuses = ['claimed', 'archived'];
+
+    // Apply search/filter to active items only
+    const activeItems = filteredItems.filter(item => activeStatuses.includes(item.status));
+    const claimedArchivedItems = filteredItems.filter(item => claimedArchivedStatuses.includes(item.status));
+
 const getStatusColor = (status) => {
       switch (status) {
         case 'lost': return 'warning';
-        case 'found': return 'success';
+        case 'found': return 'warning';
         case 'under_verification': return 'error';
         case 'claimed': return 'info';
         case 'archived': return 'default';
         default: return 'default';
       }
+    };
+
+    // Check if item should have ghost (archived/claimed) appearance
+    const isGhostItem = (status) => {
+      return status === 'archived' || status === 'claimed';
     };
 
 const getImageUrl = (url) => {
@@ -224,11 +502,39 @@ const getImageUrl = (url) => {
   return `${apiUrl}${url}`;
 };
 
-    return (
+return (
       <Box sx={{ mt: 4, px: 4 }}>
-        <Typography variant="h4" gutterBottom>
-          Welcome, {user?.displayName || user?.studentId}
-        </Typography>
+        {/* Header Section with Welcome and Notification Button on same row */}
+        <Box 
+          sx={{ 
+            display: 'flex', 
+            justifyContent: 'space-between', 
+            alignItems: 'center',
+            mb: 2
+          }}
+        >
+          <Typography variant="h4" gutterBottom>
+            Welcome, {user?.displayName || user?.studentId}
+          </Typography>
+<IconButton 
+            color="primary"
+onClick={() => {
+              setOpenNotificationDialog(true);
+              setNotificationsViewed(true);
+              setNotificationsViewedInStorage(true);
+              setNotificationsViewedCountInStorage(notifications.length);
+              setNotificationCount(0); // hide badge after viewing
+            }}
+            sx={{ 
+              backgroundColor: '#f5f5f5',
+              '&:hover': { backgroundColor: '#e0e0e0' }
+            }}
+>
+            <Badge badgeContent={notificationCount} color="error">
+              <NotificationsIcon />
+            </Badge>
+          </IconButton>
+        </Box>
 
         <Box sx={{ mb: 4 }}>
           <Button variant="contained" onClick={() => setOpenDialog(true)}>
@@ -269,11 +575,19 @@ const getImageUrl = (url) => {
             <Grid item xs={12} md={3}>
               <TextField
                 fullWidth
+                select
                 label="Location"
                 value={filterLocation}
                 onChange={(e) => setFilterLocation(e.target.value)}
                 size="small"
-              />
+              >
+                <MenuItem value="">All</MenuItem>
+                {locationOptions.map((location) => (
+                  <MenuItem key={location} value={location}>
+                    {location}
+                  </MenuItem>
+                ))}
+              </TextField>
             </Grid>
             <Grid item xs={12} md={3}>
               <TextField
@@ -284,7 +598,7 @@ const getImageUrl = (url) => {
                 onChange={(e) => setFilterStatus(e.target.value)}
                 size="small"
               >
-<MenuItem value="">All</MenuItem>
+                <MenuItem value="">All</MenuItem>
                 <MenuItem value="lost">Lost</MenuItem>
                 <MenuItem value="found">Found</MenuItem>
                 <MenuItem value="under_verification">Under Verification</MenuItem>
@@ -295,41 +609,35 @@ const getImageUrl = (url) => {
           </Grid>
         </Box>
 
+{/* Section 1: Active Lost and Found Items */}
         <Typography variant="h5" gutterBottom>
-          Lost and Found Items ({filteredItems.length})
+          Lost and Found Items ({activeItems.length})
         </Typography>
 
-        <Grid container spacing={3}>
-          {filteredItems.map((item) => (
-            <Grid item xs={12} sm={6} md={3} key={item.id}>
+        <Grid container spacing={2}>
+          {activeItems.map((item) => (
+            <Grid item xs={12} sm={6} md={2.4} key={item.id}>
               <Card
+                className="card-hover"
                 sx={{
-                  borderRadius: 3,
-                  boxShadow: 3,
-                  p: 1.5,
-                  cursor: 'pointer',
-                  '&:hover': { boxShadow: 6 }
+                  ...itemCardStyles,
+                  opacity: isGhostItem(item.status) ? 0.5 : 1,
+                  filter: isGhostItem(item.status) ? 'grayscale(80%)' : 'none'
                 }}
                 onClick={() => handleItemClick(item)}
               >
-                <CardContent sx={{ p: 1 }}>
-                  <Typography variant="h6" sx={{ mb: 1, fontWeight: 600 }}>
+                <CardContent sx={{ p: 1.5 }}>
+                  <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 600, fontSize: '0.9rem' }}>
                     {item.title}
                   </Typography>
-{item.imageUrl && (
-  <Box
-    component="img"
-    src={getImageUrl(item.imageUrl)}
-    alt={item.title}
-    sx={{
-      width: '100%',
-      height: 200,
-      objectFit: 'cover',
-      borderRadius: 2,
-      mb: 1
-    }}
-  />
-)}
+                  {item.imageUrl && (
+                    <Box
+                      component="img"
+                      src={getImageUrl(item.imageUrl)}
+                      alt={item.title}
+                      sx={itemImageStyles}
+                    />
+                  )}
                   <Box
                     sx={{
                       width: '100%',
@@ -362,8 +670,76 @@ const getImageUrl = (url) => {
                 </CardContent>
               </Card>
             </Grid>
-          ))}
+))}
         </Grid>
+
+        {/* Section 2: Claimed/Archived Items */}
+        {claimedArchivedItems.length > 0 && (
+          <>
+            <Typography variant="h5" gutterBottom sx={{ mt: 6 }}>
+              Claimed/Archived ({claimedArchivedItems.length})
+            </Typography>
+
+            <Grid container spacing={2}>
+              {claimedArchivedItems.map((item) => (
+                <Grid item xs={12} sm={6} md={2.4} key={item.id}>
+              <Card
+                className="card-hover"
+                sx={{
+                  ...itemCardStyles,
+                  opacity: 0.5,
+                  filter: 'grayscale(80%)'
+                }}
+                onClick={() => handleItemClick(item)}
+              >
+                <CardContent sx={{ p: 1.5 }}>
+                  <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 600, fontSize: '0.9rem' }}>
+                    {item.title}
+                  </Typography>
+                  {item.imageUrl && (
+                    <Box
+                      component="img"
+                      src={getImageUrl(item.imageUrl)}
+                      alt={item.title}
+                      sx={itemImageStyles}
+                    />
+                  )}
+                      <Box
+                        sx={{
+                          width: '100%',
+                          backgroundColor: '#ebe3e3',
+                          borderRadius: 1,
+                          py: 1,
+                          px: 2,
+                          mb: 1
+                        }}
+                      >
+                        <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                          DETAILS
+                        </Typography>
+                      </Box>
+                      <Box sx={{ px: 2 }}>
+                        <Typography variant="body2" sx={{ mb: 1 }}>
+                          <strong>Category:</strong> {item.category}
+                        </Typography>
+                        <Typography variant="body2" sx={{ mb: 1 }}>
+                          <strong>Location:</strong> {item.location}
+                        </Typography>
+                        <Typography variant="body2" sx={{ mb: 1 }}>
+                          <strong>Date:</strong> {new Date(item.date).toLocaleDateString()}
+                        </Typography>
+                        <Typography variant="body2">
+                          <strong>Status:</strong>{' '}
+                          <Chip label={item.status} color={getStatusColor(item.status)} size="small" />
+                        </Typography>
+                      </Box>
+                    </CardContent>
+                  </Card>
+                </Grid>
+              ))}
+            </Grid>
+          </>
+        )}
 
         {/* Post New Item Dialog */}
         <Dialog open={openDialog} onClose={() => setOpenDialog(false)} maxWidth="sm" fullWidth>
@@ -538,6 +914,10 @@ const getImageUrl = (url) => {
             <Typography variant="body1" sx={{ mb: 1 }}>
               <strong>Date:</strong> {new Date(selectedItem.date).toLocaleDateString()}
             </Typography>
+            <Typography variant="body1" sx={{ mb: 1 }}>
+              <strong>Posted by:</strong>{' '}
+              {selectedItem.User ? `${selectedItem.User.displayName || selectedItem.User.studentId} (${selectedItem.User.studentId})` : 'Unknown'}
+            </Typography>
             <Typography variant="body1" sx={{ mb: 2 }}>
               <strong>Status:</strong>{' '}
               <Chip label={selectedItem.status} color={getStatusColor(selectedItem.status)} />
@@ -562,22 +942,35 @@ const getImageUrl = (url) => {
       </Grid>
     )}
   </DialogContent>
-  <DialogActions sx={{ p: 2, gap: 1 }}>
-    <Button
-      variant="contained"
-      color="primary"
-      onClick={() => setOpenClaimDialog(true)}
-      disabled={selectedItem?.status !== 'lost' && selectedItem?.status !== 'found'}
-    >
-      Claim Item
-    </Button>
-    <Button
-      variant="outlined"
-      startIcon={<CalendarMonthIcon />}
-      onClick={() => setOpenAppointmentDialog(true)}
-    >
-      Schedule CCTV Review
-    </Button>
+<DialogActions sx={{ p: 2, gap: 1, display: 'flex', justifyContent: 'space-between' }}>
+    <Box sx={{ display: 'flex', gap: 1 }}>
+<Button
+        variant="outlined"
+        startIcon={<MessageIcon />}
+        onClick={handleMessageClick}
+        disabled={selectedItem?.status === 'claimed'}
+      >
+        Message
+      </Button>
+    </Box>
+    <Box sx={{ display: 'flex', gap: 1 }}>
+      <Button
+        variant="contained"
+        color="primary"
+        onClick={() => setOpenClaimDialog(true)}
+        disabled={selectedItem?.status === 'claimed' || selectedItem?.status === 'archived' || selectedItem?.status === 'pending'}
+      >
+        {selectedItem?.status === 'under_verification' ? 'Claim In Review' : 'Claim Item'}
+      </Button>
+      <Button
+        variant="outlined"
+        startIcon={<CalendarMonthIcon />}
+        onClick={() => setOpenAppointmentDialog(true)}
+        disabled={isGhostItem(selectedItem?.status)}
+      >
+        Schedule CCTV Review
+      </Button>
+    </Box>
   </DialogActions>
 </Dialog>
                 
@@ -619,7 +1012,7 @@ const getImageUrl = (url) => {
                         </DialogActions>
                       </Dialog>
                 
-                      {/* Appointment Dialog */}
+{/* Appointment Dialog */}
                       <Dialog open={openAppointmentDialog} onClose={() => setOpenAppointmentDialog(false)} maxWidth="sm" fullWidth>
                         <DialogTitle>Schedule CCTV Review</DialogTitle>
                         <DialogContent>
@@ -661,6 +1054,67 @@ const getImageUrl = (url) => {
                         <DialogActions>
                           <Button onClick={() => setOpenAppointmentDialog(false)}>Cancel</Button>
                           <Button onClick={handleAppointmentSubmit} variant="contained">Schedule</Button>
+                        </DialogActions>
+                      </Dialog>
+
+                      {/* Notifications Dialog */}
+                      <Dialog open={openNotificationDialog} onClose={() => setOpenNotificationDialog(false)} maxWidth="sm" fullWidth>
+                        <DialogTitle sx={{ pr: 6 }}>
+                          Notifications
+                          <IconButton
+                            onClick={() => setOpenNotificationDialog(false)}
+                            sx={{ position: 'absolute', right: 8, top: 8 }}
+                          >
+                            <CloseIcon />
+                          </IconButton>
+                        </DialogTitle>
+                        <DialogContent dividers>
+                          {notifications.length === 0 ? (
+                            <Typography variant="body1" sx={{ py: 2, textAlign: 'center', color: '#666' }}>
+                              No notifications yet
+                            </Typography>
+                          ) : (
+                            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                              {notifications.map((notif) => (
+                                <Box 
+                                  key={notif.id}
+                                  sx={{ 
+                                    p: 2, 
+                                    borderRadius: 2, 
+backgroundColor: notif.type === 'claim_approved' ? '#E8F5E9' : 
+                                                notif.type === 'claim_rejected' ? '#FFEBEE' : 
+                                                notif.type === 'appointment' ? '#E3F2FD' :
+                                                notif.type === 'item_approved' ? '#E8F5E9' :
+                                                notif.type === 'item_posted' ? '#E3F2FD' : '#FFF3E0',
+                                    border: '1px solid #ddd'
+                                  }}
+                                >
+                                  <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                                    {notif.title}
+                                  </Typography>
+                                  <Typography variant="body2" sx={{ mt: 0.5 }}>
+                                    {notif.message}
+                                  </Typography>
+                                  <Typography variant="caption" sx={{ color: '#666', mt: 1, display: 'block' }}>
+                                    {new Date(notif.time).toLocaleDateString()}
+                                  </Typography>
+                                </Box>
+                              ))}
+                            </Box>
+                          )}
+                        </DialogContent>
+                                                <DialogActions sx={{ justifyContent: 'space-between' }}>
+                          <Button
+                            onClick={() => {
+                              deleteAllNotifications();
+                              setOpenNotificationDialog(false);
+                            }}
+                            color="error"
+                            disabled={notifications.length === 0}
+                          >
+                            Delete
+                          </Button>
+                          <Button onClick={() => setOpenNotificationDialog(false)}>Close</Button>
                         </DialogActions>
                       </Dialog>
                     </Box>

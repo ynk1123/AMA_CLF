@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, Grid, Card, CardContent, TextField, MenuItem, Chip, IconButton, Dialog, DialogTitle, DialogContent, DialogActions, Alert } from '@mui/material';
+import { Box, Typography, Grid, Card, CardContent, TextField, MenuItem, Chip, IconButton, Dialog, DialogTitle, DialogContent, DialogActions, Alert, Button } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { itemService } from '../services/api';
+import MessageIcon from '@mui/icons-material/Message';
 import CloseIcon from '@mui/icons-material/Close';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 
 const Browse = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [items, setItems] = useState([]);
   const [openItemDialog, setOpenItemDialog] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
@@ -15,6 +18,26 @@ const Browse = () => {
   const [filterCategory, setFilterCategory] = useState('');
   const [filterLocation, setFilterLocation] = useState('');
   const [filterStatus, setFilterStatus] = useState('');
+
+  const itemCardStyles = {
+    borderRadius: 3,
+    boxShadow: 3,
+    overflow: 'hidden',
+    transition: 'all 0.3s ease',
+    cursor: 'pointer',
+    '&:hover': {
+      boxShadow: 6,
+      transform: 'translateY(-4px)'
+    }
+  };
+
+  const itemImageStyles = {
+    width: '100%',
+    height: 120,
+    objectFit: 'cover',
+    borderRadius: 2,
+    mb: 1.5
+  };
 
   useEffect(() => { loadItems(); }, []);
   useEffect(() => {
@@ -32,7 +55,9 @@ const Browse = () => {
     } catch (err) { console.error('Failed to load items', err); }
   };
 
-  const handleItemClick = (item) => {
+const handleItemClick = (item) => {
+    console.log('Item clicked, user:', user);
+    console.log('User from useAuth:', user);
     setSelectedItem(item);
     setOpenItemDialog(true);
   };
@@ -55,6 +80,11 @@ const getStatusColor = (status) => {
       case 'archived': return 'default';
       default: return 'default';
     }
+  };
+
+  // Check if item should have ghost (archived/claimed) appearance
+  const isGhostItem = (status) => {
+    return status === 'archived' || status === 'claimed';
   };
 
 const getImageUrl = (url) => {
@@ -113,20 +143,24 @@ const getImageUrl = (url) => {
           📦 {filteredItems.length} Items Found
         </Typography>
 
-        <Grid container spacing={3}>
+<Grid container spacing={2}>
           {filteredItems.map((item, index) => (
-            <Grid item xs={12} sm={6} md={3} key={item.id}>
+            <Grid item xs={12} sm={6} md={2.4} key={item.id}>
               <Card
                 className={`card-hover fade-in stagger-${Math.min(index + 1, 4)}`}
                 onClick={() => handleItemClick(item)}
-                sx={{ cursor: 'pointer' }}
+                sx={{ 
+                  ...itemCardStyles,
+                  opacity: isGhostItem(item.status) ? 0.5 : 1,
+                  filter: isGhostItem(item.status) ? 'grayscale(80%)' : 'none'
+                }}
               >
-                <CardContent>
-                  <Typography variant="h6" sx={{ fontWeight: 700, mb: 1 }}>
+                <CardContent sx={{ p: 1.5 }}>
+                  <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 1, fontSize: '0.9rem' }}>
                     {item.title}
                   </Typography>
                   {item.imageUrl && (
-                    <Box component="img" src={getImageUrl(item.imageUrl)} alt={item.title} sx={{ width: '100%', height: 150, objectFit: 'cover', borderRadius: 1, mb: 1.5 }} />
+                    <Box component="img" src={getImageUrl(item.imageUrl)} alt={item.title} sx={itemImageStyles} />
                   )}
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5 }}>
                     <LocationOnIcon sx={{ fontSize: 16, color: '#DC2626' }} />
@@ -159,7 +193,7 @@ const getImageUrl = (url) => {
             <CloseIcon />
           </IconButton>
         </DialogTitle>
-        <DialogContent dividers>
+<DialogContent dividers>
           {selectedItem && (
             <Grid container spacing={3}>
               <Grid item xs={12} md={6}>
@@ -181,11 +215,36 @@ const getImageUrl = (url) => {
               </Grid>
             </Grid>
           )}
-        </DialogContent>
-        <DialogActions sx={{ p: 2 }}>
-          {!user ? <Alert severity="info">Login to claim items</Alert> : 
-            selectedItem?.status === 'lost' || selectedItem?.status === 'found' ? 
-              <Typography variant="body2" color="text.secondary">Claim from Dashboard</Typography> : null}
+</DialogContent>
+<DialogActions sx={{ p: 2 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, width: '100%', justifyContent: 'space-between' }}>
+<Button
+              variant="contained"
+              startIcon={<MessageIcon />}
+              onClick={() => {
+                if (!user) {
+                  alert('Please login to message');
+                  return;
+                }
+                navigate('/chat?itemId=' + selectedItem?.id);
+              }}
+              disabled={selectedItem?.status === 'claimed'}
+              sx={{ 
+                backgroundColor: '#DC2626',
+                '&:hover': { backgroundColor: '#B91C1C' }
+              }}
+            >
+              Message
+            </Button>
+{!user && (
+              <Alert severity="info">Login to claim items</Alert>
+            )}
+            {user && (selectedItem?.status === 'lost' || selectedItem?.status === 'found') && (
+              <Typography variant="body2" color="text.secondary">
+                Claim from Dashboard
+              </Typography>
+            )}
+          </Box>
         </DialogActions>
       </Dialog>
     </Box>

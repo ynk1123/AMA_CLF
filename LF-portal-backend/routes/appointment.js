@@ -22,10 +22,24 @@ router.post('/', authenticate, async (req, res) => {
   }
 });
 
-// Get all appointments
-router.get('/', authenticate, async (req, res) => {
+// Get all appointments (admin only)
+router.get('/', authenticate, authorizeAdmin, async (req, res) => {
   try {
     const appointments = await Appointment.findAll({
+      order: [['createdAt', 'DESC']]
+    });
+    res.json(appointments);
+  } catch (err) {
+    console.error('Error fetching appointments:', err);
+    res.status(400).json({ message: 'Failed to fetch appointments', error: err.message });
+  }
+});
+
+// Get current user's appointments only
+router.get('/my-appointments', authenticate, async (req, res) => {
+  try {
+    const appointments = await Appointment.findAll({
+      where: { userId: req.user.id },
       order: [['createdAt', 'DESC']]
     });
     res.json(appointments);

@@ -10,7 +10,8 @@ const Admin = () => {
   const [stats, setStats] = useState({});
   const [locationStats, setLocationStats] = useState([]);
   const [appointments, setAppointments] = useState([]);
-  const [pendingClaims, setPendingClaims] = useState([]);
+const [pendingClaims, setPendingClaims] = useState([]);
+  const [allClaims, setAllClaims] = useState([]);
 const [users, setUsers] = useState([]);
   const [tabValue, setTabValue] = useState(0);
   const [selectedItem, setSelectedItem] = useState(null);
@@ -44,9 +45,13 @@ useEffect(() => { if (tabValue === 1) loadPendingClaims(); }, [tabValue]);
 
 const loadPendingClaims = async () => {
     try {
-      const response = await adminService.getPendingClaims();
+      // Fetch pending claims
+      const response = await adminService.getAllPendingClaims();
       setPendingClaims(response.data);
-    } catch (err) { console.error('Error:', err); }
+      // Fetch ALL claims (including approved/rejected)
+      const allResponse = await adminService.getAllClaims();
+      setAllClaims(allResponse.data);
+    } catch (err) { console.error('Error loading claims:', err); }
   };
 
 const loadUsers = async () => {
@@ -70,7 +75,7 @@ const loadUsers = async () => {
 const handleApprove = async (id) => { await adminService.approveItem(id); loadData(); };
   const handleStatusChange = async (id, status) => { await adminService.updateItemStatus(id, status); loadData(); };
   const handleDeleteItem = async (id) => { await adminService.deleteItem(id); loadData(); };
-const handleClaimApproval = async (id, status) => { await adminService.approveClaim({ id, status }); loadPendingClaims(); };
+const handleClaimApproval = async (claimId, status) => { await adminService.approveOrRejectClaim(claimId, status); loadPendingClaims(); };
   const handleViewItem = (item) => { setSelectedItem(item); setOpenItemDialog(true); };
   const handleAppointmentStatusChange = async (id, status) => { await appointmentService.updateStatus(id, status); loadData(); };
   
@@ -79,8 +84,8 @@ const handleClaimApproval = async (id, status) => { await adminService.approveCl
   const handleReactivateUser = async (id) => { await adminService.reactivateUser(id); loadUsers(); };
   const handleDeleteUser = async (id) => { await adminService.deleteUser(id); loadUsers(); };
 
-  const getStatusColor = (status) => {
-    const colors = { lost: 'success', found: 'success', pending: 'default', under_verification: 'warning', claimed: 'info', archived: 'default' };
+const getStatusColor = (status) => {
+    const colors = { lost: 'warning', found: 'warning', pending: 'default', under_verification: 'warning', claimed: 'info', archived: 'default' };
     return colors[status] || 'default';
   };
 
@@ -131,11 +136,11 @@ const getImageUrl = (url) => {
                     <TableCell>{item.id}</TableCell><TableCell>{item.title}</TableCell><TableCell>{item.category}</TableCell><TableCell>{item.location}</TableCell>
                     <TableCell><Chip label={item.status} color={getStatusColor(item.status)} size="small" /></TableCell>
                     <TableCell>{item.User?.studentId || 'Unknown'}</TableCell>
-                    <TableCell>
+<TableCell>
                       <IconButton size="small" onClick={() => handleViewItem(item)}><VisibilityIcon /></IconButton>
                       {item.status === 'pending' && <Button size="small" onClick={() => handleApprove(item.id)}>Approve</Button>}
-                      {item.status !== 'lost' && <Button size="small" onClick={() => handleStatusChange(item.id, 'lost')}>Restore</Button>}
-                      <Button size="small" onClick={() => handleStatusChange(item.id, 'claimed')}>Claim</Button>
+                      {item.status !== 'lost' && item.status !== 'found' && <Button size="small" onClick={() => handleStatusChange(item.id, item.itemType || 'lost')}>Restore</Button>}
+                      {(item.status === 'lost' || item.status === 'found') && <Button size="small" onClick={() => handleStatusChange(item.id, 'claimed')}>Claim</Button>}
                       <Button size="small" onClick={() => handleStatusChange(item.id, 'archived')}>Archive</Button>
                       <IconButton size="small" onClick={() => handleDeleteItem(item.id)} color="error"><DeleteIcon /></IconButton>
                     </TableCell>
@@ -147,26 +152,78 @@ const getImageUrl = (url) => {
         </>
       )}
 
-      {tabValue === 1 && (
+{tabValue === 1 && (
         <>
           <Typography variant="h5" gutterBottom>Pending Claims</Typography>
-          <TableContainer component={Paper}>
-            <Table>
-              <TableHead><TableRow sx={{ bgcolor: '#f5f5f5' }}><TableCell><strong>Item</strong></TableCell><TableCell><strong>Claimed By</strong></TableCell><TableCell><strong>Answer</strong></TableCell><TableCell><strong>Status</strong></TableCell><TableCell><strong>Actions</strong></TableCell></TableRow></TableHead>
-              <TableBody>
-                {pendingClaims.map((item) => (
-                  <TableRow key={item.id} hover>
-                    <TableCell>{item.title}</TableCell><TableCell>{item.User?.studentId}</TableCell><TableCell>{item.claimAnswer || '-'}</TableCell>
-                    <TableCell><Chip label={item.claimStatus} color={item.claimStatus === 'pending' ? 'warning' : 'success'} size="small" /></TableCell>
-                    <TableCell>
-                      <Button size="small" onClick={() => handleClaimApproval(item.id, 'approved')} color="success">Approve</Button>
-                      <Button size="small" onClick={() => handleClaimApproval(item.id, 'rejected')} color="error">Reject</Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
+          {pendingClaims.length === 0 ? (
+            <Paper sx={{ p: 4, textAlign: 'center' }}>
+              <Typography variant="body1" color="text.secondary">No pending claims</Typography>
+            </Paper>
+          ) : (
+            <TableContainer component={Paper}>
+              <Table>
+                <TableHead><TableRow sx={{ bgcolor: '#f5f5f5' }}><TableCell><strong>Claim ID</strong></TableCell><TableCell><strong>Item</strong></TableCell><TableCell><strong>Claimed By</strong></TableCell><TableCell><strong>Answer</strong></TableCell><TableCell><strong>Status</strong></TableCell><TableCell><strong>Actions</strong></TableCell></TableRow></TableHead>
+                <TableBody>
+                  {pendingClaims.map((claim) => (
+                    <TableRow key={claim.id} hover>
+                      <TableCell>{claim.id}</TableCell>
+                      <TableCell>{claim.Item?.title || 'Unknown'}</TableCell>
+                      <TableCell>{claim.User?.displayName || claim.User?.studentId || 'Unknown'}</TableCell>
+                      <TableCell>{claim.answer || '-'}</TableCell>
+                      <TableCell><Chip label={claim.status} color={claim.status === 'pending' ? 'warning' : 'success'} size="small" /></TableCell>
+                      <TableCell>
+                        <Button size="small" onClick={() => handleClaimApproval(claim.id, 'approved')} color="success">Approve</Button>
+                        <Button size="small" onClick={() => handleClaimApproval(claim.id, 'rejected')} color="error">Reject</Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          )}
+
+          {/* Show ALL Claims History */}
+          <Box sx={{ mt: 4 }}>
+            <Typography variant="h5" gutterBottom>All Claims History</Typography>
+            {allClaims.length === 0 ? (
+              <Paper sx={{ p: 4, textAlign: 'center' }}>
+                <Typography variant="body1" color="text.secondary">No claims history</Typography>
+              </Paper>
+            ) : (
+              <TableContainer component={Paper}>
+                <Table>
+                  <TableHead>
+                    <TableRow sx={{ bgcolor: '#e0e0e0' }}>
+                      <TableCell><strong>Claim ID</strong></TableCell>
+                      <TableCell><strong>Item</strong></TableCell>
+                      <TableCell><strong>Claimed By</strong></TableCell>
+                      <TableCell><strong>Answer</strong></TableCell>
+                      <TableCell><strong>Status</strong></TableCell>
+                      <TableCell><strong>Date</strong></TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {allClaims.map((claim) => (
+                      <TableRow key={claim.id} hover>
+                        <TableCell>{claim.id}</TableCell>
+                        <TableCell>{claim.Item?.title || 'Unknown'}</TableCell>
+                        <TableCell>{claim.User?.displayName || claim.User?.studentId || 'Unknown'}</TableCell>
+                        <TableCell>{claim.answer || '-'}</TableCell>
+                        <TableCell>
+                          <Chip 
+                            label={claim.status} 
+                            color={claim.status === 'approved' ? 'success' : claim.status === 'rejected' ? 'error' : 'warning'} 
+                            size="small" 
+                          />
+                        </TableCell>
+                        <TableCell>{claim.createdAt ? new Date(claim.createdAt).toLocaleDateString() : '-'}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            )}
+          </Box>
         </>
       )}
 

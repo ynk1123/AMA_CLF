@@ -47,7 +47,8 @@ export const itemService = {
   }),
   claimItem: (data) => api.post('/items/claim', data),
   getMyItems: () => api.get('/items/my-items'),
-  getMyClaims: () => api.get('/items/my-claims')
+  getMyClaims: () => api.get('/items/my-claims'),
+  getMyPostedItems: () => api.get('/items/my-posted-items')
 };
 
 export const messageService = {
@@ -59,6 +60,7 @@ export const messageService = {
 export const appointmentService = {
   createAppointment: (data) => api.post('/appointments', data),
   getAppointments: () => api.get('/appointments'),
+  getMyAppointments: () => api.get('/appointments/my-appointments'),
   updateStatus: (id, status) => api.put(`/appointments/${id}/status`, { status })
 };
 

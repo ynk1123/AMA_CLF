@@ -6,13 +6,26 @@ const path = require('path');
 const dotenv = require('dotenv');  // ← FIXED: require('dotenv')
 const { sequelize } = require('./config/database');
 
+// Require all models to ensure they're loaded and synced
+require('./models/user');
+require('./models/item');
+require('./models/claim');
+require('./models/appointment');
+require('./models/message');
+require('./models/contact');
+
 dotenv.config();
 
 const app = express();
 
 // CORS FIRST
+const allowedOrigins = (process.env.CORS_ORIGINS || 'http://localhost:3000,http://localhost:5173')
+  .split(',')
+  .map(origin => origin.trim())
+  .filter(Boolean);
+
 app.use(cors({
-  origin: ['http://localhost:3000', 'http://localhost:5173'],
+  origin: allowedOrigins,
   credentials: true
 }));
 
@@ -64,6 +77,8 @@ app.use((err, req, res, next) => {
 
 const PORT = process.env.PORT || 5000;
 
+// Note: Using simple sync() - the Claim table should already exist from previous runs
+// If Claim table is missing, it will be created automatically
 sequelize.sync().then(() => {
   console.log('✅ Database connected');
   app.listen(PORT, () => {
