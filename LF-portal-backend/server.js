@@ -4,7 +4,6 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const path = require('path');
 const dotenv = require('dotenv');  // ← FIXED: require('dotenv')
-dotenv.config();
 const { sequelize } = require('./config/database');
 
 // Require all models to ensure they're loaded and synced
@@ -15,10 +14,12 @@ require('./models/appointment');
 require('./models/message');
 require('./models/contact');
 
+dotenv.config();
+
 const app = express();
 
 // CORS FIRST
-const allowedOrigins = (process.env.CORS_ORIGINS || 'http://localhost:3000,http://localhost:5173')
+const allowedOrigins = (process.env.CORS_ORIGINS || 'http://localhost:3000,http://localhost:5173,https://ama-clf-1.onrender.com')
   .split(',')
   .map(origin => origin.trim())
   .filter(Boolean);
