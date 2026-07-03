@@ -1,6 +1,6 @@
-const Message = require('../models/Message');
-const User = require('../models/User');
-const Item = require('../models/Item');
+const Message = require('../models/message');
+const User = require('../models/user');
+const Item = require('../models/item');
 
 exports.getMessages = async (req, res) => {
   try {
