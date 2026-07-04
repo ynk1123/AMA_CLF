@@ -97,8 +97,8 @@ const getStatusColor = (status) => {
 const getImageUrl = (url) => {
     if (!url) return '';
     if (url.startsWith('http')) return url;
-    const apiUrl = process.env.REACT_APP_API_URL || 'https://ama-clf.onrender.com';
-    return apiUrl + url;
+    const apiUrl = process.env.REACT_APP_API_URL || (window.location.hostname === 'localhost' ? 'http://localhost:5000' : 'https://ama-clf.onrender.com');
+    return `${apiUrl}${url}`;
   };
 
   return (

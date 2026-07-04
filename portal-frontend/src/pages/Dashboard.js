@@ -497,8 +497,8 @@ const getImageUrl = (url) => {
   // Full URL already
   if (url.startsWith('http')) return url;
   
-  // Use environment variable or fallback to deployed Render backend
-  const apiUrl = process.env.REACT_APP_API_URL || 'https://ama-clf.onrender.com';
+  // Use environment variable or fallback to the matching backend host
+  const apiUrl = process.env.REACT_APP_API_URL || (window.location.hostname === 'localhost' ? 'http://localhost:5000' : 'https://ama-clf.onrender.com');
   return `${apiUrl}${url}`;
 };
 

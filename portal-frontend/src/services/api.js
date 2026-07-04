@@ -1,6 +1,14 @@
 import axios from 'axios';
 
-const API_URL = process.env.REACT_APP_API_URL || 'https://ama-clf.onrender.com/api';
+const getDefaultApiUrl = () => {
+  if (process.env.REACT_APP_API_URL) return process.env.REACT_APP_API_URL;
+  if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
+    return 'http://localhost:5000/api';
+  }
+  return 'https://ama-clf.onrender.com/api';
+};
+
+const API_URL = getDefaultApiUrl();
 
 const api = axios.create({
   baseURL: API_URL,
