@@ -41,8 +41,8 @@ const smtpSecure = process.env.SMTP_SECURE === 'true';
 
 let smtpHostIPv4 = smtpHost;
 
-const emailUser = process.env.EMAIL_USER;
-const emailPass = process.env.EMAIL_PASS;
+const emailUser = process.env.EMAIL_USER ? String(process.env.EMAIL_USER).trim() : '';
+const emailPass = process.env.EMAIL_PASS ? String(process.env.EMAIL_PASS).trim() : '';
 
 try {
   if (emailUser && emailPass) {
@@ -150,30 +150,76 @@ router.post('/requestPasswordReset', async (req, res) => {
     res.status(200).json({ message: 'If the account exists, a reset email will be sent shortly.' });
 
     // Fire-and-forget email sending (don’t hold the HTTP request open).
-    if (transporter && emailUser) {
-      transporter
-        .sendMail({
-          from: `"LF Portal" <${emailUser}>`,
-          to: userEmail,
-          subject: 'LF Portal Password Reset',
-          text: `You requested a password reset.\n\nUse this link to reset your password:\n${resetURL}\n\nThis link expires in 30 minutes.`,
-          html: `
-            <p>You requested a password reset.</p>
-            <p>Click this link to reset your password:</p>
-            <p><a href="${resetURL}">${resetURL}</a></p>
-            <p>This link expires in 30 minutes.</p>
-          `
-        })
+    if (emailUser) {
+      const mailOptions = {
+        from: `"LF Portal" <${emailUser}>`,
+        to: userEmail,
+        subject: 'LF Portal Password Reset',
+        text: `You requested a password reset.\n\nUse this link to reset your password:\n${resetURL}\n\nThis link expires in 30 minutes.`,
+        html: `
+          <p>You requested a password reset.</p>
+          <p>Click this link to reset your password:</p>
+          <p><a href="${resetURL}">${resetURL}</a></p>
+          <p>This link expires in 30 minutes.</p>
+        `
+      };
+
+      const makeTransport = (attemptPort) => {
+        const is465 = attemptPort === 465;
+        const secure = is465 ? true : false;
+
+        // Transporter already created (465/secure) - keep it for attempt 1.
+        if (is465 && transporter) return transporter;
+
+        // For the fallback attempt, build a fresh transport using IPv4 resolution result if we can.
+        return nodemailer.createTransport({
+          host: smtpHostIPv4,
+          port: attemptPort,
+          secure,
+          requireTLS: true,
+          auth: {
+            user: emailUser,
+            pass: emailPass
+          },
+          tls: {
+            rejectUnauthorized: process.env.SMTP_TLS_REJECT_UNAUTHORIZED !== 'false'
+          },
+          connectionTimeout: 15_000,
+          greetingTimeout: 15_000,
+          socketTimeout: 30_000
+        });
+      };
+
+      const sendAttempt = async (attemptPort) => {
+        const t = makeTransport(attemptPort);
+        console.log(`📨 Attempting SMTP send (port ${attemptPort}, secure=${attemptPort === 465}) to ${userEmail}`);
+        await t.sendMail(mailOptions);
+      };
+
+      sendAttempt(465)
         .then(() => {
-          console.log(`✁ Reset email sent to ${userEmail}`);
+          console.log(`✁ Reset email sent to ${userEmail} (465)`);
         })
-        .catch((emailErr) => {
-          console.log('❁ Email send error:', emailErr.message);
+        .catch(async (emailErr) => {
+          console.log('❁ Email send error (465):', emailErr.message);
           if (emailErr.code) console.log('SMTP code:', emailErr.code);
           if (emailErr.response) console.log('SMTP response:', emailErr.response);
+
+          // Retry once using 587/STARTTLS if the network times out.
+          const timeoutLike = emailErr && (emailErr.code === 'ETIMEDOUT' || emailErr.code === 'EHOSTUNREACH' || emailErr.code === 'ECONNRESET');
+          if (timeoutLike) {
+            try {
+              await sendAttempt(587);
+              console.log(`✁ Reset email sent to ${userEmail} (587)`);
+            } catch (e2) {
+              console.log('❁ Email send error (587):', e2.message);
+              if (e2.code) console.log('SMTP code:', e2.code);
+              if (e2.response) console.log('SMTP response:', e2.response);
+            }
+          }
         });
     } else {
-      console.log('⚠️ Transporter/email not configured; reset email not sent.');
+      console.log('⚠️ EMAIL_USER missing; reset email not sent.');
     }
   } catch (error) {
     console.log('Error:', error);
