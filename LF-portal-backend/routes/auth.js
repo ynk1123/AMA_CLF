@@ -48,7 +48,13 @@ try {
   if (emailUser && emailPass) {
     // Resolve to IPv4 if possible
     dns.lookup(smtpHost, { family: 4 })
-      .then((addr) => {
+      .then((result) => {
+        // Node versions differ: dns.lookup may return a string OR an object {address, family}.
+        const addr =
+          typeof result === 'string'
+            ? result
+            : (result && typeof result.address === 'string' ? result.address : null);
+
         if (addr) smtpHostIPv4 = addr;
       })
       .catch(() => {
