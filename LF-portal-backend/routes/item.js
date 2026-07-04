@@ -88,10 +88,22 @@ router.post('/', authenticate, upload.single('image'), async (req, res) => {
     res.status(201).json(item);
   } catch (err) {
     console.error('Error creating item:', err);
+    // Helpful for Render 400s debugging (validation / Cloudinary misconfig / multer issues)
+    console.error('CreateItem req.user:', req.user);
+    console.error('CreateItem req.body keys:', Object.keys(req.body || {}));
+    if (req.file) console.error('CreateItem file:', { field: req.file.fieldname, mimetype: req.file.mimetype, size: req.file.size });
+
     res.status(400).json({
       message: 'Failed to create item',
       error: err.message,
       details: err.errors || err,
+      reqBodyKeys: Object.keys(req.body || {}),
+      cloudinaryConfigured: {
+        hasCloudName: !!process.env.CLOUDINARY_CLOUD_NAME,
+        hasApiKey: !!process.env.CLOUDINARY_API_KEY,
+        hasApiSecret: !!process.env.CLOUDINARY_API_SECRET,
+        folder: process.env.CLOUDINARY_FOLDER || null,
+      },
     });
   }
 });
