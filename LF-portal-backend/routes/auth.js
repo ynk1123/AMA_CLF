@@ -29,42 +29,50 @@ if (!JWT_SECRET) {
 
 // Email Transporter
 let transporter = null;
-// Use Gmail app password
-const emailUser = 'campuslostandfoundama@gmail.com';
-const emailPass = 'epje cstg rdvd wnzr';
-const smtpHost = 'smtp.gmail.com';
-const smtpPort = 587;
-const smtpSecure = false;
+
+const smtpHost = process.env.SMTP_HOST || 'smtp.gmail.com';
+const smtpPort = Number(process.env.SMTP_PORT || 587);
+const smtpSecure = process.env.SMTP_SECURE === 'true';
+
+const emailUser = process.env.EMAIL_USER;
+const emailPass = process.env.EMAIL_PASS;
 
 try {
   if (emailUser && emailPass) {
     transporter = nodemailer.createTransport({
       host: smtpHost,
       port: smtpPort,
-      secure: false,
+      secure: smtpSecure,
       requireTLS: true,
       auth: {
         user: emailUser,
         pass: emailPass
       },
       tls: {
-        rejectUnauthorized: false
-      }
+        // Keep strict TLS by default (safer + often faster/reliable).
+        // If you must bypass due to a specific environment issue, set SMTP_TLS_REJECT_UNAUTHORIZED=false.
+        rejectUnauthorized: process.env.SMTP_TLS_REJECT_UNAUTHORIZED !== 'false'
+      },
+      // Timeouts to avoid “takes too long” on Render.
+      connectionTimeout: 15_000,
+      greetingTimeout: 15_000,
+      socketTimeout: 30_000
     });
 
+    // Verify once on startup (non-blocking).
     transporter.verify((verifyErr) => {
       if (verifyErr) {
-        console.log('❁ESMTP verify failed:', verifyErr.message);
+        console.log('❁ SMTP verify failed:', verifyErr.message);
         if (verifyErr.code) console.log('SMTP code:', verifyErr.code);
       } else {
-        console.log(`✁EEmail transporter ready (${smtpHost}:${smtpPort}, secure=${smtpSecure})`);
+        console.log(`✁ Email transporter ready (${smtpHost}:${smtpPort}, secure=${smtpSecure})`);
       }
     });
   } else {
-    console.log('⚠�E�EEMAIL_USER / EMAIL_PASS missing. Reset emails will not be sent.');
+    console.log('⚠️ EMAIL_USER / EMAIL_PASS missing. Reset emails will not be sent.');
   }
 } catch (err) {
-  console.log('⚠�E�EEmail transporter init error:', err.message);
+  console.log('⚠️ Email transporter init error:', err.message);
 }
 
 // REQUEST PASSWORD RESET
@@ -83,31 +91,35 @@ router.post('/requestPasswordReset', async (req, res) => {
     if (normalizedEmail) where.email = normalizedEmail;
     else where.studentId = normalizedStudentId;
 
-const user = await User.findOne({ where });
+    const user = await User.findOne({ where });
 
+    // Security: respond the same way whether the user exists or not.
     if (!user) {
-      return res.status(404).json({ message: "User doesn't exist" });
+      return res.status(200).json({ message: 'If the account exists, a reset email will be sent shortly.' });
     }
 
     // Allow reset by studentId even without email
-    // If email is missing, use studentId@campus.edu as fallback
     let userEmail = user.email;
     if (!userEmail || !String(userEmail).includes('@')) {
       userEmail = user.studentId + '@campus.edu';
     }
 
-const secret = JWT_SECRET + user.password;
+    const secret = JWT_SECRET + user.password;
     const token = jwt.sign(
-      { id: user.id, email: userEmail }, 
-      secret, 
+      { id: user.id, email: userEmail },
+      secret,
       { expiresIn: '30m' }
     );
 
     const resetURL = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/reset-password/${user.id}/${token}`;
 
-    if (transporter) {
-      try {
-        await transporter.sendMail({
+    // Respond immediately (don’t block on SMTP).
+    res.status(200).json({ message: 'If the account exists, a reset email will be sent shortly.' });
+
+    // Fire-and-forget email sending (don’t hold the HTTP request open).
+    if (transporter && emailUser) {
+      transporter
+        .sendMail({
           from: `"LF Portal" <${emailUser}>`,
           to: userEmail,
           subject: 'LF Portal Password Reset',
@@ -118,18 +130,18 @@ const secret = JWT_SECRET + user.password;
             <p><a href="${resetURL}">${resetURL}</a></p>
             <p>This link expires in 30 minutes.</p>
           `
+        })
+        .then(() => {
+          console.log(`✁ Reset email sent to ${userEmail}`);
+        })
+        .catch((emailErr) => {
+          console.log('❁ Email send error:', emailErr.message);
+          if (emailErr.code) console.log('SMTP code:', emailErr.code);
+          if (emailErr.response) console.log('SMTP response:', emailErr.response);
         });
-        console.log(`✁EReset email sent to ${user.email}`);
-        return res.status(200).json({ message: 'Reset link sent to email!' });
-      } catch (emailErr) {
-        console.log('❁EEmail send error:', emailErr.message);
-        if (emailErr.code) console.log('SMTP code:', emailErr.code);
-        if (emailErr.response) console.log('SMTP response:', emailErr.response);
-        return res.status(200).json({ message: 'Error sending email', resetLink: resetURL });
-      }
+    } else {
+      console.log('⚠️ Transporter/email not configured; reset email not sent.');
     }
-
-    return res.status(200).json({ message: 'Link generated', resetLink: resetURL });
   } catch (error) {
     console.log('Error:', error);
     res.status(500).json({ message: 'Something went wrong' });
