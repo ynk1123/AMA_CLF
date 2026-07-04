@@ -59,9 +59,8 @@ const Login = () => {
       const isEmail = value.includes('@');
       const payload = isEmail ? { email: value } : { studentId: value };
       const response = await authService.forgotPassword(payload);
-      let msg = response.data.message;
-      if (response.data.resetLink && !response.data.emailSent) msg += ' Link: ' + response.data.resetLink;
-      setForgotMessage(msg);
+      // Never display reset token/link in the UI (even if backend accidentally returns it).
+      setForgotMessage(response.data.message || 'If the account exists, a reset email will be sent shortly.');
     } catch (err) {
       setForgotMessage(err.response?.data?.message || 'Failed');
     }
