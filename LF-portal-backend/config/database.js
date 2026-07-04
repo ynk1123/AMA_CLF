@@ -3,7 +3,12 @@ const dotenv = require('dotenv');
 
 dotenv.config();
 
-const useSsl = process.env.DB_SSL === 'true';
+// Render Postgres typically requires SSL.
+// DB_SSL can be set to 'true' to force SSL, but we also auto-enable when using a non-local DB.
+const envDbHost = (process.env.DB_HOST || '').toLowerCase();
+const useSsl =
+  process.env.DB_SSL === 'true' ||
+  (envDbHost && envDbHost !== 'localhost' && envDbHost !== '127.0.0.1');
 
 const sequelize = new Sequelize(
   process.env.DB_NAME || 'campus_lost_found',
@@ -24,5 +29,6 @@ const sequelize = new Sequelize(
     logging: false
   }
 );
+
 
 module.exports = { sequelize };
