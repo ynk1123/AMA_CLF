@@ -1,41 +1,35 @@
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
-const path = require('path');
 const Item = require('../models/item');
 const User = require('../models/user');
 const Claim = require('../models/claim');
 const { authenticate } = require('../middleware/auth');
+const cloudinary = require('cloudinary').v2;
 
-// Configure multer for file uploads
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    // Ensure the folder exists (important on Render; filesystem can differ).
-    const uploadDir = path.join(__dirname, '../uploads');
-    const fs = require('fs');
-    try {
-      if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
-      cb(null, uploadDir);
-    } catch (e) {
-      cb(e);
-    }
-  },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + path.extname(file.originalname));
-  }
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
+const ensureCloudinaryConfigured = () => {
+  if (!process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET) {
+    throw new Error('Cloudinary is not configured. Missing CLOUDINARY_CLOUD_NAME / CLOUDINARY_API_KEY / CLOUDINARY_API_SECRET');
+  }
+};
 
-const upload = multer({ storage });
+// Use memory storage so we don't rely on Render's ephemeral filesystem
+const upload = multer({ storage: multer.memoryStorage() });
 
 // Create item - defaults to 'pending' status
 router.post('/', authenticate, upload.single('image'), async (req, res) => {
   try {
+    ensureCloudinaryConfigured();
+
     const { title, category, color, brand, description, location, date, type } = req.body;
 
     // Required-field validation to prevent DB/Sequelize 500s.
-    // title/category/location are required by the model.
-    // date must match YYYY-MM-DD for DATEONLY.
     if (!title || typeof title !== 'string' || !title.trim()) {
       return res.status(400).json({ message: 'Missing/invalid title' });
     }
@@ -52,30 +46,31 @@ router.post('/', authenticate, upload.single('image'), async (req, res) => {
       return res.status(400).json({ message: "Missing/invalid type. Expected 'lost' or 'found'." });
     }
 
-    // Dashboard uses <input type="date" />, which should send YYYY-MM-DD.
-    // If the field is missing or invalid, PostgreSQL DATE will reject it.
+    // Normalize date for DATEONLY
     let normalizedDate = date;
     if (typeof normalizedDate !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(normalizedDate)) {
       normalizedDate = null;
     }
-    
-// Default to 'lost' if not provided
-    const itemType = (type === 'found') ? 'found' : 'lost';
-    
+
+    // Default to 'lost' if not provided
+    const itemType = type === 'found' ? 'found' : 'lost';
+
     let imageUrl = null;
     if (req.file) {
-      imageUrl = `/uploads/${req.file.filename}`;
+      const dataUri = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
+      const uploadResult = await cloudinary.uploader.upload(dataUri, {
+        folder: process.env.CLOUDINARY_FOLDER || undefined,
+        resource_type: 'image',
+      });
+      imageUrl = uploadResult.secure_url;
     } else if (req.body?.image) {
-      // Some clients may send an image field but Multer couldn't parse it.
-      // Keep imageUrl null; better to fail validation explicitly later.
       imageUrl = null;
     }
 
-    
     // If admin posts item, skip pending status - no approval needed
     // If student posts item, require admin approval (default to 'pending')
-    const itemStatus = (req.user.role === 'admin') ? itemType : 'pending';
-    
+    const itemStatus = req.user.role === 'admin' ? itemType : 'pending';
+
     const item = await Item.create({
       title,
       category,
@@ -84,19 +79,19 @@ router.post('/', authenticate, upload.single('image'), async (req, res) => {
       description,
       location,
       date: normalizedDate,
-      itemType: itemType, // Store the original type (lost/found)
-      status: itemStatus, // Admin items go live immediately, student items need approval
+      itemType: itemType,
+      status: itemStatus,
       imageUrl,
-      userId: req.user.id
+      userId: req.user.id,
     });
-    
+
     res.status(201).json(item);
   } catch (err) {
     console.error('Error creating item:', err);
     res.status(400).json({
       message: 'Failed to create item',
       error: err.message,
-      details: err.errors || err
+      details: err.errors || err,
     });
   }
 });
@@ -104,38 +99,33 @@ router.post('/', authenticate, upload.single('image'), async (req, res) => {
 // Get all items - only show approved items to public
 router.get('/', async (req, res) => {
   try {
-    const userId = req.user?.id; // Get current user if authenticated
-    
-// Only show items that are not yet under admin verification
-    // (lost/found can be claimed, claimed/archived are already resolved)
+    const userId = req.user?.id;
+
     const items = await Item.findAll({
       where: { status: ['lost', 'found', 'claimed', 'archived'] },
       include: [
         {
           model: User,
           as: 'User',
-          attributes: ['id', 'displayName', 'studentId']
-        }
+          attributes: ['id', 'displayName', 'studentId'],
+        },
       ],
-      order: [['createdAt', 'DESC']]
+      order: [['createdAt', 'DESC']],
     });
-    
-    // If user is authenticated, check their claim status for each item
-    // Override status for users who have pending claims
+
     if (userId) {
       const Claims = require('../models/claim');
       for (const item of items) {
         const userClaim = await Claims.findOne({
-          where: { itemId: item.id, userId: userId, status: 'pending' }
+          where: { itemId: item.id, userId: userId, status: 'pending' },
         });
+
         if (userClaim) {
-          // User has pending claim - set status directly on the data object
-          // This will be included in the JSON response
           item.status = 'under_verification';
         }
       }
     }
-    
+
     res.json(items);
   } catch (err) {
     console.error('Error fetching items:', err);
@@ -147,35 +137,29 @@ router.get('/', async (req, res) => {
 router.post('/claim', authenticate, async (req, res) => {
   try {
     const { id, answer } = req.body;
-    
+
     const item = await Item.findByPk(id);
     if (!item) return res.status(404).json({ message: 'Item not found' });
-    
-    // Allow claiming if status is lost or found
+
     if (item.status !== 'lost' && item.status !== 'found') {
       return res.status(400).json({ message: 'This item cannot be claimed' });
     }
-    
-    // Check if user already has a pending claim for this item
+
     const existingClaim = await Claim.findOne({
-      where: { itemId: id, userId: req.user.id, status: 'pending' }
+      where: { itemId: id, userId: req.user.id, status: 'pending' },
     });
-    
+
     if (existingClaim) {
       return res.status(400).json({ message: 'You already have a pending claim for this item' });
     }
-    
-// Create a new Claim record
+
     const claim = await Claim.create({
       itemId: id,
       userId: req.user.id,
       answer: answer,
-      status: 'pending'
+      status: 'pending',
     });
-    
-    // DON'T change item status - keep it lost/found so OTHER users can still see and claim
-    // Only the claimant will see "under_verification" via the GET endpoint override
-    
+
     res.json({ message: 'Claim submitted successfully', claim });
   } catch (err) {
     console.error('Error claiming item:', err);
@@ -192,11 +176,12 @@ router.get('/my-claims', authenticate, async (req, res) => {
         {
           model: Item,
           as: 'Item',
-          attributes: ['id', 'title', 'category', 'status', 'imageUrl']
-        }
+          attributes: ['id', 'title', 'category', 'status', 'imageUrl'],
+        },
       ],
-      order: [['createdAt', 'DESC']]
+      order: [['createdAt', 'DESC']],
     });
+
     res.json(claims);
   } catch (err) {
     console.error('Error fetching claims:', err);
@@ -209,8 +194,9 @@ router.get('/my-posted-items', authenticate, async (req, res) => {
   try {
     const items = await Item.findAll({
       where: { userId: req.user.id },
-      order: [['createdAt', 'DESC']]
+      order: [['createdAt', 'DESC']],
     });
+
     res.json(items);
   } catch (err) {
     console.error('Error fetching my items:', err);
@@ -219,3 +205,4 @@ router.get('/my-posted-items', authenticate, async (req, res) => {
 });
 
 module.exports = router;
+
