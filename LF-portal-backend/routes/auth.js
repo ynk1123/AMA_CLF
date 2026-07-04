@@ -82,6 +82,15 @@ try {
           socketTimeout: 30_000
         });
 
+        console.log('📨 Effective SMTP config:',
+          JSON.stringify({
+            smtpHostRequested: smtpHost,
+            smtpHostIPv4,
+            smtpPort,
+            smtpSecure
+          })
+        );
+
         // Verify once on startup (non-blocking).
         transporter.verify((verifyErr) => {
           if (verifyErr) {
