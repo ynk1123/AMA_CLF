@@ -94,13 +94,13 @@ app.use('/api/contact', require('./routes/contact'));
 
 // Serve frontend index.html for all non-API routes when build exists
 if (fs.existsSync(frontendBuildPath)) {
-  app.get('*', (req, res, next) => {
-    if (req.path.startsWith('/api')) {
-      return next();
-    }
+  // Use explicit route patterns to avoid Express/Path-to-RegExp issues with Node 24.
+  app.get(/^\/(?!api\/)[\s\S]*$/, (req, res, next) => {
+    if (req.path.startsWith('/api')) return next();
     res.sendFile(path.join(frontendBuildPath, 'index.html'));
   });
 }
+
 
 // Error handler
 app.use((err, req, res, next) => {
