@@ -10,19 +10,47 @@ const { authenticate } = require('../middleware/auth');
 // Configure multer for file uploads
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, 'uploads/');
+    // Ensure the folder exists (important on Render; filesystem can differ).
+    const uploadDir = path.join(__dirname, '../uploads');
+    const fs = require('fs');
+    try {
+      if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
+      cb(null, uploadDir);
+    } catch (e) {
+      cb(e);
+    }
   },
   filename: (req, file, cb) => {
     cb(null, Date.now() + path.extname(file.originalname));
   }
 });
 
+
 const upload = multer({ storage });
 
 // Create item - defaults to 'pending' status
 router.post('/', authenticate, upload.single('image'), async (req, res) => {
   try {
-const { title, category, color, brand, description, location, date, type } = req.body;
+    const { title, category, color, brand, description, location, date, type } = req.body;
+
+    // Required-field validation to prevent DB/Sequelize 500s.
+    // title/category/location are required by the model.
+    // date must match YYYY-MM-DD for DATEONLY.
+    if (!title || typeof title !== 'string' || !title.trim()) {
+      return res.status(400).json({ message: 'Missing/invalid title' });
+    }
+    if (!category || typeof category !== 'string' || !category.trim()) {
+      return res.status(400).json({ message: 'Missing/invalid category' });
+    }
+    if (!location || typeof location !== 'string' || !location.trim()) {
+      return res.status(400).json({ message: 'Missing/invalid location' });
+    }
+    if (typeof date !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+      return res.status(400).json({ message: 'Missing/invalid date. Expected YYYY-MM-DD.' });
+    }
+    if (type !== 'lost' && type !== 'found') {
+      return res.status(400).json({ message: "Missing/invalid type. Expected 'lost' or 'found'." });
+    }
 
     // Dashboard uses <input type="date" />, which should send YYYY-MM-DD.
     // If the field is missing or invalid, PostgreSQL DATE will reject it.
@@ -37,7 +65,12 @@ const { title, category, color, brand, description, location, date, type } = req
     let imageUrl = null;
     if (req.file) {
       imageUrl = `/uploads/${req.file.filename}`;
+    } else if (req.body?.image) {
+      // Some clients may send an image field but Multer couldn't parse it.
+      // Keep imageUrl null; better to fail validation explicitly later.
+      imageUrl = null;
     }
+
     
     // If admin posts item, skip pending status - no approval needed
     // If student posts item, require admin approval (default to 'pending')
