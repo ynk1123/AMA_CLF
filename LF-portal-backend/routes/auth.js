@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
+const dns = require('dns').promises;
 
 const router = express.Router();
 
@@ -27,47 +28,64 @@ if (!JWT_SECRET) {
   throw new Error('JWT_SECRET not configured');
 }
 
-// Email Transporter
+/*
+  Email Transporter
+  Render networking is sometimes IPv6-fragile (ENETUNREACH to IPv6 addresses).
+  To improve reliability, we resolve the SMTP host and prefer an IPv4 address.
+*/
 let transporter = null;
 
 const smtpHost = process.env.SMTP_HOST || 'smtp.gmail.com';
 const smtpPort = Number(process.env.SMTP_PORT || 587);
 const smtpSecure = process.env.SMTP_SECURE === 'true';
 
+let smtpHostIPv4 = smtpHost;
+
 const emailUser = process.env.EMAIL_USER;
 const emailPass = process.env.EMAIL_PASS;
 
 try {
   if (emailUser && emailPass) {
-    transporter = nodemailer.createTransport({
-      host: smtpHost,
-      port: smtpPort,
-      secure: smtpSecure,
-      requireTLS: true,
-      auth: {
-        user: emailUser,
-        pass: emailPass
-      },
-      tls: {
-        // Keep strict TLS by default (safer + often faster/reliable).
-        // If you must bypass due to a specific environment issue, set SMTP_TLS_REJECT_UNAUTHORIZED=false.
-        rejectUnauthorized: process.env.SMTP_TLS_REJECT_UNAUTHORIZED !== 'false'
-      },
-      // Timeouts to avoid “takes too long” on Render.
-      connectionTimeout: 15_000,
-      greetingTimeout: 15_000,
-      socketTimeout: 30_000
-    });
+    // Resolve to IPv4 if possible
+    dns.lookup(smtpHost, { family: 4 })
+      .then((addr) => {
+        if (addr) smtpHostIPv4 = addr;
+      })
+      .catch(() => {
+        // If IPv4 resolution fails, fall back to original hostname.
+        smtpHostIPv4 = smtpHost;
+      })
+      .finally(() => {
+        transporter = nodemailer.createTransport({
+          host: smtpHostIPv4,
+          port: smtpPort,
+          secure: smtpSecure,
+          requireTLS: true,
+          auth: {
+            user: emailUser,
+            pass: emailPass
+          },
+          tls: {
+            // Keep strict TLS by default (safer + often faster/reliable).
+            // If you must bypass due to a specific environment issue, set SMTP_TLS_REJECT_UNAUTHORIZED=false.
+            rejectUnauthorized: process.env.SMTP_TLS_REJECT_UNAUTHORIZED !== 'false'
+          },
+          // Timeouts to avoid “takes too long” on Render.
+          connectionTimeout: 15_000,
+          greetingTimeout: 15_000,
+          socketTimeout: 30_000
+        });
 
-    // Verify once on startup (non-blocking).
-    transporter.verify((verifyErr) => {
-      if (verifyErr) {
-        console.log('❁ SMTP verify failed:', verifyErr.message);
-        if (verifyErr.code) console.log('SMTP code:', verifyErr.code);
-      } else {
-        console.log(`✁ Email transporter ready (${smtpHost}:${smtpPort}, secure=${smtpSecure})`);
-      }
-    });
+        // Verify once on startup (non-blocking).
+        transporter.verify((verifyErr) => {
+          if (verifyErr) {
+            console.log('❁ SMTP verify failed:', verifyErr.message);
+            if (verifyErr.code) console.log('SMTP code:', verifyErr.code);
+          } else {
+            console.log(`✁ Email transporter ready (${smtpHostIPv4}:${smtpPort}, secure=${smtpSecure})`);
+          }
+        });
+      });
   } else {
     console.log('⚠️ EMAIL_USER / EMAIL_PASS missing. Reset emails will not be sent.');
   }
