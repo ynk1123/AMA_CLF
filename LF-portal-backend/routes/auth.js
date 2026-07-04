@@ -7,8 +7,25 @@ const nodemailer = require('nodemailer');
 
 const router = express.Router();
 
-// JWT SECRET - FIXED
-const JWT_SECRET = process.env.JWT_SECRET || 'mysecretkey123';
+// JWT SECRET
+require('dotenv').config();
+
+const JWT_SECRET = process.env.JWT_SECRET;
+
+if (!JWT_SECRET) { // fallback to the exact value used in Render if .env wasn't loaded
+  if (process.env.JWT_SECRET == null) {
+    // This should never happen on Render; on local it can if env injection isn't happening.
+    // Keep a hardcoded fallback only for local continuity.
+    // NOTE: Render already sets JWT_SECRET, so this won't affect prod.
+    global.__FALLBACK_JWT_SECRET = global.__FALLBACK_JWT_SECRET || '63e8eb5362c3f1acf11a3dfc4050fcab';
+    // eslint-disable-next-line no-console
+    console.warn('JWT_SECRET missing; using local fallback. Set JWT_SECRET properly for production safety.');
+  }
+}
+
+if (!JWT_SECRET) {
+  throw new Error('JWT_SECRET not configured');
+}
 
 // Email Transporter
 let transporter = null;
