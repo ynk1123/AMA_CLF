@@ -3,6 +3,7 @@ const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const path = require('path');
+const fs = require('fs');
 const dotenv = require('dotenv');  // ← FIXED: require('dotenv')
 const { sequelize } = require('./config/database');
 
@@ -17,6 +18,9 @@ require('./models/contact');
 dotenv.config();
 
 const app = express();
+
+// Render and proxy-aware header support
+app.set('trust proxy', 1);
 
 // CORS FIRST
 const defaultOrigins = [
@@ -47,6 +51,12 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // ⭐ STATIC IMAGES - SIMPLE & WORKING
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+// Serve React frontend build when available
+const frontendBuildPath = path.join(__dirname, '../portal-frontend/build');
+if (fs.existsSync(frontendBuildPath)) {
+  app.use(express.static(frontendBuildPath));
+}
 
 // Security
 app.use(helmet({
@@ -81,6 +91,16 @@ app.use('/api/messages', require('./routes/message'));
 app.use('/api/appointments', require('./routes/appointment'));
 app.use('/api/admin', require('./routes/admin'));
 app.use('/api/contact', require('./routes/contact'));
+
+// Serve frontend index.html for all non-API routes when build exists
+if (fs.existsSync(frontendBuildPath)) {
+  app.get('*', (req, res, next) => {
+    if (req.path.startsWith('/api')) {
+      return next();
+    }
+    res.sendFile(path.join(frontendBuildPath, 'index.html'));
+  });
+}
 
 // Error handler
 app.use((err, req, res, next) => {
