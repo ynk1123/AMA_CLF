@@ -58,7 +58,7 @@ const secret = JWT_SECRET + user.password;
     const token = jwt.sign({ id: user.id, email: userEmail }, secret, { expiresIn: '30m' });
 
     // Use hash route so it works even when server/Render rewrites don't forward deep links.
-const resetURL = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/reset-password/${user.id}/${token}`;
+const resetURL = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/#/reset-password/${user.id}/${token}`;
 
     console.log('ℹ️ ResetURL being emailed:', resetURL);
 
