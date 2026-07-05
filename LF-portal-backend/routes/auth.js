@@ -3,113 +3,80 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const crypto = require('crypto');
-const nodemailer = require('nodemailer');
 const dns = require('dns').promises;
+const nodemailer = require('nodemailer');
+
 
 const router = express.Router();
 
 // JWT SECRET
 require('dotenv').config();
 
-const JWT_SECRET = process.env.JWT_SECRET;
+const FALLBACK_JWT_SECRET = '63e8eb5362c3f1acf11a3dfc4050fcab';
+const JWT_SECRET = process.env.JWT_SECRET || global.__FALLBACK_JWT_SECRET || FALLBACK_JWT_SECRET;
 
-if (!JWT_SECRET) { // fallback to the exact value used in Render if .env wasn't loaded
-  if (process.env.JWT_SECRET == null) {
-    // This should never happen on Render; on local it can if env injection isn't happening.
-    // Keep a hardcoded fallback only for local continuity.
-    // NOTE: Render already sets JWT_SECRET, so this won't affect prod.
-    global.__FALLBACK_JWT_SECRET = global.__FALLBACK_JWT_SECRET || '63e8eb5362c3f1acf11a3dfc4050fcab';
-    // eslint-disable-next-line no-console
-    console.warn('JWT_SECRET missing; using local fallback. Set JWT_SECRET properly for production safety.');
-  }
-}
-
-if (!JWT_SECRET) {
-  throw new Error('JWT_SECRET not configured');
+if (!process.env.JWT_SECRET) {
+  global.__FALLBACK_JWT_SECRET = global.__FALLBACK_JWT_SECRET || FALLBACK_JWT_SECRET;
+  // eslint-disable-next-line no-console
+  console.warn('JWT_SECRET missing; using local fallback. Set JWT_SECRET properly for production safety.');
 }
 
 /*
-  Email Transporter
-  Render networking is sometimes IPv6-fragile (ENETUNREACH to IPv6 addresses).
-  To improve reliability, we resolve the SMTP host and prefer an IPv4 address.
+  Email via Gmail SMTP (App Password).
+  Keeps password reset UX fast: request responds immediately; email is sent async.
 */
+
+const EMAIL_USER = process.env.EMAIL_USER ? String(process.env.EMAIL_USER).trim() : '';
+const EMAIL_PASS = process.env.EMAIL_PASS ? String(process.env.EMAIL_PASS).trim() : '';
+const SMTP_HOST = process.env.SMTP_HOST ? String(process.env.SMTP_HOST).trim() : 'smtp.gmail.com';
+const SMTP_PORT = process.env.SMTP_PORT ? Number(process.env.SMTP_PORT) : 587; // TLS
+
+const SMTP_SECURE = process.env.SMTP_SECURE === 'true'; // usually false for 587
+const SMTP_TLS_REJECT_UNAUTHORIZED = process.env.SMTP_TLS_REJECT_UNAUTHORIZED === undefined
+  ? false
+  : process.env.SMTP_TLS_REJECT_UNAUTHORIZED !== 'false';
+
 let transporter = null;
 
-const smtpHost = process.env.SMTP_HOST || 'smtp.gmail.com';
-const smtpPort = Number(process.env.SMTP_PORT || 587);
-const smtpSecure = process.env.SMTP_SECURE === 'true';
-
-let smtpHostIPv4 = smtpHost;
-
-const emailUser = process.env.EMAIL_USER ? String(process.env.EMAIL_USER).trim() : '';
-const emailPass = process.env.EMAIL_PASS ? String(process.env.EMAIL_PASS).trim() : '';
-
 try {
-  if (emailUser && emailPass) {
-    // Resolve to IPv4 if possible
-    dns.lookup(smtpHost, { family: 4 })
-      .then((result) => {
-        // Node versions differ: dns.lookup may return a string OR an object {address, family}.
-        const addr =
-          typeof result === 'string'
-            ? result
-            : (result && typeof result.address === 'string' ? result.address : null);
+  if (EMAIL_USER && EMAIL_PASS) {
+    transporter = nodemailer.createTransport({
+      host: SMTP_HOST,
+      port: SMTP_PORT,
+      secure: SMTP_SECURE,
+      requireTLS: true,
+      auth: {
+        user: EMAIL_USER,
+        pass: EMAIL_PASS
+      },
+      tls: {
+        rejectUnauthorized: SMTP_TLS_REJECT_UNAUTHORIZED
+      },
+      connectionTimeout: 15_000,
+      greetingTimeout: 15_000,
+      socketTimeout: 30_000
+    });
 
-        if (addr) smtpHostIPv4 = addr;
-      })
-      .catch(() => {
-        // If IPv4 resolution fails, fall back to original hostname.
-        smtpHostIPv4 = smtpHost;
-      })
-      .finally(() => {
-        transporter = nodemailer.createTransport({
-          host: smtpHostIPv4,
-          port: smtpPort,
-          secure: smtpSecure,
-          requireTLS: true,
-          auth: {
-            user: emailUser,
-            pass: emailPass
-          },
-          tls: {
-            // Keep strict TLS by default (safer + often faster/reliable).
-            // If you must bypass due to a specific environment issue, set SMTP_TLS_REJECT_UNAUTHORIZED=false.
-            rejectUnauthorized: process.env.SMTP_TLS_REJECT_UNAUTHORIZED !== 'false'
-          },
-          // Timeouts to avoid “takes too long” on Render.
-          connectionTimeout: 15_000,
-          greetingTimeout: 15_000,
-          socketTimeout: 30_000
-        });
-
-        console.log('📨 Effective SMTP config:',
-          JSON.stringify({
-            smtpHostRequested: smtpHost,
-            smtpHostIPv4,
-            smtpPort,
-            smtpSecure
-          })
-        );
-
-        // Verify once on startup (non-blocking).
-        transporter.verify((verifyErr) => {
-          if (verifyErr) {
-            console.log('❁ SMTP verify failed:', verifyErr.message);
-            if (verifyErr.code) console.log('SMTP code:', verifyErr.code);
-          } else {
-            console.log(`✁ Email transporter ready (${smtpHostIPv4}:${smtpPort}, secure=${smtpSecure})`);
-          }
-        });
-      });
+    // verify without blocking requests
+    transporter.verify((verifyErr) => {
+      if (verifyErr) {
+        console.log('❌ SMTP verify failed:', verifyErr.message);
+        if (verifyErr.code) console.log('SMTP code:', verifyErr.code);
+      } else {
+        console.log(`✅ SMTP transporter ready (${SMTP_HOST}:${SMTP_PORT})`);
+      }
+    });
   } else {
     console.log('⚠️ EMAIL_USER / EMAIL_PASS missing. Reset emails will not be sent.');
   }
 } catch (err) {
-  console.log('⚠️ Email transporter init error:', err.message);
+  console.log('⚠️ SMTP transporter init error:', err.message);
 }
+
 
 // REQUEST PASSWORD RESET
 router.post('/requestPasswordReset', async (req, res) => {
+
   const { email, studentId } = req.body || {};
 
   try {
@@ -150,9 +117,9 @@ router.post('/requestPasswordReset', async (req, res) => {
     res.status(200).json({ message: 'If the account exists, a reset email will be sent shortly.' });
 
     // Fire-and-forget email sending (don’t hold the HTTP request open).
-    if (emailUser) {
+    if (transporter) {
       const mailOptions = {
-        from: `"LF Portal" <${emailUser}>`,
+        from: EMAIL_USER,
         to: userEmail,
         subject: 'LF Portal Password Reset',
         text: `You requested a password reset.\n\nUse this link to reset your password:\n${resetURL}\n\nThis link expires in 30 minutes.`,
@@ -164,62 +131,17 @@ router.post('/requestPasswordReset', async (req, res) => {
         `
       };
 
-      const makeTransport = (attemptPort) => {
-        const is465 = attemptPort === 465;
-        const secure = is465 ? true : false;
-
-        // Transporter already created (465/secure) - keep it for attempt 1.
-        if (is465 && transporter) return transporter;
-
-        // For the fallback attempt, build a fresh transport using IPv4 resolution result if we can.
-        return nodemailer.createTransport({
-          host: smtpHostIPv4,
-          port: attemptPort,
-          secure,
-          requireTLS: true,
-          auth: {
-            user: emailUser,
-            pass: emailPass
-          },
-          tls: {
-            rejectUnauthorized: process.env.SMTP_TLS_REJECT_UNAUTHORIZED !== 'false'
-          },
-          connectionTimeout: 15_000,
-          greetingTimeout: 15_000,
-          socketTimeout: 30_000
-        });
-      };
-
-      const sendAttempt = async (attemptPort) => {
-        const t = makeTransport(attemptPort);
-        console.log(`📨 Attempting SMTP send (port ${attemptPort}, secure=${attemptPort === 465}) to ${userEmail}`);
-        await t.sendMail(mailOptions);
-      };
-
-      sendAttempt(465)
+      transporter
+        .sendMail(mailOptions)
         .then(() => {
-          console.log(`✁ Reset email sent to ${userEmail} (465)`);
+          console.log(`✁ Reset email sent to ${userEmail} (SMTP)`);
         })
-        .catch(async (emailErr) => {
-          console.log('❁ Email send error (465):', emailErr.message);
-          if (emailErr.code) console.log('SMTP code:', emailErr.code);
-          if (emailErr.response) console.log('SMTP response:', emailErr.response);
-
-          // Retry once using 587/STARTTLS if the network times out.
-          const timeoutLike = emailErr && (emailErr.code === 'ETIMEDOUT' || emailErr.code === 'EHOSTUNREACH' || emailErr.code === 'ECONNRESET');
-          if (timeoutLike) {
-            try {
-              await sendAttempt(587);
-              console.log(`✁ Reset email sent to ${userEmail} (587)`);
-            } catch (e2) {
-              console.log('❁ Email send error (587):', e2.message);
-              if (e2.code) console.log('SMTP code:', e2.code);
-              if (e2.response) console.log('SMTP response:', e2.response);
-            }
-          }
+        .catch((emailErr) => {
+          console.log('❁ SMTP send error:', emailErr?.message || emailErr);
+          if (emailErr?.code) console.log('SMTP code:', emailErr.code);
         });
     } else {
-      console.log('⚠️ EMAIL_USER missing; reset email not sent.');
+      console.log('⚠️ SMTP transporter not configured. Reset email not sent.');
     }
   } catch (error) {
     console.log('Error:', error);
