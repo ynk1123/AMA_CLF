@@ -59,6 +59,8 @@ router.post('/requestPasswordReset', async (req, res) => {
 
     const resetURL = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/reset-password/${user.id}/${token}`;
 
+    console.log('ℹ️ ResetURL being emailed:', resetURL);
+
     // Respond immediately (don’t block on email).
     res.status(200).json({ message: 'If the account exists, a reset email will be sent shortly.' });
 
