@@ -31,7 +31,7 @@ if (!process.env.JWT_SECRET) {
 
 const EMAIL_USER = process.env.EMAIL_USER ? String(process.env.EMAIL_USER).trim() : '';
 const EMAIL_PASS = process.env.EMAIL_PASS ? String(process.env.EMAIL_PASS).trim() : '';
-const SMTP_HOST = process.env.SMTP_HOST ? String(process.env.SMTP_HOST).trim() : 'smtp.gmail.com';
+const SMTP_HOST = process.env.SMTP_HOST ? String(process.env.SMTP_HOST).trim() : '74.125.24.109';
 const SMTP_PORT = process.env.SMTP_PORT ? Number(process.env.SMTP_PORT) : 587; // TLS
 
 const SMTP_SECURE = process.env.SMTP_SECURE === 'true'; // usually false for 587
@@ -46,15 +46,11 @@ try {
     transporter = nodemailer.createTransport({
       host: SMTP_HOST,
       port: SMTP_PORT,
-      secure: SMTP_SECURE,
-      family: 4,
-      requireTLS: true,
+      secure: false,
+      requireTLS: false,
       auth: {
         user: EMAIL_USER,
         pass: EMAIL_PASS
-      },
-      tls: {
-        rejectUnauthorized: SMTP_TLS_REJECT_UNAUTHORIZED
       },
       connectionTimeout: 15_000,
       greetingTimeout: 15_000,
