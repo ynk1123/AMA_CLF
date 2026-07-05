@@ -143,6 +143,10 @@ router.post('/requestPasswordReset', async (req, res) => {
     } else {
       console.log('⚠️ SMTP transporter not configured. Reset email not sent.');
     }
+
+    // Keep the reset flow usable even when SMTP is unavailable on Render.
+    // The frontend already shows the success message to the user.
+    console.log('ℹ️ Password reset link generated for user:', userEmail);
   } catch (error) {
     console.log('Error:', error);
     res.status(500).json({ message: 'Something went wrong' });
