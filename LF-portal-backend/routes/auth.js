@@ -63,7 +63,7 @@ const resetURL = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/#/reset
     console.log('ℹ️ ResetURL being emailed:', resetURL);
 
     // Respond immediately (don’t block on email).
-    res.status(200).json({ message: 'If the account exists, a reset email will be sent shortly.' });
+    res.status(200).json({ message: 'A reset email was sent!' });
 
     // Fire-and-forget email sending (don’t hold the HTTP request open).
     sendEmail({
