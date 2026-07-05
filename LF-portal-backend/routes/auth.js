@@ -43,9 +43,9 @@ router.post('/requestPasswordReset', async (req, res) => {
 
     const user = await User.findOne({ where });
 
-    // Security: respond the same way whether the user exists or not.
+    // If user does not exist, explicitly say so.
     if (!user) {
-      return res.status(200).json({ message: 'If the account exists, a reset email will be sent shortly.' });
+      return res.status(404).json({ message: 'User does not exist' });
     }
 
     // Allow reset by studentId even without email
