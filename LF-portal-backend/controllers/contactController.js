@@ -146,12 +146,15 @@ exports.submitContact = async (req, res) => {
 
     console.log('✅ Contact form submitted:', contact.id);
 
-    // Send email notification
-    await sendContactNotification(contact);
+    // Send email notification (don't fail the submission if email fails)
+    const emailOk = await sendContactNotification(contact);
 
     res.status(201).json({
-      message: 'Thank you for your message! We will get back to you soon.',
-      id: contact.id
+      message: emailOk
+        ? 'Thank you for your message! We will get back to you soon.'
+        : 'Your message was saved, but we could not send the email notification. Please try again later.',
+      id: contact.id,
+      emailSent: emailOk
     });
   } catch (err) {
     console.error('Error in submitContact:', err);

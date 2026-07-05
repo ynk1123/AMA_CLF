@@ -58,7 +58,13 @@ const ContactUs = () => {
       setSuccess(true);
       setFormData({ name: '', email: '', subject: '', message: '' });
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to send message. Please try again.');
+      const status = err.response?.status;
+      const backendMessage = err.response?.data?.message;
+      setError(
+        status && backendMessage
+          ? `Request failed (${status}): ${backendMessage}`
+          : backendMessage || 'Failed to send message. Please try again.'
+      );
     }
     setLoading(false);
   };
