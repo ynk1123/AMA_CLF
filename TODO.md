@@ -1,24 +1,13 @@
-# TODO - Fix Render Image Uploads
+# TODO - SendGrid migration (LF-portal-backend)
 
-## Step 1: Confirm the failure mode
-- [ ] Check deployed browser Network tab for image request
-- [ ] Confirm whether `/uploads/<file>` returns 404
-
-## Step 2: Decide storage strategy
-- [ ] Prefer durable storage since Render free plan filesystem is ephemeral
-- [ ] Implement Cloudinary (fastest) or S3 (standard)
-
-## Step 3: Implement durable uploads
-- [ ] Add Cloudinary/S3 dependencies
-- [ ] Update `LF-portal-backend/routes/item.js` multer flow to upload to provider
-- [ ] Store returned public URL in `Item.imageUrl`
-- [ ] Ensure existing `/uploads` static serving still works for old images (optional)
-
-## Step 4: Update frontend (if needed)
-- [ ] Verify `Browse.js` / `Dashboard.js` image URL resolver supports provider URLs (already supports full `http` URLs)
-
-## Step 5: Environment variables + deploy
-- [ ] Add provider credentials to Render env vars
-- [ ] Redeploy backend
-- [ ] Create test item with image and verify it renders after reload
+- [ ] Replace Gmail/nodemailer usage in `LF-portal-backend/routes/auth.js` (password reset email) with SendGrid using `@sendgrid/mail`.
+- [ ] Replace Gmail/nodemailer usage in `LF-portal-backend/controllers/contactController.js` (contact notification email) with SendGrid.
+- [ ] Remove hardcoded Gmail credentials from the code and switch to env vars.
+- [ ] Add/confirm required env vars for Render:
+  - SENDGRID_API_KEY
+  - SENDGRID_FROM_EMAIL
+  - SENDGRID_FROM_NAME (optional)
+  - FRONTEND_URL (already used)
+- [ ] Add a small helper module (e.g., `LF-portal-backend/utils/mailer.js`) to centralize SendGrid send logic.
+- [ ] Run backend locally to ensure no runtime errors.
 
