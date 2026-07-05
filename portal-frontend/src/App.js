@@ -30,11 +30,17 @@ function App() {
                 <Route path="/browse" element={<Browse />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
+
+                {/* Password reset link from email */}
                 <Route path="/reset-password/:id/:token" element={<ResetPassword />} />
+
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/admin" element={<Admin />} />
-<Route path="/chat" element={<Chat />} />
+                <Route path="/chat" element={<Chat />} />
                 <Route path="/contact" element={<ContactUs />} />
+
+                {/* Fallback: if refresh/deep link fails, still load SPA */}
+                <Route path="*" element={<Landing />} />
               </Routes>
 <Footer />
             </Box>
