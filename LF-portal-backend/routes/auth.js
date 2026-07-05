@@ -5,7 +5,6 @@ const User = require('../models/user');
 const crypto = require('crypto');
 const dns = require('dns').promises;
 const nodemailer = require('nodemailer');
-const sgMail = require('@sendgrid/mail');
 
 
 const router = express.Router();
@@ -29,8 +28,6 @@ if (!process.env.JWT_SECRET) {
 
 const EMAIL_USER = process.env.EMAIL_USER ? String(process.env.EMAIL_USER).trim() : '';
 const EMAIL_PASS = process.env.EMAIL_PASS ? String(process.env.EMAIL_PASS).trim() : '';
-const EMAIL_FROM = process.env.EMAIL_FROM ? String(process.env.EMAIL_FROM).trim() : EMAIL_USER || 'noreply@campuslostandfound.com';
-const SENDGRID_API_KEY = process.env.SENDGRID_API_KEY ? String(process.env.SENDGRID_API_KEY).trim() : '';
 const SMTP_HOST = process.env.SMTP_HOST ? String(process.env.SMTP_HOST).trim() : 'smtp.gmail.com';
 const SMTP_PORT = process.env.SMTP_PORT ? Number(process.env.SMTP_PORT) : 587; // TLS
 
@@ -40,14 +37,9 @@ const SMTP_TLS_REJECT_UNAUTHORIZED = process.env.SMTP_TLS_REJECT_UNAUTHORIZED ==
   : process.env.SMTP_TLS_REJECT_UNAUTHORIZED !== 'false';
 
 let transporter = null;
-let mailProvider = 'none';
 
 try {
-  if (SENDGRID_API_KEY) {
-    sgMail.setApiKey(SENDGRID_API_KEY);
-    mailProvider = 'sendgrid';
-    console.log('✅ Email provider ready (SendGrid)');
-  } else if (EMAIL_USER && EMAIL_PASS) {
+  if (EMAIL_USER && EMAIL_PASS) {
     transporter = nodemailer.createTransport({
       host: SMTP_HOST,
       port: SMTP_PORT,
@@ -71,7 +63,6 @@ try {
         console.log('❌ SMTP verify failed:', verifyErr.message);
         if (verifyErr.code) console.log('SMTP code:', verifyErr.code);
       } else {
-        mailProvider = 'smtp';
         console.log(`✅ SMTP transporter ready (${SMTP_HOST}:${SMTP_PORT})`);
       }
     });
@@ -81,29 +72,6 @@ try {
 } catch (err) {
   console.log('⚠️ SMTP transporter init error:', err.message);
 }
-
-const sendPasswordResetEmail = async ({ to, resetURL }) => {
-  const subject = 'LF Portal Password Reset';
-  const text = `You requested a password reset.\n\nUse this link to reset your password:\n${resetURL}\n\nThis link expires in 30 minutes.`;
-  const html = `
-    <p>You requested a password reset.</p>
-    <p>Click this link to reset your password:</p>
-    <p><a href="${resetURL}">${resetURL}</a></p>
-    <p>This link expires in 30 minutes.</p>
-  `;
-
-  if (mailProvider === 'sendgrid') {
-    await sgMail.send({ to, from: EMAIL_FROM, subject, text, html });
-    return;
-  }
-
-  if (transporter) {
-    await transporter.sendMail({ from: EMAIL_FROM, to, subject, text, html });
-    return;
-  }
-
-  throw new Error('No mail provider configured');
-};
 
 
 // REQUEST PASSWORD RESET
@@ -149,17 +117,31 @@ router.post('/requestPasswordReset', async (req, res) => {
     res.status(200).json({ message: 'If the account exists, a reset email will be sent shortly.' });
 
     // Fire-and-forget email sending (don’t hold the HTTP request open).
-    if (mailProvider !== 'none' || transporter) {
-      sendPasswordResetEmail({ to: userEmail, resetURL })
+    if (transporter) {
+      const mailOptions = {
+        from: EMAIL_USER,
+        to: userEmail,
+        subject: 'LF Portal Password Reset',
+        text: `You requested a password reset.\n\nUse this link to reset your password:\n${resetURL}\n\nThis link expires in 30 minutes.`,
+        html: `
+          <p>You requested a password reset.</p>
+          <p>Click this link to reset your password:</p>
+          <p><a href="${resetURL}">${resetURL}</a></p>
+          <p>This link expires in 30 minutes.</p>
+        `
+      };
+
+      transporter
+        .sendMail(mailOptions)
         .then(() => {
-          console.log(`✁ Reset email sent to ${userEmail} (${mailProvider || 'smtp'})`);
+          console.log(`✁ Reset email sent to ${userEmail} (SMTP)`);
         })
         .catch((emailErr) => {
-          console.log('❁ Mail send error:', emailErr?.message || emailErr);
-          if (emailErr?.code) console.log('Mail code:', emailErr.code);
+          console.log('❁ SMTP send error:', emailErr?.message || emailErr);
+          if (emailErr?.code) console.log('SMTP code:', emailErr.code);
         });
     } else {
-      console.log('⚠️ Mail provider not configured. Reset email not sent.');
+      console.log('⚠️ SMTP transporter not configured. Reset email not sent.');
     }
   } catch (error) {
     console.log('Error:', error);
