@@ -3,7 +3,8 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const crypto = require('crypto');
-const dns = require('dns').promises;
+const dns = require('dns');
+const dnsPromises = dns.promises;
 const nodemailer = require('nodemailer');
 
 
@@ -11,6 +12,8 @@ const router = express.Router();
 
 // JWT SECRET
 require('dotenv').config();
+
+dns.setDefaultResultOrder('ipv4first');
 
 const FALLBACK_JWT_SECRET = '63e8eb5362c3f1acf11a3dfc4050fcab';
 const JWT_SECRET = process.env.JWT_SECRET || global.__FALLBACK_JWT_SECRET || FALLBACK_JWT_SECRET;
@@ -44,6 +47,7 @@ try {
       host: SMTP_HOST,
       port: SMTP_PORT,
       secure: SMTP_SECURE,
+      family: 4,
       requireTLS: true,
       auth: {
         user: EMAIL_USER,
