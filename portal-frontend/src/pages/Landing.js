@@ -134,6 +134,10 @@ const Landing = () => {
               alignItems: 'center',
               justifyContent: 'center',
               gap: { xs: 1.5, sm: 0 },
+              '@media (max-width:600px)': {
+                px: '16px',
+                width: '100%',
+              },
             }}
             className="fade-in stagger-2"
           >
