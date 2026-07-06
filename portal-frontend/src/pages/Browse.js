@@ -175,15 +175,36 @@ const getImageUrl = (url) => {
                       }}
                     />
                   )}
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5 }}>
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 0.5,
+                      mb: 0.5,
+                      '@media (max-width:600px)': { display: 'none' },
+                    }}
+                  >
                     <LocationOnIcon sx={{ fontSize: 16, color: '#DC2626' }} />
                     <Typography variant="body2" color="text.secondary">{item.location}</Typography>
                   </Box>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 1 }}>
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 0.5,
+                      mb: 1,
+                      '@media (max-width:600px)': { display: 'none' },
+                    }}
+                  >
                     <CalendarTodayIcon sx={{ fontSize: 16, color: '#DC2626' }} />
                     <Typography variant="body2" color="text.secondary">{new Date(item.date).toLocaleDateString()}</Typography>
                   </Box>
-                  <Chip label={item.status} color={getStatusColor(item.status)} size="small" sx={{ fontWeight: 600 }} />
+                  <Chip
+                    label={item.status}
+                    color={getStatusColor(item.status)}
+                    size="small"
+                    sx={{ fontWeight: 600, '@media (max-width:600px)': { display: 'none' } }}
+                  />
                 </CardContent>
               </Card>
             </Grid>

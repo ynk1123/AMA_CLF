@@ -640,7 +640,14 @@ onClick={() => {
                       DETAILS
                     </Typography>
                   </Box>
-                  <Box sx={{ px: 2 }}>
+                  <Box
+                    sx={{
+                      px: 2,
+                      '@media (max-width:600px)': {
+                        display: 'none',
+                      },
+                    }}
+                  >
                     <Typography variant="body2" sx={{ mb: 1 }}>
                       <strong>Category:</strong> {item.category}
                     </Typography>
