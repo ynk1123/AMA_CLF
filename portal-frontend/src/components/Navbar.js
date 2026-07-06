@@ -115,13 +115,14 @@ const Navbar = () => {
         <Box sx={{ display: { xs: 'block', sm: 'none' } }}>
           <Button
             color="inherit"
-            onClick={() => setLangAnchor(null)}
+            onClick={(e) => setLangAnchor(e.currentTarget)}
             sx={{ minWidth: 36, p: 0.5, fontWeight: 700 }}
-            aria-label="open menu"
+            aria-label="open mobile menu"
           >
             ☰
           </Button>
         </Box>
+
 
         {/* Desktop nav (hidden on mobile) */}
         <Box sx={{ display: { xs: 'none', sm: 'block' } }}>
