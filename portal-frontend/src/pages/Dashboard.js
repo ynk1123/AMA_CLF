@@ -627,7 +627,7 @@ onClick={() => {
                 },
               }}
             >
-              <Card
+                      <Card
                 className="card-hover"
                 sx={{
                   ...itemCardStyles,
@@ -689,7 +689,7 @@ onClick={() => {
                       }}
                     />
                   )}
-                  <Box
+                      <Box
                     sx={{
                       width: '100%',
                       backgroundColor: '#ebe3e3',

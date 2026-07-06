@@ -170,7 +170,15 @@ const getImageUrl = (url) => {
                 }}
               >
                 <CardContent sx={{ p: 1.5 }}>
-                  <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 1, fontSize: '0.9rem' }}>
+                  <Typography
+                    variant="subtitle1"
+                    sx={{
+                      fontWeight: 700,
+                      mb: 1,
+                      fontSize: '0.9rem',
+                      '@media (max-width:600px)': { display: 'none' },
+                    }}
+                  >
                     {item.title}
                   </Typography>
                   {item.imageUrl && (
@@ -181,14 +189,50 @@ const getImageUrl = (url) => {
                       sx={{
                         ...itemImageStyles,
                         '@media (max-width:600px)': {
-                          height: 36,
+                          width: '100%',
                           aspectRatio: '1/1',
-                          width: 36,
+                          height: 'auto',
                           mb: 0.5,
+                          borderRadius: 4,
+                          objectFit: 'cover',
+                          display: 'block',
                         },
                       }}
                     />
                   )}
+                  <Box
+                    sx={{
+                      display: 'none',
+                      '@media (max-width:600px)': {
+                        display: 'block',
+                        width: '100%',
+                        textAlign: 'center',
+                        bgcolor: 'rgba(248,248,248,0.9)',
+                        borderRadius: 1,
+                        p: '4px 4px',
+                        mb: 0.5,
+                      },
+                    }}
+                  >
+                    <Typography
+                      variant="subtitle1"
+                      sx={{
+                        fontSize: '12px',
+                        lineHeight: 1.2,
+                        fontWeight: 700,
+                        textAlign: 'center',
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        '@media (max-width:600px)': {
+                          mb: 0,
+                          px: 0,
+                        },
+                      }}
+                    >
+                      {item.title}
+                    </Typography>
+                  </Box>
                   <Box
                     sx={{
                       display: 'flex',
