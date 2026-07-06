@@ -500,9 +500,10 @@ return (
             justifyContent: 'space-between', 
             alignItems: 'center', 
             mb: 2,
-            '@media (max-width:600px)': { mb: 1 },
+            '@media (max-width:600px)': { mb: 1, mt: '20px !important' },
           }}
         >
+
           <Typography
             variant="h4"
             sx={{

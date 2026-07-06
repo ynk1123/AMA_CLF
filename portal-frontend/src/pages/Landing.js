@@ -109,11 +109,13 @@ const Landing = () => {
               variant="h2"
               gutterBottom
               sx={{
-                fontWeight: 700,
-            fontSize: { xs: '1.05rem', sm: '1.45rem', md: '3rem' },
-                lineHeight: { xs: 1.15, sm: 1.2, md: 1.15 },
+                fontWeight: 800,
+            fontSize: { xs: '28px !important', sm: '1.45rem', md: '3rem' },
+                lineHeight: { xs: 1.1, sm: 1.2, md: 1.15 },
+                mb: { xs: '8px !important', sm: undefined },
               }}
             >
+
 
               {t('welcomeTitle')}
             </Typography>
