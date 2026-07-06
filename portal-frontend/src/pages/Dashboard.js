@@ -68,7 +68,8 @@ const Dashboard = () => {
     // Notification state - real data from API
     const [notifications, setNotifications] = useState([]);
     const [notificationCount, setNotificationCount] = useState(0);
-const [openNotificationDialog, setOpenNotificationDialog] = useState(false);
+    const [openNotificationDialog, setOpenNotificationDialog] = useState(false);
+
     const [notificationsViewed, setNotificationsViewed] = useState(false);
 
     const loadNotificationsViewedFromStorage = () => {
@@ -531,9 +532,40 @@ onClick={() => {
         </Box>
 
         {/* Search and Filters */}
-        <Box sx={{ mb: 4, p: 2, backgroundColor: '#f5f5f5', borderRadius: 2 }}>
-          <Typography variant="h6" gutterBottom>Search and Filters</Typography>
-          <Grid container spacing={2}>
+        <Box
+          sx={{
+            mb: 4,
+            p: 2,
+            backgroundColor: '#f5f5f5',
+            borderRadius: 2,
+            border: '2px solid #FEE2E2',
+            '@media (max-width:600px)': {
+              mb: 2,
+              p: 1.5,
+            },
+          }}
+        >
+          <Typography
+            variant="h6"
+            gutterBottom
+            sx={{
+              '@media (max-width:600px)': { mb: 1 },
+            }}
+          >
+            Search and Filters
+          </Typography>
+
+          <Grid
+            container
+            spacing={2}
+            sx={{
+              '@media (max-width:600px)': {
+                display: 'grid',
+                gridTemplateColumns: '1fr 1fr',
+                gap: '8px',
+              },
+            }}
+          >
             <Grid item xs={12} md={3}>
               <TextField
                 fullWidth
@@ -541,8 +573,18 @@ onClick={() => {
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 size="small"
+                sx={{
+                  '@media (max-width:600px)': {
+                    '& .MuiInputBase-root': { minHeight: 34 },
+                    '& .MuiInputLabel-root': { fontSize: 14 },
+                    '& input': { fontSize: 14, py: '6px' },
+                    '& .MuiSvgIcon-root': { fontSize: 18 },
+                  },
+                }}
               />
             </Grid>
+
+
             <Grid item xs={12} md={3}>
               <TextField
                 fullWidth
@@ -551,6 +593,14 @@ onClick={() => {
                 value={filterCategory}
                 onChange={(e) => setFilterCategory(e.target.value)}
                 size="small"
+                sx={{
+                  '@media (max-width:600px)': {
+                    '& .MuiInputBase-root': { minHeight: 34 },
+                    '& .MuiInputLabel-root': { fontSize: 14 },
+                    '& .MuiSelect-select': { fontSize: 14, py: '6px' },
+                    '& .MuiSvgIcon-root': { fontSize: 18 },
+                  },
+                }}
               >
                 <MenuItem value="">All</MenuItem>
                 <MenuItem value="ID">ID</MenuItem>
@@ -560,6 +610,7 @@ onClick={() => {
                 <MenuItem value="Other">Other</MenuItem>
               </TextField>
             </Grid>
+
             <Grid item xs={12} md={3}>
               <TextField
                 fullWidth
@@ -568,6 +619,14 @@ onClick={() => {
                 value={filterLocation}
                 onChange={(e) => setFilterLocation(e.target.value)}
                 size="small"
+                sx={{
+                  '@media (max-width:600px)': {
+                    '& .MuiInputBase-root': { minHeight: 34 },
+                    '& .MuiInputLabel-root': { fontSize: 14 },
+                    '& .MuiSelect-select': { fontSize: 14, py: '6px' },
+                    '& .MuiSvgIcon-root': { fontSize: 18 },
+                  },
+                }}
               >
                 <MenuItem value="">All</MenuItem>
                 {locationOptions.map((location) => (
@@ -577,6 +636,7 @@ onClick={() => {
                 ))}
               </TextField>
             </Grid>
+
             <Grid item xs={12} md={3}>
               <TextField
                 fullWidth
@@ -585,6 +645,14 @@ onClick={() => {
                 value={filterStatus}
                 onChange={(e) => setFilterStatus(e.target.value)}
                 size="small"
+                sx={{
+                  '@media (max-width:600px)': {
+                    '& .MuiInputBase-root': { minHeight: 34 },
+                    '& .MuiInputLabel-root': { fontSize: 14 },
+                    '& .MuiSelect-select': { fontSize: 14, py: '6px' },
+                    '& .MuiSvgIcon-root': { fontSize: 18 },
+                  },
+                }}
               >
                 <MenuItem value="">All</MenuItem>
                 <MenuItem value="lost">Lost</MenuItem>
