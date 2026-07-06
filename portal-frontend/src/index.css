@@ -167,3 +167,20 @@ button { cursor: pointer; font-family: inherit; }
 * {
   transition: all 0.2s ease;
 }
+
+/* Mobile layout safety */
+html, body {
+  width: 100%;
+}
+
+body {
+  overflow-x: hidden;
+}
+
+/* Prevent huge tap targets / typography scaling issues */
+@media (max-width: 600px) {
+  body {
+    -webkit-text-size-adjust: 100%;
+  }
+}
+

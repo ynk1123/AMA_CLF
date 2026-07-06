@@ -160,7 +160,20 @@ const getImageUrl = (url) => {
                     {item.title}
                   </Typography>
                   {item.imageUrl && (
-                    <Box component="img" src={getImageUrl(item.imageUrl)} alt={item.title} sx={itemImageStyles} />
+                    <Box
+                      component="img"
+                      src={getImageUrl(item.imageUrl)}
+                      alt={item.title}
+                      sx={{
+                        ...itemImageStyles,
+                        '@media (max-width:600px)': {
+                          height: 36,
+                          aspectRatio: '1/1',
+                          width: 36,
+                          mb: 0.5,
+                        },
+                      }}
+                    />
                   )}
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5 }}>
                     <LocationOnIcon sx={{ fontSize: 16, color: '#DC2626' }} />
