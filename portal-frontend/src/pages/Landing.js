@@ -110,9 +110,10 @@ const Landing = () => {
               gutterBottom
               sx={{
                 fontWeight: 700,
-                fontSize: { xs: '1.6rem', md: '3rem' },
+            fontSize: { xs: '1.25rem', sm: '1.6rem', md: '3rem' },
               }}
             >
+
               {t('welcomeTitle')}
             </Typography>
           </Box>
