@@ -17,7 +17,7 @@ const Landing = () => {
         sx={{
           background: 'linear-gradient(135deg, #DC2626 0%, #EF4444 50%, #F87171 100%)',
           color: 'white',
-          py: 12,
+          py: { xs: 7, sm: 10, md: 12 },
           textAlign: 'center',
           position: 'relative',
           overflow: 'hidden',
