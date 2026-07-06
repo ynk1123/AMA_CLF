@@ -50,9 +50,20 @@ const Footer = () => {
 
         {/* Copyright */}
         <Box sx={{ pt: 2, borderTop: '1px solid rgba(255,255,255,0.1)' }}>
-          <Typography variant="body2" sx={{ opacity: 0.6 }}>
+          <Typography
+            variant="body2"
+            sx={{
+              opacity: 0.6,
+              '@media (max-width:600px)': {
+                fontSize: '11px !important',
+                opacity: 0.5,
+                pb: '12px',
+              },
+            }}
+          >
             © {currentYear} Campus Lost & Found. All rights reserved.
           </Typography>
+
         </Box>
       </Container>
     </Box>
