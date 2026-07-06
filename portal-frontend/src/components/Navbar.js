@@ -51,38 +51,40 @@ const Navbar = () => {
 
   return (
     <AppBar position="static" className="fade-in">
-      <Toolbar>
+      <Toolbar sx={{ minHeight: { xs: 60, sm: 64 } }}>
         <SearchIcon sx={{ mr: 1, fontSize: { xs: 20, sm: 28 }, display: { xs: 'none', sm: 'inline-flex' } }} />
 
-        <Typography 
-          variant="h6" 
+        {/* Brand (left) */}
+        <Typography
+          variant="h6"
           sx={{
             flexGrow: 1,
             fontWeight: 700,
             cursor: 'pointer',
             fontSize: { xs: '0.95rem', sm: '1rem' },
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
           }}
           onClick={() => navigate(user ? '/dashboard' : '/')}
         >
-
           {t('campusLostAndFound')}
         </Typography>
-        
-        {/* Language Selector */}
+
+        {/* Language selector (kept visible, but compact) */}
         <Button
           color="inherit"
           onClick={handleLanguageClick}
           startIcon={<LanguageIcon />}
-          sx={{ 
-            mr: 2,
+          sx={{
+            mr: 1.5,
             fontWeight: 600,
             border: '1px solid rgba(255,255,255,0.3)',
             px: { xs: 0.75, sm: 1 },
             minWidth: { xs: 0, sm: 'auto' },
-            '& .MuiButton-startIcon': { mr: { xs: 0, sm: 0.75 } },
+            '& .MuiButton-startIcon': { mr: { xs: 0.5, sm: 0.75 } },
             '& .MuiButton-endIcon': { display: { xs: 'none', sm: 'inline-flex' } },
-
-            '&:hover': { backgroundColor: 'rgba(255,255,255,0.15)' }
+            '&:hover': { backgroundColor: 'rgba(255,255,255,0.15)' },
           }}
         >
           {getCurrentLanguage().flag} {getCurrentLanguage().code.toUpperCase()}
@@ -91,18 +93,16 @@ const Navbar = () => {
           anchorEl={langAnchor}
           open={Boolean(langAnchor)}
           onClose={handleLanguageClose}
-          PaperProps={{
-            sx: { mt: 1 }
-          }}
+          PaperProps={{ sx: { mt: 1 } }}
         >
           {languages.map((lang) => (
-            <MenuItem 
+            <MenuItem
               key={lang.code}
               onClick={() => handleLanguageSelect(lang.code)}
               selected={language === lang.code}
-              sx={{ 
+              sx={{
                 fontWeight: language === lang.code ? 700 : 400,
-                backgroundColor: language === lang.code ? '#FEE2E2' : 'transparent'
+                backgroundColor: language === lang.code ? '#FEE2E2' : 'transparent',
               }}
             >
               <Typography sx={{ mr: 1 }}>{lang.flag}</Typography>
@@ -111,8 +111,23 @@ const Navbar = () => {
           ))}
         </Menu>
 
-<Box>
+        {/* Mobile menu icon */}
+        <Box sx={{ display: { xs: 'block', sm: 'none' } }}>
+          <Button
+            color="inherit"
+            onClick={() => setLangAnchor(null)}
+            sx={{ minWidth: 36, p: 0.5, fontWeight: 700 }}
+            aria-label="open menu"
+          >
+            ☰
+          </Button>
+        </Box>
+
+        {/* Desktop nav (hidden on mobile) */}
+        <Box sx={{ display: { xs: 'none', sm: 'block' } }}>
           {!user ? (
+
+
             <>
               <Button 
                 color="inherit" 
