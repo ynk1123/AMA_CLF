@@ -531,11 +531,12 @@ onClick={() => {
           </IconButton>
         </Box>
 
-        <Box sx={{ mb: 4, '@media (max-width:600px)': { mb: 1 } }}>
+        <Box sx={{ mb: 4, mt: 2, '@media (max-width:600px)': { mb: 1.5, mt: 2 } }}>
           <Button variant="contained" onClick={() => setOpenDialog(true)}>
             Post New Item
           </Button>
         </Box>
+
 
 
         {/* Search and Filters */}
@@ -672,10 +673,20 @@ onClick={() => {
           </Grid>
         </Box>
 
-{/* Section 1: Active Lost and Found Items */}
-        <Typography variant="h5" gutterBottom>
+        {/* Section 1: Active Lost and Found Items */}
+        <Typography
+          variant="h5"
+          gutterBottom={false}
+          sx={{
+            mt: { xs: 3, sm: 0 },
+            '@media (max-width:600px)': { mt: '24px !important' },
+          }}
+        >
           Lost and Found Items ({activeItems.length})
         </Typography>
+
+
+
 
 {/* Desktop/tablet cards */}
         <Grid
@@ -996,7 +1007,8 @@ onClick={() => {
           </DialogActions>
         </Dialog>
 
-{/* Item Detail Dialog */}
+        {/* Item Detail Dialog */}
+
 <Dialog 
   open={openItemDialog} 
   onClose={() => setOpenItemDialog(false)} 
