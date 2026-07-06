@@ -189,6 +189,7 @@ const Landing = () => {
             fontWeight: 700,
             color: '#DC2626',
             lineHeight: 1.1,
+            textAlign: { xs: 'center', sm: 'center', md: 'center' },
           }}
         >
           {t('features')}
