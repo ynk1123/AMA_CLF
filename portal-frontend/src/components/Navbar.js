@@ -52,12 +52,19 @@ const Navbar = () => {
   return (
     <AppBar position="static" className="fade-in">
       <Toolbar>
-        <SearchIcon sx={{ mr: 1, fontSize: 28 }} />
+        <SearchIcon sx={{ mr: 1, fontSize: { xs: 20, sm: 28 }, display: { xs: 'none', sm: 'inline-flex' } }} />
+
         <Typography 
           variant="h6" 
-          sx={{ flexGrow: 1, fontWeight: 700, cursor: 'pointer' }}
+          sx={{
+            flexGrow: 1,
+            fontWeight: 700,
+            cursor: 'pointer',
+            fontSize: { xs: '0.95rem', sm: '1rem' },
+          }}
           onClick={() => navigate(user ? '/dashboard' : '/')}
         >
+
           {t('campusLostAndFound')}
         </Typography>
         
@@ -70,6 +77,11 @@ const Navbar = () => {
             mr: 2,
             fontWeight: 600,
             border: '1px solid rgba(255,255,255,0.3)',
+            px: { xs: 0.75, sm: 1 },
+            minWidth: { xs: 0, sm: 'auto' },
+            '& .MuiButton-startIcon': { mr: { xs: 0, sm: 0.75 } },
+            '& .MuiButton-endIcon': { display: { xs: 'none', sm: 'inline-flex' } },
+
             '&:hover': { backgroundColor: 'rgba(255,255,255,0.15)' }
           }}
         >

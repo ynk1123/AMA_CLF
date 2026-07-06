@@ -74,12 +74,14 @@ const Login = () => {
   };
 
   return (
-    <Container maxWidth="sm" sx={{ mt: 10, mb: 10 }}>
+    <Container maxWidth="sm" sx={{ mt: { xs: 6, sm: 10 }, mb: { xs: 6, sm: 10 } }}>
+
       <Paper 
         className="fade-in-scale"
         elevation={0}
         sx={{ 
-          p: 5,
+          p: { xs: 3, sm: 5 },
+
           border: '2px solid #DC2626',
           borderRadius: 3,
           position: 'relative',
@@ -98,9 +100,10 @@ const Login = () => {
 
         <Typography 
           variant="h3" 
-          align="center" 
+          align="center"
           gutterBottom
-          sx={{ 
+          sx={{
+            fontSize: { xs: '1.55rem', sm: undefined },
             fontWeight: 700,
             color: '#DC2626',
             mb: 1,
@@ -108,6 +111,7 @@ const Login = () => {
         >
           {t('welcomeBack')}
         </Typography>
+
         <Typography 
           variant="body1" 
           align="center" 
