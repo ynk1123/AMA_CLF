@@ -14,6 +14,7 @@ const Login = () => {
   const [forgotInput, setForgotInput] = useState('');
   const [forgotLoading, setForgotLoading] = useState(false);
   const [forgotMessage, setForgotMessage] = useState('');
+  const [loginLoading, setLoginLoading] = useState(false);
   const { login } = useAuth();
   const { t } = useLanguage();
   const navigate = useNavigate();
@@ -22,6 +23,8 @@ const Login = () => {
 
   const handleStudentLogin = async (e) => {
     e.preventDefault();
+    setLoginLoading(true);
+    setError('');
     try {
       const response = await authService.login(formData);
       login({ 
@@ -151,6 +154,7 @@ const Login = () => {
             fullWidth 
             variant="contained"
             className="btn-pulse"
+            disabled={loginLoading}
             sx={{ 
               mt: 2,
               mb: 2,
@@ -165,7 +169,7 @@ const Login = () => {
               }
             }}
           >
-            {t('signIn')}
+            {loginLoading ? 'Signing in...' : t('signIn')}
           </Button>
           <Button 
             fullWidth 
