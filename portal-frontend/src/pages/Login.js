@@ -34,13 +34,16 @@ const Login = () => {
         role: 'student' 
       }, response.data.token);
       navigate('/dashboard');
-    } catch (err) { 
+    } catch (err) {
+      // Ensure the button never stays stuck on "Signing in...".
       // Check for suspended account (403) vs invalid credentials (401)
       if (err.response?.status === 403) {
         setError(err.response.data.message || 'Your account has been suspended');
       } else {
         setError('Invalid Student ID/Email or Password');
       }
+    } finally {
+      setLoginLoading(false);
     }
   };
 
