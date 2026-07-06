@@ -97,7 +97,15 @@ const getImageUrl = (url) => {
   return (
     <Box sx={{ minHeight: '100vh', py: 3 }}>
       <Box className="fade-in" sx={{ px: 4, mt: 4 }}>
-        <Typography variant="h3" sx={{ fontWeight: 700, color: '#DC2626', mb: 1 }}>
+        <Typography
+          variant="h3"
+          sx={{
+            fontWeight: 700,
+            color: '#DC2626',
+            mb: 1,
+            '@media (max-width:600px)': { fontSize: '1.4rem' },
+          }}
+        >
           Browse Items
         </Typography>
         <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
@@ -152,7 +160,13 @@ const getImageUrl = (url) => {
                 sx={{ 
                   ...itemCardStyles,
                   opacity: isGhostItem(item.status) ? 0.5 : 1,
-                  filter: isGhostItem(item.status) ? 'grayscale(80%)' : 'none'
+                  filter: isGhostItem(item.status) ? 'grayscale(80%)' : 'none',
+                  '@media (max-width:600px)': {
+                    boxShadow: 'none',
+                    borderRadius: 1,
+                    backgroundColor: 'transparent',
+                    overflow: 'hidden',
+                  },
                 }}
               >
                 <CardContent sx={{ p: 1.5 }}>
