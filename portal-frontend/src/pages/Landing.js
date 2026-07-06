@@ -104,30 +104,53 @@ const Landing = () => {
         }} />
 
         <Container maxWidth="md" sx={{ position: 'relative', zIndex: 1 }}>
-          <Box className="fade-in-scale">
-            <Typography variant="h2" gutterBottom sx={{ fontWeight: 700, fontSize: { xs: '2rem', md: '3rem' } }}>
+          <Box className="fade-in-scale" sx={{ px: { xs: 2, md: 0 } }}>
+            <Typography
+              variant="h2"
+              gutterBottom
+              sx={{
+                fontWeight: 700,
+                fontSize: { xs: '1.6rem', md: '3rem' },
+              }}
+            >
               {t('welcomeTitle')}
             </Typography>
           </Box>
-          <Typography variant="h5" gutterBottom sx={{ opacity: 0.95, mb: 4 }} className="fade-in stagger-1">
+          <Typography
+            variant="h5"
+            gutterBottom
+            sx={{ opacity: 0.95, mb: 4, fontSize: { xs: '1rem', md: undefined } }}
+            className="fade-in stagger-1"
+          >
             {t('welcomeSubtitle')}
           </Typography>
-          <Box sx={{ mt: 5 }} className="fade-in stagger-2">
+          <Box
+            sx={{
+              mt: 5,
+              display: 'flex',
+              flexDirection: { xs: 'column', sm: 'row' },
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: { xs: 1.5, sm: 0 },
+            }}
+            className="fade-in stagger-2"
+          >
             <Button
               variant="contained"
               size="large"
-              sx={{ 
-                mr: 2, 
-                backgroundColor: '#fff', 
+              sx={{
+                width: { xs: '100%', sm: 'auto' },
+                mr: { xs: 0, sm: 2 },
+                backgroundColor: '#fff',
                 color: '#DC2626',
                 fontWeight: 700,
-                px: 4,
-                py: 1.5,
-                '&:hover': { 
+                px: { xs: 3, md: 4 },
+                py: 1.3,
+                '&:hover': {
                   backgroundColor: '#1A1A2E',
                   color: '#fff',
                   transform: 'scale(1.05)',
-                }
+                },
               }}
               onClick={() => navigate('/register')}
             >
@@ -136,20 +159,22 @@ const Landing = () => {
             <Button
               variant="contained"
               size="large"
-              sx={{ 
-                mr: 2, 
-                backgroundColor: 'rgba(255,255,255,0.2)', 
+              sx={{
+                width: { xs: '100%', sm: 'auto' },
+                mr: { xs: 0, sm: 2 },
+                backgroundColor: 'rgba(255,255,255,0.2)',
                 color: '#fff',
                 fontWeight: 600,
-                px: 4,
-                py: 1.5,
-                '&:hover': { backgroundColor: 'rgba(255,255,255,0.3)' }
+                px: { xs: 3, md: 4 },
+                py: 1.3,
+                '&:hover': { backgroundColor: 'rgba(255,255,255,0.3)' },
               }}
               onClick={() => navigate('/browse')}
             >
               {t('browseItems')}
             </Button>
           </Box>
+
         </Container>
       </Box>
 
