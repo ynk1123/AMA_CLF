@@ -57,6 +57,7 @@ const Navbar = () => {
     return languages.find(l => l.code === language) || languages[0];
   };
 
+
   return (
     <AppBar position="static" className="fade-in">
       <Toolbar sx={{ minHeight: { xs: 60, sm: 64 } }}>
@@ -79,29 +80,35 @@ const Navbar = () => {
           {t('campusLostAndFound')}
         </Typography>
 
-        {/* Language selector (kept visible, but compact) */}
+        {/* Language selector (mobile: icon-only in a square box) */}
         <Button
           color="inherit"
           onClick={handleLanguageClick}
-          startIcon={<LanguageIcon />}
-
           sx={{
-            mr: 1.5,
+            mr: 1.0,
             fontWeight: 600,
             border: '1px solid rgba(255,255,255,0.3)',
-            px: { xs: 0.75, sm: 1 },
-            minWidth: { xs: 0, sm: 'auto' },
-            '& .MuiButton-startIcon': { mr: { xs: 0.5, sm: 0.75 } },
-            '& .MuiButton-endIcon': { display: { xs: 'none', sm: 'inline-flex' } },
+            px: 0,
+            minWidth: { xs: 38, sm: 'auto' },
+            width: { xs: 38, sm: 'auto' },
+            height: { xs: 38, sm: 'auto' },
+            borderRadius: '6px',
             '&:hover': { backgroundColor: 'rgba(255,255,255,0.15)' },
           }}
         >
-          <Box component="span" sx={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 24 }}>
+          <Box
+            component="span"
+            sx={{
+              width: { xs: 38, sm: 'auto' },
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
             <LanguageIcon sx={{ fontSize: 22, color: 'white' }} />
           </Box>
-
-
         </Button>
+
         <Menu
           anchorEl={langAnchor}
           open={Boolean(langAnchor)}
