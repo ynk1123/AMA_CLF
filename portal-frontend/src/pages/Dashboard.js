@@ -492,17 +492,23 @@ const getImageUrl = (url) => {
 };
 
 return (
-      <Box sx={{ mt: 4, px: 4 }}>
+      <Box sx={{ mt: 4, px: 4, '@media (max-width:600px)': { mt: 1 } }}>
         {/* Header Section with Welcome and Notification Button on same row */}
         <Box 
           sx={{ 
             display: 'flex', 
             justifyContent: 'space-between', 
-            alignItems: 'center',
-            mb: 2
+            alignItems: 'center', 
+            mb: 2,
+            '@media (max-width:600px)': { mb: 1 },
           }}
         >
-          <Typography variant="h4" gutterBottom>
+          <Typography
+            variant="h4"
+            sx={{
+              '@media (max-width:600px)': { mb: 0.5 },
+            }}
+          >
             Welcome, {user?.displayName || user?.studentId}
           </Typography>
 <IconButton 
@@ -525,11 +531,12 @@ onClick={() => {
           </IconButton>
         </Box>
 
-        <Box sx={{ mb: 4 }}>
+        <Box sx={{ mb: 4, '@media (max-width:600px)': { mb: 1 } }}>
           <Button variant="contained" onClick={() => setOpenDialog(true)}>
             Post New Item
           </Button>
         </Box>
+
 
         {/* Search and Filters */}
         <Box

@@ -138,21 +138,22 @@ const Browse = () => {
 
   return (
     <Box sx={{ minHeight: '100vh', py: 3 }}>
-      <Box className="fade-in" sx={{ px: 4, mt: 4 }}>
-        <Typography
+      <Box className="fade-in" sx={{ px: 4, mt: 4, '@media (max-width:600px)': { mt: 1 } }}>
+      <Typography
           variant="h3"
           sx={{
             fontWeight: 700,
             color: '#DC2626',
             mb: 1,
-            '@media (max-width:600px)': { fontSize: '1.4rem' },
+            '@media (max-width:600px)': { fontSize: '1.4rem', mb: 0.5 },
           }}
         >
           Browse Items
         </Typography>
-        <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
+        <Typography variant="body1" color="text.secondary" sx={{ mb: 4, '@media (max-width:600px)': { mb: 2 } }}>
           Find lost items or report found items
         </Typography>
+
 
         {/* Filters */}
         <Box
