@@ -105,12 +105,13 @@ const Landing = () => {
 
         <Container maxWidth="md" sx={{ position: 'relative', zIndex: 1 }}>
           <Box className="fade-in-scale" sx={{ px: { xs: 2, md: 0 } }}>
-            <Typography
+              <Typography
               variant="h2"
               gutterBottom
               sx={{
                 fontWeight: 700,
-            fontSize: { xs: '1.25rem', sm: '1.6rem', md: '3rem' },
+            fontSize: { xs: '1.05rem', sm: '1.45rem', md: '3rem' },
+                lineHeight: { xs: 1.15, sm: 1.2, md: 1.15 },
               }}
             >
 

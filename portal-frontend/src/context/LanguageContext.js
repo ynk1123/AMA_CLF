@@ -4,6 +4,7 @@ const translations = {
   en: {
     // Navbar
     campusLostAndFound: 'Campus Lost & Found',
+
     login: 'Login',
     register: 'Register',
     dashboard: 'Dashboard',
@@ -13,8 +14,8 @@ const translations = {
     view: 'View',
     
     // Landing
-    welcomeTitle: 'Campus Lost and Found Portal',
-    welcomeSubtitle: 'Secure. Simple. Track and recover lost items easily.',
+    welcomeTitle: 'Campus Lost & Found',
+    welcomeSubtitle: 'Track and recover lost items instantly.',
     getStarted: 'Get Started',
     browseItems: 'Browse Items',
     features: 'Features',
@@ -171,8 +172,8 @@ claimItem: 'Claim Item',
     view: 'Ver',
     
     // Landing
-    welcomeTitle: 'Portal de Objetos Perdidos',
-    welcomeSubtitle: 'Seguro. Simple. Rastrea y recupera objetos perdidos fácilmente.',
+    welcomeTitle: 'Campus Lost & Found',
+    welcomeSubtitle: 'Track and recover lost items instantly.',
     getStarted: 'Comenzar',
     browseItems: 'Ver Objetos',
     features: 'Características',
