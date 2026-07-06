@@ -149,60 +149,50 @@ const [openNotificationDialog, setOpenNotificationDialog] = useState(false);
     // Load notifications
     const loadNotifications = async () => {
       try {
-        // Load dismissed notifications to exclude them
         const dismissedIds = loadDismissedNotificationsFromStorage();
-        
-        // First load from localStorage for immediate display
         const storedNotifs = loadNotificationsFromStorage();
         const isAdmin = user?.role === 'admin';
+
         let notifList = storedNotifs
-          .filter(n => !dismissedIds.includes(n.id)) // Filter out dismissed ones
+          .filter(n => !dismissedIds.includes(n.id))
           .map(n => {
-          if ((n.type === 'item_pending' || n.type === 'item_posted') && n.id.startsWith('item-')) {
-            const message = isAdmin
-              ? 'A user is waiting for approval'
-              : 'Your item is waiting for admin approval';
-            return {
-              ...n,
-              type: isAdmin ? 'item_posted' : 'item_pending',
-              message
-            };
-          }
-          return n;
-        });
-        
-        // 1. Fetch user's own posted items INCLUDING pending items
-        const myPostedItems = await itemService.getMyPostedItems();
-        
-        // Pending items (still waiting for approval)
-        const pendingItems = myPostedItems.data.filter(item => item.status === 'pending');
+            if ((n.type === 'item_pending' || n.type === 'item_posted') && n.id.startsWith('item-')) {
+              const message = isAdmin ? 'A user is waiting for approval' : 'Your item is waiting for admin approval';
+              return { ...n, type: isAdmin ? 'item_posted' : 'item_pending', message };
+            }
+            return n;
+          });
+
+        // Fetch in parallel to reduce initial load time.
+        const [myPostedItemsRes, myClaimsRes, myAppointmentsRes] = await Promise.all([
+          itemService.getMyPostedItems(),
+          itemService.getMyClaims(),
+          appointmentService.getMyAppointments()
+        ]);
+
+        const myPostedItems = myPostedItemsRes.data || [];
+        const pendingItems = myPostedItems.filter(item => item.status === 'pending');
         const existingPendingIds = notifList
           .filter(n => n.type === 'item_pending' || n.type === 'item_posted')
           .map(n => n.id);
-        
+
         pendingItems.forEach(item => {
           const notifId = `item-${item.id}`;
           if (!existingPendingIds.includes(notifId) && !dismissedIds.includes(notifId)) {
-            const message = isAdmin 
-              ? 'A user is waiting for approval' 
-              : 'Your item is waiting for admin approval';
+            const message = isAdmin ? 'A user is waiting for approval' : 'Your item is waiting for admin approval';
             notifList.push({
               id: notifId,
               type: isAdmin ? 'item_posted' : 'item_pending',
               title: item.title,
-              message: message,
+              message,
               time: item.createdAt
             });
           }
         });
 
-        // APPROVED items - only show for non-admin users who can't see their own approved items in the list
         if (!isAdmin) {
-          const approvedItems = myPostedItems.data.filter(item => item.status === 'lost' || item.status === 'found');
-          const existingApprovedIds = storedNotifs
-            .filter(n => n.type === 'item_approved')
-            .map(n => n.id);
-          
+          const approvedItems = myPostedItems.filter(item => item.status === 'lost' || item.status === 'found');
+          const existingApprovedIds = storedNotifs.filter(n => n.type === 'item_approved').map(n => n.id);
           approvedItems.forEach(item => {
             const notifId = `item-approved-${item.id}`;
             if (!existingApprovedIds.includes(notifId) && !dismissedIds.includes(notifId)) {
@@ -217,17 +207,17 @@ const [openNotificationDialog, setOpenNotificationDialog] = useState(false);
           });
         }
 
-        // 2. Fetch user's claims
-        const myClaims = await itemService.getMyClaims();
+        const myClaims = myClaimsRes.data || [];
         const existingClaimIds = storedNotifs
           .filter(n => n.type === 'claim_approved' || n.type === 'claim_rejected')
           .map(n => n.id);
-        
-        const processedClaims = myClaims.data.filter(claim => 
-          (claim.status === 'approved' || claim.status === 'rejected') && 
+
+        const processedClaims = myClaims.filter(claim =>
+          (claim.status === 'approved' || claim.status === 'rejected') &&
           !existingClaimIds.includes(`claim-${claim.id}`) &&
           !dismissedIds.includes(`claim-${claim.id}`)
         );
+
         processedClaims.forEach(claim => {
           notifList.push({
             id: `claim-${claim.id}`,
@@ -238,13 +228,10 @@ const [openNotificationDialog, setOpenNotificationDialog] = useState(false);
           });
         });
 
-        // 3. Fetch user's OWN CCTV appointments only
-        const myAppointments = await appointmentService.getMyAppointments();
-        const existingApptIds = storedNotifs
-          .filter(n => n.type === 'appointment')
-          .map(n => n.id);
-        
-        myAppointments.data.forEach(appt => {
+        const myAppointments = myAppointmentsRes.data || [];
+        const existingApptIds = storedNotifs.filter(n => n.type === 'appointment').map(n => n.id);
+
+        myAppointments.forEach(appt => {
           const notifId = `appt-${appt.id}`;
           if (!existingApptIds.includes(notifId) && !dismissedIds.includes(notifId)) {
             notifList.push({
@@ -257,17 +244,12 @@ const [openNotificationDialog, setOpenNotificationDialog] = useState(false);
           }
         });
 
-        // Save to localStorage for persistence
         saveNotificationsToStorage(notifList);
-        
         setNotifications(notifList);
 
-        // If user already viewed notifications, only count new notifications since the last view.
         const viewed = loadNotificationsViewedFromStorage();
         const viewedCount = loadNotificationsViewedCountFromStorage();
-        const count = viewed
-          ? Math.max(0, notifList.length - viewedCount)
-          : notifList.length;
+        const count = viewed ? Math.max(0, notifList.length - viewedCount) : notifList.length;
         setNotificationCount(count);
       } catch (err) {
         console.error('Failed to load notifications', err);
@@ -294,6 +276,9 @@ useEffect(() => {
       loadItems();
       loadNotifications();
     }, []);
+
+    const [postingItem, setPostingItem] = useState(false);
+
 
     const loadItems = async () => {
       try {
@@ -364,6 +349,7 @@ formData.append('type', newItem.type);
   }
 
 try {
+    setPostingItem(true);
     await itemService.createItem(formData);
     setOpenDialog(false);
     setNewItem({
@@ -381,6 +367,8 @@ try {
     loadNotifications(); // Reload notifications to show pending item status
   } catch (err) {
     console.error('Failed to create item', err);
+  } finally {
+    setPostingItem(false);
   }
 };
 
@@ -848,7 +836,9 @@ onClick={() => {
           </DialogContent>
           <DialogActions>
             <Button onClick={() => setOpenDialog(false)}>Cancel</Button>
-            <Button onClick={handleSubmit} variant="contained">Submit</Button>
+<Button onClick={handleSubmit} variant="contained" disabled={postingItem}>
+                {postingItem ? 'Posting the item...' : 'Submit'}
+              </Button>
           </DialogActions>
         </Dialog>
 

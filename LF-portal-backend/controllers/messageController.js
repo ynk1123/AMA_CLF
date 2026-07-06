@@ -52,10 +52,21 @@ exports.createMessage = async (req, res) => {
       timestamp: new Date()
     });
 
-    const messageWithUser = await Message.findOne({
-      where: { id: message.id },
-      include: [{ model: User, as: 'User', attributes: ['studentId', 'displayName'] }]
-    });
+    // Avoid extra DB roundtrip: fetch only when needed.
+    // (If your Sequelize setup supports it, consider using `Message.findByPk(..., { include })` only in that case.)
+    const messageWithUser = {
+      ...message.toJSON(),
+      User: { studentId: req.user?.studentId, displayName: req.user?.displayName }
+    };
+
+    // Fallback: if req.user doesn't carry display fields, do the include query.
+    if (!messageWithUser.User?.studentId || !messageWithUser.User?.displayName) {
+      const fetched = await Message.findOne({
+        where: { id: message.id },
+        include: [{ model: User, as: 'User', attributes: ['studentId', 'displayName'] }]
+      });
+      return res.status(201).json(fetched);
+    }
 
     return res.status(201).json(messageWithUser);
   } catch (err) {

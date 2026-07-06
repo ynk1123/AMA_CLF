@@ -69,24 +69,30 @@ const Chat = () => {
     }
   };
 
+const [sendingMessage, setSendingMessage] = useState(false);
+
   const handleSendMessage = async () => {
-    if (!newMessage.trim() || !selectedItem) {
-      console.log('No message or no item selected');
+    if (!newMessage.trim() || !selectedItem || sendingMessage) {
       return;
     }
-  
+
+    setSendingMessage(true);
     try {
-      console.log('Sending message:', { content: newMessage, itemId: selectedItem.id });
       const response = await messageService.createMessage({
         content: newMessage,
         itemId: selectedItem.id
       });
-      console.log('Message sent successfully:', response.data);
+
+      // Backend returns created message including User, so append instead of reloading all messages.
+      if (response?.data) {
+        setMessages(prev => [...prev, response.data]);
+      }
       setNewMessage('');
-      loadMessages(selectedItem.id);
     } catch (err) {
       console.error('Failed to send message:', err.response?.data || err.message);
       alert('Failed to send message. Please try again.');
+    } finally {
+      setSendingMessage(false);
     }
   };
 
@@ -236,14 +242,15 @@ const formatDateTime = (timestamp) => {
                 {/* Message Input */}
                 <Box sx={{ p: 2, backgroundColor: '#FEE2E2', borderTop: '2px solid #DC2626' }}>
                   <Box sx={{ display: 'flex', gap: 1 }}>
-                    <TextField
+<TextField
                       fullWidth
-                      placeholder={`Message about ${selectedItem.title}...`}
+                      placeholder={sendingMessage ? 'Sending...' : `Message about ${selectedItem.title}...`}
                       value={newMessage}
                       onChange={(e) => setNewMessage(e.target.value)}
                       onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
                       variant="outlined"
                       size="small"
+                      disabled={sendingMessage}
                       sx={{
                         '& .MuiOutlinedInput-root': {
                           backgroundColor: '#fff',
@@ -256,6 +263,7 @@ const formatDateTime = (timestamp) => {
                     <Button
                       variant="contained"
                       onClick={handleSendMessage}
+                      disabled={sendingMessage}
                       sx={{ backgroundColor: '#DC2626', '&:hover': { backgroundColor: '#B91C1C' } }}
                     >
                       <SendIcon />
