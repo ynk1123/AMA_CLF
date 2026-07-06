@@ -602,16 +602,10 @@ onClick={() => {
           Lost and Found Items ({activeItems.length})
         </Typography>
 
+{/* Desktop/tablet cards */}
         <Grid
           container
           spacing={2}
-          sx={{
-            '@media (max-width:600px)': {
-              display: 'grid',
-              gridTemplateColumns: 'repeat(4, 1fr)',
-              gap: '6px',
-            },
-          }}
         >
           {activeItems.map((item) => (
             <Grid
@@ -620,159 +614,15 @@ onClick={() => {
               sm={6}
               md={2.4}
               key={item.id}
-              sx={{
-                '@media (max-width:600px)': {
-                  width: '100%',
-                  margin: 0,
-                },
-              }}
             >
-                      <Card
+              <Card
                 className="card-hover"
                 sx={{
                   ...itemCardStyles,
                   opacity: isGhostItem(item.status) ? 0.5 : 1,
                   filter: isGhostItem(item.status) ? 'grayscale(80%)' : 'none',
                   '@media (max-width:600px)': {
-                    boxShadow: 'none',
-                    borderRadius: 1,
-                    backgroundColor: 'transparent',
-                    overflow: 'hidden',
-                  },
-                }}
-                onClick={() => handleItemClick(item)}
-              >
-                <CardContent
-                  sx={{
-                    p: 1.5,
-                    '@media (max-width:600px)': {
-                      p: 0.5,
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      justifyContent: 'flex-start',
-                      gap: 0.25,
-                    },
-                  }}
-                >
-                  <Typography
-                    variant="subtitle1"
-                    sx={{
-                      mb: 1,
-                      fontWeight: 600,
-                      fontSize: '0.9rem',
-                      '@media (max-width:600px)': {
-                        mb: 0,
-                        fontSize: '10px',
-                        lineHeight: 1.1,
-                        textAlign: 'center',
-                      },
-                    }}
-                  >
-                    {item.title}
-                  </Typography>
-                  {item.imageUrl && (
-                    <Box
-                      component="img"
-                      src={getImageUrl(item.imageUrl)}
-                      alt={item.title}
-                      sx={{
-                        ...itemImageStyles,
-                        '@media (max-width:600px)': {
-                          height: 36,
-                          width: 36,
-                          aspectRatio: '1/1',
-                          borderRadius: 0,
-                          mb: 0.25,
-                          objectFit: 'cover',
-                        },
-                      }}
-                    />
-                  )}
-                      <Box
-                    sx={{
-                      width: '100%',
-                      backgroundColor: '#ebe3e3',
-                      borderRadius: 1,
-                      py: 1,
-                      px: 2,
-                      mb: 1,
-                      '@media (max-width:600px)': {
-                        display: 'none',
-                      },
-                    }}
-                  >
-                  <Typography
-                    variant="subtitle2"
-                    sx={{
-                      fontWeight: 600,
-                      '@media (max-width:600px)': {
-                        display: 'none',
-                      },
-                    }}
-                  >
-                      DETAILS
-                    </Typography>
-                  </Box>
-                  <Box
-                    sx={{
-                      px: 2,
-                      '@media (max-width:600px)': {
-                        display: 'none',
-                      },
-                    }}
-                  >
-                    <Typography variant="body2" sx={{ mb: 1 }}>
-                      <strong>Category:</strong> {item.category}
-                    </Typography>
-                    <Typography variant="body2" sx={{ mb: 1 }}>
-                      <strong>Location:</strong> {item.location}
-                    </Typography>
-                    <Typography variant="body2" sx={{ mb: 1 }}>
-                      <strong>Date:</strong> {new Date(item.date).toLocaleDateString()}
-                    </Typography>
-                    <Typography variant="body2">
-                      <strong>Status:</strong>{' '}
-                      <Chip label={item.status} color={getStatusColor(item.status)} size="small" />
-                    </Typography>
-                  </Box>
-                </CardContent>
-              </Card>
-            </Grid>
-))}
-        </Grid>
-
-        {/* Section 2: Claimed/Archived Items */}
-        {claimedArchivedItems.length > 0 && (
-          <>
-            <Typography variant="h5" gutterBottom sx={{ mt: 6 }}>
-              Claimed/Archived ({claimedArchivedItems.length})
-            </Typography>
-
-            <Grid
-              container
-              spacing={2}
-              sx={{
-                '@media (max-width:600px)': {
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(4, 1fr)',
-                  gap: '6px',
-                },
-              }}
-            >
-              {claimedArchivedItems.map((item) => (
-                <Grid item xs={12} sm={6} md={2.4} key={item.id}>
-              <Card
-                className="card-hover"
-                sx={{
-                  ...itemCardStyles,
-                  opacity: 0.5,
-                  filter: 'grayscale(80%)',
-                  '@media (max-width:600px)': {
-                    boxShadow: 'none',
-                    borderRadius: 1,
-                    backgroundColor: 'transparent',
-                    overflow: 'hidden',
+                    display: 'none',
                   },
                 }}
                 onClick={() => handleItemClick(item)}
@@ -782,13 +632,109 @@ onClick={() => {
                     {item.title}
                   </Typography>
                   {item.imageUrl && (
-                    <Box
-                      component="img"
-                      src={getImageUrl(item.imageUrl)}
-                      alt={item.title}
-                      sx={itemImageStyles}
-                    />
+                    <Box component="img" src={getImageUrl(item.imageUrl)} alt={item.title} sx={itemImageStyles} />
                   )}
+                  <Box
+                    sx={{
+                      width: '100%',
+                      backgroundColor: '#ebe3e3',
+                      borderRadius: 1,
+                      py: 1,
+                      px: 2,
+                      mb: 1,
+                    }}
+                  >
+                    <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                      DETAILS
+                    </Typography>
+                  </Box>
+                  <Box sx={{ px: 2 }}>
+                    <Typography variant="body2" sx={{ mb: 1 }}>
+                      <strong>Category:</strong> {item.category}
+                    </Typography>
+                    <Typography variant="body2" sx={{ mb: 1 }}>
+                      <strong>Location:</strong> {item.location}
+                    </Typography>
+                    <Typography variant="body2" sx={{ mb: 1 }}>
+                      <strong>Date:</strong> {item.date ? new Date(item.date).toLocaleDateString() : ''}
+                    </Typography>
+                    <Typography variant="body2">
+                      <strong>Status:</strong>{' '}
+                      <Chip label={item.status} color={getStatusColor(item.status)} size="small" />
+                    </Typography>
+                  </Box>
+                </CardContent>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
+
+        {/* Mobile strict 4-column grid cards */}
+        <Box
+          sx={{
+            display: 'none',
+            '@media (max-width:600px)': { display: 'block' },
+          }}
+        >
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px', width: '100%', padding: '4px' }}>
+            {activeItems.map((item) => (
+              <div
+                key={item.id}
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  width: '100%',
+                  overflow: 'hidden',
+                  opacity: isGhostItem(item.status) ? 0.5 : 1,
+                  filter: isGhostItem(item.status) ? 'grayscale(80%)' : 'none',
+                  cursor: 'pointer',
+                }}
+                onClick={() => handleItemClick(item)}
+              >
+                <img
+                  src={item.imageUrl ? getImageUrl(item.imageUrl) : item.image}
+                  alt={item.title}
+                  style={{ width: '100%', aspectRatio: '1/1', objectFit: 'cover', borderRadius: '8px', display: 'block' }}
+                />
+                <span style={{ display: 'block', width: '100%', fontSize: '11px', textAlign: 'center', marginTop: '6px', fontWeight: '500', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  {item.title}
+                </span>
+              </div>
+            ))}
+          </div>
+        </Box>
+
+        {/* Section 2: Claimed/Archived Items */}
+        {claimedArchivedItems.length > 0 && (
+          <>
+            <Typography variant="h5" gutterBottom sx={{ mt: 6 }}>
+              Claimed/Archived ({claimedArchivedItems.length})
+            </Typography>
+
+{/* Desktop/tablet cards */}
+            <Grid container spacing={2}>
+              {claimedArchivedItems.map((item) => (
+                <Grid item xs={12} sm={6} md={2.4} key={item.id}>
+                  <Card
+                    className="card-hover"
+                    sx={{
+                      ...itemCardStyles,
+                      opacity: 0.5,
+                      filter: 'grayscale(80%)',
+                      '@media (max-width:600px)': {
+                        display: 'none',
+                      },
+                    }}
+                    onClick={() => handleItemClick(item)}
+                  >
+                    <CardContent sx={{ p: 1.5 }}>
+                      <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 600, fontSize: '0.9rem' }}>
+                        {item.title}
+                      </Typography>
+                      {item.imageUrl && (
+                        <Box component="img" src={getImageUrl(item.imageUrl)} alt={item.title} sx={itemImageStyles} />
+                      )}
                       <Box
                         sx={{
                           width: '100%',
@@ -811,7 +757,7 @@ onClick={() => {
                           <strong>Location:</strong> {item.location}
                         </Typography>
                         <Typography variant="body2" sx={{ mb: 1 }}>
-                          <strong>Date:</strong> {new Date(item.date).toLocaleDateString()}
+                          <strong>Date:</strong> {item.date ? new Date(item.date).toLocaleDateString() : ''}
                         </Typography>
                         <Typography variant="body2">
                           <strong>Status:</strong>{' '}
@@ -823,6 +769,42 @@ onClick={() => {
                 </Grid>
               ))}
             </Grid>
+
+            {/* Mobile strict 4-column grid cards */}
+            <Box
+              sx={{
+                display: 'none',
+                '@media (max-width:600px)': { display: 'block' },
+              }}
+            >
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px', width: '100%', padding: '4px' }}>
+                {claimedArchivedItems.map((item) => (
+                  <div
+                    key={item.id}
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      width: '100%',
+                      overflow: 'hidden',
+                      opacity: 0.5,
+                      filter: 'grayscale(80%)',
+                      cursor: 'pointer',
+                    }}
+                    onClick={() => handleItemClick(item)}
+                  >
+                    <img
+                      src={item.imageUrl ? getImageUrl(item.imageUrl) : item.image}
+                      alt={item.title}
+                      style={{ width: '100%', aspectRatio: '1/1', objectFit: 'cover', borderRadius: '8px', display: 'block' }}
+                    />
+                    <span style={{ display: 'block', width: '100%', fontSize: '11px', textAlign: 'center', marginTop: '6px', fontWeight: '500', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      {item.title}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </Box>
           </>
         )}
 

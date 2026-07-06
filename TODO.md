@@ -1,13 +1,10 @@
-# TODO - SendGrid migration (LF-portal-backend)
+# TODO
 
-- [ ] Replace Gmail/nodemailer usage in `LF-portal-backend/routes/auth.js` (password reset email) with SendGrid using `@sendgrid/mail`.
-- [ ] Replace Gmail/nodemailer usage in `LF-portal-backend/controllers/contactController.js` (contact notification email) with SendGrid.
-- [ ] Remove hardcoded Gmail credentials from the code and switch to env vars.
-- [ ] Add/confirm required env vars for Render:
-  - SENDGRID_API_KEY
-  - SENDGRID_FROM_EMAIL
-  - SENDGRID_FROM_NAME (optional)
-  - FRONTEND_URL (already used)
-- [ ] Add a small helper module (e.g., `LF-portal-backend/utils/mailer.js`) to centralize SendGrid send logic.
-- [ ] Run backend locally to ensure no runtime errors.
+## Browse + Dashboard Mobile 4-column grid refactor
+- [ ] Refactor `portal-frontend/src/pages/Browse.js` mobile card loop to strict 4-column grid row using exact JSX structure and inline styles provided.
+- [ ] Refactor `portal-frontend/src/pages/Dashboard.js` mobile card loops (both Active and Claimed/Archived sections) to strict 4-column grid row using exact JSX structure and inline styles provided.
+- [ ] Ensure Browse.js and Dashboard.js use same mobile scaling: 4 columns, image fills column, title text immediately below image.
+- [ ] Keep existing desktop/tablet layout behavior intact as much as possible (only adjust mobile rendering via inline responsive styles if needed).
+- [ ] Verify dialogs/actions still work after refactor (click handlers still open correct item).
+- [ ] Run frontend build/lint commands if available.
 

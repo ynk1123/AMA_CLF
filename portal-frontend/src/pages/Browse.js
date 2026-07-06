@@ -151,21 +151,19 @@ const getImageUrl = (url) => {
           📦 {filteredItems.length} Items Found
         </Typography>
 
-<Grid container spacing={2}>
+{/* Desktop/tablet cards */}
+        <Grid container spacing={2}>
           {filteredItems.map((item, index) => (
             <Grid item xs={12} sm={6} md={2.4} key={item.id}>
               <Card
                 className={`card-hover fade-in stagger-${Math.min(index + 1, 4)}`}
                 onClick={() => handleItemClick(item)}
-                sx={{ 
+                sx={{
                   ...itemCardStyles,
                   opacity: isGhostItem(item.status) ? 0.5 : 1,
                   filter: isGhostItem(item.status) ? 'grayscale(80%)' : 'none',
                   '@media (max-width:600px)': {
-                    boxShadow: 'none',
-                    borderRadius: 1,
-                    backgroundColor: 'transparent',
-                    overflow: 'hidden',
+                    display: 'none',
                   },
                 }}
               >
@@ -176,7 +174,6 @@ const getImageUrl = (url) => {
                       fontWeight: 700,
                       mb: 1,
                       fontSize: '0.9rem',
-                      '@media (max-width:600px)': { display: 'none' },
                     }}
                   >
                     {item.title}
@@ -186,60 +183,15 @@ const getImageUrl = (url) => {
                       component="img"
                       src={getImageUrl(item.imageUrl)}
                       alt={item.title}
-                      sx={{
-                        ...itemImageStyles,
-                        '@media (max-width:600px)': {
-                          width: '100%',
-                          aspectRatio: '1/1',
-                          height: 'auto',
-                          mb: 0.5,
-                          borderRadius: 4,
-                          objectFit: 'cover',
-                          display: 'block',
-                        },
-                      }}
+                      sx={itemImageStyles}
                     />
                   )}
-                  <Box
-                    sx={{
-                      display: 'none',
-                      '@media (max-width:600px)': {
-                        display: 'block',
-                        width: '100%',
-                        textAlign: 'center',
-                        bgcolor: 'rgba(248,248,248,0.9)',
-                        borderRadius: 1,
-                        p: '4px 4px',
-                        mb: 0.5,
-                      },
-                    }}
-                  >
-                    <Typography
-                      variant="subtitle1"
-                      sx={{
-                        fontSize: '12px',
-                        lineHeight: 1.2,
-                        fontWeight: 700,
-                        textAlign: 'center',
-                        whiteSpace: 'nowrap',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        '@media (max-width:600px)': {
-                          mb: 0,
-                          px: 0,
-                        },
-                      }}
-                    >
-                      {item.title}
-                    </Typography>
-                  </Box>
                   <Box
                     sx={{
                       display: 'flex',
                       alignItems: 'center',
                       gap: 0.5,
                       mb: 0.5,
-                      '@media (max-width:600px)': { display: 'none' },
                     }}
                   >
                     <LocationOnIcon sx={{ fontSize: 16, color: '#DC2626' }} />
@@ -251,23 +203,58 @@ const getImageUrl = (url) => {
                       alignItems: 'center',
                       gap: 0.5,
                       mb: 1,
-                      '@media (max-width:600px)': { display: 'none' },
                     }}
                   >
                     <CalendarTodayIcon sx={{ fontSize: 16, color: '#DC2626' }} />
-                    <Typography variant="body2" color="text.secondary">{new Date(item.date).toLocaleDateString()}</Typography>
+                    <Typography variant="body2" color="text.secondary">{item.date ? new Date(item.date).toLocaleDateString() : ''}</Typography>
                   </Box>
                   <Chip
                     label={item.status}
                     color={getStatusColor(item.status)}
                     size="small"
-                    sx={{ fontWeight: 600, '@media (max-width:600px)': { display: 'none' } }}
+                    sx={{ fontWeight: 600 }}
                   />
                 </CardContent>
               </Card>
             </Grid>
           ))}
         </Grid>
+
+        {/* Mobile strict 4-column grid cards */}
+        <Box
+          sx={{
+            display: 'none',
+            '@media (max-width:600px)': { display: 'block' },
+          }}
+        >
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px', width: '100%', padding: '4px' }}>
+            {filteredItems.map((item) => (
+              <div
+                key={item.id}
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  width: '100%',
+                  overflow: 'hidden',
+                  opacity: isGhostItem(item.status) ? 0.5 : 1,
+                  filter: isGhostItem(item.status) ? 'grayscale(80%)' : 'none',
+                  cursor: 'pointer',
+                }}
+                onClick={() => handleItemClick(item)}
+              >
+                <img
+                  src={item.imageUrl ? getImageUrl(item.imageUrl) : item.image}
+                  alt={item.title}
+                  style={{ width: '100%', aspectRatio: '1/1', objectFit: 'cover', borderRadius: '8px', display: 'block' }}
+                />
+                <span style={{ display: 'block', width: '100%', fontSize: '11px', textAlign: 'center', marginTop: '6px', fontWeight: '500', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  {item.title}
+                </span>
+              </div>
+            ))}
+          </div>
+        </Box>
 
         {filteredItems.length === 0 && (
           <Box className="fade-in" sx={{ textAlign: 'center', py: 8 }}>
