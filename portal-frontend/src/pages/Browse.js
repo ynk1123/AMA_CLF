@@ -27,8 +27,8 @@ const Browse = () => {
     cursor: 'pointer',
     '&:hover': {
       boxShadow: 6,
-      transform: 'translateY(-4px)'
-    }
+      transform: 'translateY(-4px)',
+    },
   };
 
   const itemImageStyles = {
@@ -36,14 +36,17 @@ const Browse = () => {
     height: 120,
     objectFit: 'cover',
     borderRadius: 2,
-    mb: 1.5
+    mb: 1.5,
   };
 
-  useEffect(() => { loadItems(); }, []);
+  useEffect(() => {
+    loadItems();
+  }, []);
+
   useEffect(() => {
     // Stagger animation on mount
     const timer = setTimeout(() => {
-      document.querySelectorAll('.fade-in').forEach(el => el.style.opacity = '1');
+      document.querySelectorAll('.fade-in').forEach((el) => (el.style.opacity = '1'));
     }, 100);
     return () => clearTimeout(timer);
   }, []);
@@ -52,45 +55,58 @@ const Browse = () => {
     try {
       const response = await itemService.getItems();
       setItems(response.data || []);
-    } catch (err) { console.error('Failed to load items', err); }
+    } catch (err) {
+      console.error('Failed to load items', err);
+    }
   };
 
-const handleItemClick = (item) => {
+  const handleItemClick = (item) => {
     console.log('Item clicked, user:', user);
     console.log('User from useAuth:', user);
     setSelectedItem(item);
     setOpenItemDialog(true);
   };
 
-  const filteredItems = items.filter(item => {
-    const matchesSearch = item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          item.description.toLowerCase().includes(searchTerm.toLowerCase());
+  const filteredItems = items.filter((item) => {
+    const matchesSearch =
+      item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.description.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = !filterCategory || item.category === filterCategory;
-    const matchesLocation = !filterLocation || item.location.toLowerCase().includes(filterLocation.toLowerCase());
+    const matchesLocation =
+      !filterLocation ||
+      item.location.toLowerCase().includes(filterLocation.toLowerCase());
     const matchesStatus = !filterStatus || item.status === filterStatus;
     return matchesSearch && matchesCategory && matchesLocation && matchesStatus;
   });
 
-const getStatusColor = (status) => {
+  const getStatusColor = (status) => {
     switch (status) {
-      case 'lost': return 'warning';
-      case 'found': return 'success';
-      case 'under_verification': return 'error';
-      case 'claimed': return 'info';
-      case 'archived': return 'default';
-      default: return 'default';
+      case 'lost':
+        return 'warning';
+      case 'found':
+        return 'success';
+      case 'under_verification':
+        return 'error';
+      case 'claimed':
+        return 'info';
+      case 'archived':
+        return 'default';
+      default:
+        return 'default';
     }
   };
 
   // Check if item should have ghost (archived/claimed) appearance
-  const isGhostItem = (status) => {
-    return status === 'archived' || status === 'claimed';
-  };
+  const isGhostItem = (status) => status === 'archived' || status === 'claimed';
 
-const getImageUrl = (url) => {
+  const getImageUrl = (url) => {
     if (!url) return '';
     if (url.startsWith('http')) return url;
-    const apiUrl = process.env.REACT_APP_API_URL || (window.location.hostname === 'localhost' ? 'http://localhost:5000' : 'https://ama-clf.onrender.com');
+    const apiUrl =
+      process.env.REACT_APP_API_URL ||
+      (window.location.hostname === 'localhost'
+        ? 'http://localhost:5000'
+        : 'https://ama-clf.onrender.com');
     return `${apiUrl}${url}`;
   };
 
@@ -113,16 +129,76 @@ const getImageUrl = (url) => {
         </Typography>
 
         {/* Filters */}
-        <Box sx={{ mb: 4, p: 3, backgroundColor: '#fff', borderRadius: 2, border: '2px solid #FEE2E2' }}>
-          <Typography variant="h6" sx={{ fontWeight: 700, color: '#DC2626', mb: 2 }}>
+        <Box
+          sx={{
+            mb: 4,
+            p: 3,
+            backgroundColor: '#fff',
+            borderRadius: 2,
+            border: '2px solid #FEE2E2',
+            '@media (max-width:600px)': {
+              mb: 2,
+              p: 1.5,
+            },
+          }}
+        >
+          <Typography
+            variant="h6"
+            sx={{
+              fontWeight: 700,
+              color: '#DC2626',
+              mb: 2,
+              '@media (max-width:600px)': { mb: 1 },
+            }}
+          >
             🔍 Filter Items
           </Typography>
-          <Grid container spacing={2}>
+
+          <Grid
+            container
+            spacing={2}
+            sx={{
+              '@media (max-width:600px)': {
+                display: 'grid',
+                gridTemplateColumns: '1fr 1fr',
+                gap: '8px',
+              },
+            }}
+          >
             <Grid item xs={12} md={3}>
-              <TextField fullWidth label="Search" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} size="small" placeholder="Search items..." />
+              <TextField
+                fullWidth
+                label="Search"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                size="small"
+                placeholder="Search items..."
+                sx={{
+                  '@media (max-width:600px)': {
+                    '& .MuiInputBase-root': { minHeight: 34 },
+                    '& .MuiInputLabel-root': { fontSize: 14 },
+                    '& input': { fontSize: 14, py: '6px' },
+                  },
+                }}
+              />
             </Grid>
+
             <Grid item xs={12} md={3}>
-              <TextField fullWidth select label="Category" value={filterCategory} onChange={(e) => setFilterCategory(e.target.value)} size="small">
+              <TextField
+                fullWidth
+                select
+                label="Category"
+                value={filterCategory}
+                onChange={(e) => setFilterCategory(e.target.value)}
+                size="small"
+                sx={{
+                  '@media (max-width:600px)': {
+                    '& .MuiInputBase-root': { minHeight: 34 },
+                    '& .MuiInputLabel-root': { fontSize: 14 },
+                    '& .MuiSelect-select': { fontSize: 14, py: '6px' },
+                  },
+                }}
+              >
                 <MenuItem value="">All</MenuItem>
                 <MenuItem value="ID">ID</MenuItem>
                 <MenuItem value="Gadget">Gadget</MenuItem>
@@ -131,11 +207,41 @@ const getImageUrl = (url) => {
                 <MenuItem value="Other">Other</MenuItem>
               </TextField>
             </Grid>
+
             <Grid item xs={12} md={3}>
-              <TextField fullWidth label="Location" value={filterLocation} onChange={(e) => setFilterLocation(e.target.value)} size="small" placeholder="Filter by location..." />
+              <TextField
+                fullWidth
+                label="Location"
+                value={filterLocation}
+                onChange={(e) => setFilterLocation(e.target.value)}
+                size="small"
+                placeholder="Filter by location..."
+                sx={{
+                  '@media (max-width:600px)': {
+                    '& .MuiInputBase-root': { minHeight: 34 },
+                    '& .MuiInputLabel-root': { fontSize: 14 },
+                    '& input': { fontSize: 14, py: '6px' },
+                  },
+                }}
+              />
             </Grid>
+
             <Grid item xs={12} md={3}>
-              <TextField fullWidth select label="Status" value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} size="small">
+              <TextField
+                fullWidth
+                select
+                label="Status"
+                value={filterStatus}
+                onChange={(e) => setFilterStatus(e.target.value)}
+                size="small"
+                sx={{
+                  '@media (max-width:600px)': {
+                    '& .MuiInputBase-root': { minHeight: 34 },
+                    '& .MuiInputLabel-root': { fontSize: 14 },
+                    '& .MuiSelect-select': { fontSize: 14, py: '6px' },
+                  },
+                }}
+              >
                 <MenuItem value="">All</MenuItem>
                 <MenuItem value="lost">Lost</MenuItem>
                 <MenuItem value="found">Found</MenuItem>
@@ -151,7 +257,7 @@ const getImageUrl = (url) => {
           📦 {filteredItems.length} Items Found
         </Typography>
 
-{/* Desktop/tablet cards */}
+        {/* Desktop/tablet cards */}
         <Grid container spacing={2}>
           {filteredItems.map((item, index) => (
             <Grid item xs={12} sm={6} md={2.4} key={item.id}>
@@ -195,7 +301,9 @@ const getImageUrl = (url) => {
                     }}
                   >
                     <LocationOnIcon sx={{ fontSize: 16, color: '#DC2626' }} />
-                    <Typography variant="body2" color="text.secondary">{item.location}</Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {item.location}
+                    </Typography>
                   </Box>
                   <Box
                     sx={{
@@ -206,14 +314,11 @@ const getImageUrl = (url) => {
                     }}
                   >
                     <CalendarTodayIcon sx={{ fontSize: 16, color: '#DC2626' }} />
-                    <Typography variant="body2" color="text.secondary">{item.date ? new Date(item.date).toLocaleDateString() : ''}</Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {item.date ? new Date(item.date).toLocaleDateString() : ''}
+                    </Typography>
                   </Box>
-                  <Chip
-                    label={item.status}
-                    color={getStatusColor(item.status)}
-                    size="small"
-                    sx={{ fontWeight: 600 }}
-                  />
+                  <Chip label={item.status} color={getStatusColor(item.status)} size="small" sx={{ fontWeight: 600 }} />
                 </CardContent>
               </Card>
             </Grid>
@@ -227,7 +332,15 @@ const getImageUrl = (url) => {
             '@media (max-width:600px)': { display: 'block' },
           }}
         >
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px', width: '100%', padding: '4px' }}>
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(4, 1fr)',
+              gap: '8px',
+              width: '100%',
+              padding: '4px',
+            }}
+          >
             {filteredItems.map((item) => (
               <div
                 key={item.id}
@@ -246,9 +359,27 @@ const getImageUrl = (url) => {
                 <img
                   src={item.imageUrl ? getImageUrl(item.imageUrl) : item.image}
                   alt={item.title}
-                  style={{ width: '100%', aspectRatio: '1/1', objectFit: 'cover', borderRadius: '8px', display: 'block' }}
+                  style={{
+                    width: '100%',
+                    aspectRatio: '1/1',
+                    objectFit: 'cover',
+                    borderRadius: '8px',
+                    display: 'block',
+                  }}
                 />
-                <span style={{ display: 'block', width: '100%', fontSize: '11px', textAlign: 'center', marginTop: '6px', fontWeight: '500', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                <span
+                  style={{
+                    display: 'block',
+                    width: '100%',
+                    fontSize: '11px',
+                    textAlign: 'center',
+                    marginTop: '6px',
+                    fontWeight: '500',
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                  }}
+                >
                   {item.title}
                 </span>
               </div>
@@ -258,8 +389,12 @@ const getImageUrl = (url) => {
 
         {filteredItems.length === 0 && (
           <Box className="fade-in" sx={{ textAlign: 'center', py: 8 }}>
-            <Typography variant="h5" color="text.secondary">No items found</Typography>
-            <Typography variant="body1" color="text.secondary" sx={{ mt: 1 }}>Try adjusting your filters</Typography>
+            <Typography variant="h5" color="text.secondary">
+              No items found
+            </Typography>
+            <Typography variant="body1" color="text.secondary" sx={{ mt: 1 }}>
+              Try adjusting your filters
+            </Typography>
           </Box>
         )}
       </Box>
@@ -272,32 +407,55 @@ const getImageUrl = (url) => {
             <CloseIcon />
           </IconButton>
         </DialogTitle>
-<DialogContent dividers>
+
+        <DialogContent dividers>
           {selectedItem && (
             <Grid container spacing={3}>
               <Grid item xs={12} md={6}>
                 {selectedItem.imageUrl && (
-                  <Box component="img" src={getImageUrl(selectedItem.imageUrl)} alt={selectedItem.title} sx={{ width: '100%', borderRadius: 2 }} />
+                  <Box
+                    component="img"
+                    src={getImageUrl(selectedItem.imageUrl)}
+                    alt={selectedItem.title}
+                    sx={{ width: '100%', borderRadius: 2 }}
+                  />
                 )}
               </Grid>
-<Grid item xs={12} md={6}>
-                <Typography variant="h6" sx={{ fontWeight: 700, color: '#DC2626', mb: 2 }}>Details</Typography>
-                <Typography variant="body1" sx={{ mb: 1 }}><strong>Category:</strong> {selectedItem.category}</Typography>
-                <Typography variant="body1" sx={{ mb: 1 }}><strong>Location:</strong> {selectedItem.location}</Typography>
-                <Typography variant="body1" sx={{ mb: 1 }}><strong>Date:</strong> {new Date(selectedItem.date).toLocaleDateString()}</Typography>
-                <Typography variant="body1" sx={{ mb: 1 }}><strong>Posted by:</strong> {selectedItem.User?.displayName || selectedItem.User?.studentId || 'Unknown'}</Typography>
-                <Typography variant="body1" sx={{ mb: 2 }}><strong>Status:</strong> <Chip label={selectedItem.status} color={getStatusColor(selectedItem.status)} /></Typography>
-                <Typography variant="h6" sx={{ fontWeight: 700, mt: 2, mb: 1 }}>Description</Typography>
+              <Grid item xs={12} md={6}>
+                <Typography variant="h6" sx={{ fontWeight: 700, color: '#DC2626', mb: 2 }}>
+                  Details
+                </Typography>
+                <Typography variant="body1" sx={{ mb: 1 }}>
+                  <strong>Category:</strong> {selectedItem.category}
+                </Typography>
+                <Typography variant="body1" sx={{ mb: 1 }}>
+                  <strong>Location:</strong> {selectedItem.location}
+                </Typography>
+                <Typography variant="body1" sx={{ mb: 1 }}>
+                  <strong>Date:</strong> {new Date(selectedItem.date).toLocaleDateString()}
+                </Typography>
+                <Typography variant="body1" sx={{ mb: 1 }}>
+                  <strong>Posted by:</strong>{' '}
+                  {selectedItem.User?.displayName || selectedItem.User?.studentId || 'Unknown'}
+                </Typography>
+                <Typography variant="body1" sx={{ mb: 2 }}>
+                  <strong>Status:</strong>{' '}
+                  <Chip label={selectedItem.status} color={getStatusColor(selectedItem.status)} />
+                </Typography>
+                <Typography variant="h6" sx={{ fontWeight: 700, mt: 2, mb: 1 }}>
+                  Description
+                </Typography>
                 <Box sx={{ p: 2, backgroundColor: '#FEE2E2', borderRadius: 1 }}>
                   <Typography variant="body1">{selectedItem.description || 'No description provided.'}</Typography>
                 </Box>
               </Grid>
             </Grid>
           )}
-</DialogContent>
-<DialogActions sx={{ p: 2 }}>
+        </DialogContent>
+
+        <DialogActions sx={{ p: 2 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, width: '100%', justifyContent: 'space-between' }}>
-<Button
+            <Button
               variant="contained"
               startIcon={<MessageIcon />}
               onClick={() => {
@@ -308,16 +466,14 @@ const getImageUrl = (url) => {
                 navigate('/chat?itemId=' + selectedItem?.id);
               }}
               disabled={selectedItem?.status === 'claimed'}
-              sx={{ 
+              sx={{
                 backgroundColor: '#DC2626',
-                '&:hover': { backgroundColor: '#B91C1C' }
+                '&:hover': { backgroundColor: '#B91C1C' },
               }}
             >
               Message
             </Button>
-{!user && (
-              <Alert severity="info">Login to claim items</Alert>
-            )}
+            {!user && <Alert severity="info">Login to claim items</Alert>}
             {user && (selectedItem?.status === 'lost' || selectedItem?.status === 'found') && (
               <Typography variant="body2" color="text.secondary">
                 Claim from Dashboard
@@ -331,3 +487,4 @@ const getImageUrl = (url) => {
 };
 
 export default Browse;
+

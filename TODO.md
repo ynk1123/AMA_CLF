@@ -1,10 +1,7 @@
 # TODO
-
-## Browse + Dashboard Mobile 4-column grid refactor
-- [ ] Refactor `portal-frontend/src/pages/Browse.js` mobile card loop to strict 4-column grid row using exact JSX structure and inline styles provided.
-- [ ] Refactor `portal-frontend/src/pages/Dashboard.js` mobile card loops (both Active and Claimed/Archived sections) to strict 4-column grid row using exact JSX structure and inline styles provided.
-- [ ] Ensure Browse.js and Dashboard.js use same mobile scaling: 4 columns, image fills column, title text immediately below image.
-- [ ] Keep existing desktop/tablet layout behavior intact as much as possible (only adjust mobile rendering via inline responsive styles if needed).
-- [ ] Verify dialogs/actions still work after refactor (click handlers still open correct item).
-- [ ] Run frontend build/lint commands if available.
+- [x] Update Browse.js: optimize “Search and Filters” container for mobile (max-width:600px).
+- [ ] Reduce card padding/margins for slimmer height on mobile.
+- [ ] Change mobile fields layout to a 2-column (2x2) grid.
+- [ ] Reduce TextField font-size and input padding/height on mobile; keep select dropdown arrow aligned.
+- [ ] Verify no layout regressions in desktop/tablet.
 
