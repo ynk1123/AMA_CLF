@@ -470,9 +470,9 @@ const Browse = () => {
                 <Typography variant="body1" sx={{ mb: 1 }}>
                   <strong>Date:</strong> {new Date(selectedItem.date).toLocaleDateString()}
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 1 }}>
+<Typography variant="body1" sx={{ mb: 1 }}>
                   <strong>Posted by:</strong>{' '}
-                  {selectedItem.User?.displayName || selectedItem.User?.studentId || 'Unknown'}
+                  {selectedItem.User?.displayName || selectedItem.User?.studentId || 'Admin'}
                 </Typography>
                 <Typography variant="body1" sx={{ mb: 2 }}>
                   <strong>Status:</strong>{' '}
