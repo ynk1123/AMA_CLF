@@ -186,47 +186,195 @@ const Landing = () => {
         </Typography>
         <Grid container spacing={4}>
           <Grid item xs={12} md={4}>
-            <Card className="card-hover fade-in stagger-1" sx={{ textAlign: 'center', p: 3, height: '100%' }}>
-              <CardContent>
-                <Box className="float" sx={{ mb: 2 }}>
-                  <SearchIcon sx={{ fontSize: 55, color: '#DC2626' }} />
+            <Card
+              className="card-hover fade-in stagger-1"
+              sx={{
+                height: '100%',
+                p: { xs: 1.25, sm: 2, md: 3 },
+              }}
+            >
+              <CardContent
+                sx={{
+                  p: 0,
+                  display: { xs: 'flex', md: 'block' },
+                  textAlign: { xs: 'left', md: 'center' },
+                  alignItems: { xs: 'flex-start', md: 'center' },
+                  gap: { xs: 1.25, md: 0 },
+                }}
+              >
+                <Box
+                  className="float"
+                  sx={{
+                    mb: { xs: 0, md: 2 },
+                    mr: { xs: 0.5, md: 0 },
+                    display: 'flex',
+                    justifyContent: { xs: 'flex-start', md: 'center' },
+                    alignItems: { xs: 'flex-start', md: 'center' },
+                  }}
+                >
+                  <SearchIcon
+                    sx={{
+                      fontSize: { xs: 30, sm: 34, md: 55 },
+                      color: '#DC2626',
+                      mt: { xs: '3px', md: 0 },
+                    }}
+                  />
                 </Box>
-                <Typography variant="h5" gutterBottom sx={{ fontWeight: 700, color: '#DC2626' }}>
-                  {t('feature1Title')}
-                </Typography>
-                <Typography variant="body1" color="text.secondary">
-                  {t('feature1Desc')}
-                </Typography>
+                <Box>
+                  <Typography
+                    variant="h5"
+                    gutterBottom
+                    sx={{
+                      fontWeight: 700,
+                      color: '#DC2626',
+                      mb: { xs: 0.25, md: undefined },
+                      fontSize: { xs: '1.0rem', sm: '1.1rem', md: undefined },
+                      lineHeight: 1.2,
+                    }}
+                  >
+                    {t('feature1Title')}
+                  </Typography>
+                  <Typography
+                    variant="body1"
+                    color="text.secondary"
+                    sx={{
+                      fontSize: { xs: '0.85rem', sm: '0.95rem', md: undefined },
+                      lineHeight: 1.3,
+                    }}
+                  >
+                    {t('feature1Desc')}
+                  </Typography>
+                </Box>
               </CardContent>
             </Card>
           </Grid>
+
           <Grid item xs={12} md={4}>
-            <Card className="card-hover fade-in stagger-2" sx={{ textAlign: 'center', p: 3, height: '100%' }}>
-              <CardContent>
-                <Box className="float" style={{ animationDelay: '0.5s' }} sx={{ mb: 2 }}>
-                  <PostAddIcon sx={{ fontSize: 55, color: '#DC2626' }} />
+            <Card
+              className="card-hover fade-in stagger-2"
+              sx={{
+                height: '100%',
+                p: { xs: 1.25, sm: 2, md: 3 },
+              }}
+            >
+              <CardContent
+                sx={{
+                  p: 0,
+                  display: { xs: 'flex', md: 'block' },
+                  textAlign: { xs: 'left', md: 'center' },
+                  alignItems: { xs: 'flex-start', md: 'center' },
+                  gap: { xs: 1.25, md: 0 },
+                }}
+              >
+                <Box
+                  className="float"
+                  style={{ animationDelay: '0.5s' }}
+                  sx={{
+                    mb: { xs: 0, md: 2 },
+                    mr: { xs: 0.5, md: 0 },
+                    display: 'flex',
+                    justifyContent: { xs: 'flex-start', md: 'center' },
+                    alignItems: { xs: 'flex-start', md: 'center' },
+                  }}
+                >
+                  <PostAddIcon
+                    sx={{
+                      fontSize: { xs: 30, sm: 34, md: 55 },
+                      color: '#DC2626',
+                      mt: { xs: '3px', md: 0 },
+                    }}
+                  />
                 </Box>
-                <Typography variant="h5" gutterBottom sx={{ fontWeight: 700, color: '#DC2626' }}>
-                  {t('feature2Title')}
-                </Typography>
-                <Typography variant="body1" color="text.secondary">
-                  {t('feature2Desc')}
-                </Typography>
+                <Box>
+                  <Typography
+                    variant="h5"
+                    gutterBottom
+                    sx={{
+                      fontWeight: 700,
+                      color: '#DC2626',
+                      mb: { xs: 0.25, md: undefined },
+                      fontSize: { xs: '1.0rem', sm: '1.1rem', md: undefined },
+                      lineHeight: 1.2,
+                    }}
+                  >
+                    {t('feature2Title')}
+                  </Typography>
+                  <Typography
+                    variant="body1"
+                    color="text.secondary"
+                    sx={{
+                      fontSize: { xs: '0.85rem', sm: '0.95rem', md: undefined },
+                      lineHeight: 1.3,
+                    }}
+                  >
+                    {t('feature2Desc')}
+                  </Typography>
+                </Box>
               </CardContent>
             </Card>
           </Grid>
+
           <Grid item xs={12} md={4}>
-            <Card className="card-hover fade-in stagger-3" sx={{ textAlign: 'center', p: 3, height: '100%' }}>
-              <CardContent>
-                <Box className="float" style={{ animationDelay: '1s' }} sx={{ mb: 2 }}>
-                  <VerifiedUserIcon sx={{ fontSize: 55, color: '#DC2626' }} />
+            <Card
+              className="card-hover fade-in stagger-3"
+              sx={{
+                height: '100%',
+                p: { xs: 1.25, sm: 2, md: 3 },
+              }}
+            >
+              <CardContent
+                sx={{
+                  p: 0,
+                  display: { xs: 'flex', md: 'block' },
+                  textAlign: { xs: 'left', md: 'center' },
+                  alignItems: { xs: 'flex-start', md: 'center' },
+                  gap: { xs: 1.25, md: 0 },
+                }}
+              >
+                <Box
+                  className="float"
+                  style={{ animationDelay: '1s' }}
+                  sx={{
+                    mb: { xs: 0, md: 2 },
+                    mr: { xs: 0.5, md: 0 },
+                    display: 'flex',
+                    justifyContent: { xs: 'flex-start', md: 'center' },
+                    alignItems: { xs: 'flex-start', md: 'center' },
+                  }}
+                >
+                  <VerifiedUserIcon
+                    sx={{
+                      fontSize: { xs: 30, sm: 34, md: 55 },
+                      color: '#DC2626',
+                      mt: { xs: '3px', md: 0 },
+                    }}
+                  />
                 </Box>
-                <Typography variant="h5" gutterBottom sx={{ fontWeight: 700, color: '#DC2626' }}>
-                  {t('feature3Title')}
-                </Typography>
-                <Typography variant="body1" color="text.secondary">
-                  {t('feature3Desc')}
-                </Typography>
+                <Box>
+                  <Typography
+                    variant="h5"
+                    gutterBottom
+                    sx={{
+                      fontWeight: 700,
+                      color: '#DC2626',
+                      mb: { xs: 0.25, md: undefined },
+                      fontSize: { xs: '1.0rem', sm: '1.1rem', md: undefined },
+                      lineHeight: 1.2,
+                    }}
+                  >
+                    {t('feature3Title')}
+                  </Typography>
+                  <Typography
+                    variant="body1"
+                    color="text.secondary"
+                    sx={{
+                      fontSize: { xs: '0.85rem', sm: '0.95rem', md: undefined },
+                      lineHeight: 1.3,
+                    }}
+                  >
+                    {t('feature3Desc')}
+                  </Typography>
+                </Box>
               </CardContent>
             </Card>
           </Grid>
