@@ -22,18 +22,27 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Handle 401 errors (auto-logout)
+// Handle 401 errors.
+// IMPORTANT: do NOT hard-navigate on 401 for the login endpoint itself,
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      window.location.href = '/login';
+    const status = error.response?.status;
+    if (status === 401) {
+      const url = error.config?.url || '';
+      const isAuthLoginAttempt = url.includes('/auth/login') || url.includes('/auth/admin-login');
+
+      if (!isAuthLoginAttempt) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        // Keep SPA navigation within the app.
+        window.history.pushState({}, '', '/login');
+      }
     }
     return Promise.reject(error);
   }
 );
+
 
 export const authService = {
 
