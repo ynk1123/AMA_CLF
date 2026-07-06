@@ -180,11 +180,20 @@ const Landing = () => {
       </Box>
 
       {/* Features Section */}
-      <Container sx={{ py: { xs: 6, sm: 8, md: 10 } }}>
-        <Typography variant="h4" align="center" sx={{ mb: { xs: 3, sm: 4, md: 5 }, fontWeight: 700, color: '#DC2626' }}>
+      <Container sx={{ py: { xs: 4, sm: 7, md: 10 } }}>
+        <Typography
+          variant="h4"
+          align="center"
+          sx={{
+            mb: { xs: 2, sm: 4, md: 5 },
+            fontWeight: 700,
+            color: '#DC2626',
+            lineHeight: 1.1,
+          }}
+        >
           {t('features')}
         </Typography>
-        <Grid container spacing={{ xs: 1, sm: 3, md: 4 }}>
+        <Grid container spacing={{ xs: 0.5, sm: 3, md: 4 }}>
           <Grid item xs={12} md={4}>
             <Card
               className="card-hover fade-in stagger-1"
