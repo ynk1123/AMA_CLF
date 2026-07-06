@@ -1,5 +1,6 @@
 import React from 'react';
-import { AppBar, Toolbar, Typography, Button, Box, Menu, MenuItem } from '@mui/material';
+import { AppBar, Toolbar, Typography, Button, Box, Menu, MenuItem, IconButton } from '@mui/material';
+
 import ForumIcon from '@mui/icons-material/Forum';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import SearchIcon from '@mui/icons-material/Search';
@@ -26,6 +27,8 @@ const Navbar = () => {
   const { t, language, changeLanguage } = useLanguage();
   const navigate = useNavigate();
   const [langAnchor, setLangAnchor] = React.useState(null);
+  const [mobileMenuAnchor, setMobileMenuAnchor] = React.useState(null);
+
 
   const handleLogout = () => {
     logout();
@@ -39,6 +42,11 @@ const Navbar = () => {
   const handleLanguageClose = () => {
     setLangAnchor(null);
   };
+
+  const handleMobileMenuClose = () => {
+    setMobileMenuAnchor(null);
+  };
+
 
   const handleLanguageSelect = (code) => {
     changeLanguage(code);
@@ -76,6 +84,7 @@ const Navbar = () => {
           color="inherit"
           onClick={handleLanguageClick}
           startIcon={<LanguageIcon />}
+
           sx={{
             mr: 1.5,
             fontWeight: 600,
@@ -111,20 +120,105 @@ const Navbar = () => {
           ))}
         </Menu>
 
+
         {/* Mobile menu icon */}
         <Box sx={{ display: { xs: 'block', sm: 'none' } }}>
-          <Button
+          <IconButton
+            size="small"
             color="inherit"
-            onClick={(e) => setLangAnchor(e.currentTarget)}
-            sx={{ minWidth: 36, p: 0.5, fontWeight: 700 }}
+            onClick={(e) => setMobileMenuAnchor(e.currentTarget)}
+            sx={{ minWidth: 36, borderRadius: 2 }}
             aria-label="open mobile menu"
           >
             ☰
-          </Button>
+          </IconButton>
         </Box>
 
+        {/* Mobile nav drawer/menu */}
+        <Menu
+          anchorEl={mobileMenuAnchor}
+          open={Boolean(mobileMenuAnchor)}
+          onClose={handleMobileMenuClose}
+          PaperProps={{
+            sx: { mt: 1, minWidth: 180 },
+          }}
+        >
+          {user ? (
+            user.role === 'admin' ? (
+              <MenuItem
+                onClick={() => {
+                  navigate('/dashboard');
+                  handleMobileMenuClose();
+                }}
+              >
+                {t('view')}
+              </MenuItem>
+            ) : (
+              <MenuItem
+                onClick={() => {
+                  navigate('/dashboard');
+                  handleMobileMenuClose();
+                }}
+              >
+                {t('dashboard')}
+              </MenuItem>
+            )
+          ) : (
+            <MenuItem
+              onClick={() => {
+                navigate('/login');
+                handleMobileMenuClose();
+              }}
+            >
+              {t('login')}
+            </MenuItem>
+          )}
+
+          {user && user.role === 'admin' && (
+            <MenuItem
+              onClick={() => {
+                navigate('/admin');
+                handleMobileMenuClose();
+              }}
+            >
+              {t('admin')}
+            </MenuItem>
+          )}
+
+          {user && (
+            <MenuItem
+              onClick={() => {
+                navigate('/chat');
+                handleMobileMenuClose();
+              }}
+            >
+              {t('messages')}
+            </MenuItem>
+          )}
+
+          {user ? (
+            <MenuItem
+              onClick={() => {
+                handleLogout();
+                handleMobileMenuClose();
+              }}
+            >
+              {t('logout')}
+            </MenuItem>
+          ) : (
+            <MenuItem
+              onClick={() => {
+                navigate('/register');
+                handleMobileMenuClose();
+              }}
+            >
+              {t('register')}
+            </MenuItem>
+          )}
+        </Menu>
 
         {/* Desktop nav (hidden on mobile) */}
+
         <Box sx={{ display: { xs: 'none', sm: 'block' } }}>
           {!user ? (
 
