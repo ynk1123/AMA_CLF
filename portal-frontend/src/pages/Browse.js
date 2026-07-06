@@ -17,6 +17,32 @@ const Browse = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterCategory, setFilterCategory] = useState('');
   const [filterLocation, setFilterLocation] = useState('');
+  const locationOptions = [
+    'Library',
+    'Computer Laboratory',
+    'Science Laboratory',
+    'Classroom',
+    'Cafeteria',
+    'Student Lounge',
+    'Registrar Office',
+    'Admissions Office',
+    'Guidance Office',
+    "Dean's Office",
+    'Faculty Room',
+    'Administration Building',
+    'IT Department',
+    'Conference Room',
+    'Auditorium',
+    'Parking Area',
+    'Main Gate',
+    'Security Office',
+    'Elevator Area',
+    'Emergency Stairs',
+    'Hallway',
+    'Restroom',
+    'Clinic',
+  ];
+
   const [filterStatus, setFilterStatus] = useState('');
 
   const itemCardStyles = {
@@ -211,20 +237,29 @@ const Browse = () => {
             <Grid item xs={12} md={3}>
               <TextField
                 fullWidth
+                select
                 label="Location"
                 value={filterLocation}
                 onChange={(e) => setFilterLocation(e.target.value)}
                 size="small"
-                placeholder="Filter by location..."
                 sx={{
                   '@media (max-width:600px)': {
                     '& .MuiInputBase-root': { minHeight: 34 },
                     '& .MuiInputLabel-root': { fontSize: 14 },
-                    '& input': { fontSize: 14, py: '6px' },
+                    '& .MuiSelect-select': { fontSize: 14, py: '6px' },
+                    '& .MuiSvgIcon-root': { fontSize: 18 },
                   },
                 }}
-              />
+              >
+                <MenuItem value="">All</MenuItem>
+                {locationOptions.map((location) => (
+                  <MenuItem key={location} value={location}>
+                    {location}
+                  </MenuItem>
+                ))}
+              </TextField>
             </Grid>
+
 
             <Grid item xs={12} md={3}>
               <TextField
