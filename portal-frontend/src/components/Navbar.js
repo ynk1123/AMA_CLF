@@ -96,7 +96,11 @@ const Navbar = () => {
             '&:hover': { backgroundColor: 'rgba(255,255,255,0.15)' },
           }}
         >
-          {getCurrentLanguage().flag} {getCurrentLanguage().code.toUpperCase()}
+          <Box component="span" sx={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 24 }}>
+            <LanguageIcon sx={{ fontSize: 22, color: 'white' }} />
+          </Box>
+
+
         </Button>
         <Menu
           anchorEl={langAnchor}
