@@ -289,12 +289,20 @@ const Browse = () => {
           </Grid>
         </Box>
 
-        <Typography variant="h6" sx={{ fontWeight: 700, color: '#1A1A2E', mb: 2 }}>
+        <Typography
+          variant="h6"
+          sx={{
+            fontWeight: 700,
+            color: '#1A1A2E',
+            mb: 1,
+            '@media (max-width:600px)': { mb: '8px !important' },
+          }}
+        >
           📦 {filteredItems.length} Items Found
         </Typography>
 
         {/* Desktop/tablet cards */}
-        <Grid container spacing={2}>
+        <Grid container spacing={2} sx={{ '@media (max-width:600px)': { mt: '0 !important' } }}>
           {filteredItems.map((item, index) => (
             <Grid item xs={12} sm={6} md={2.4} key={item.id}>
               <Card
