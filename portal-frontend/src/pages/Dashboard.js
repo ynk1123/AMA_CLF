@@ -756,14 +756,15 @@ onClick={() => {
           ))}
         </Grid>
 
-        {/* Mobile strict 4-column grid cards */}
+        {/* Mobile strict 2-column grid cards */}
         <Box
           sx={{
             display: 'none',
             '@media (max-width:600px)': { display: 'block' },
           }}
         >
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px', width: '100%', padding: '4px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px', width: '100%', padding: '4px' }}>
+
             {activeItems.map((item) => (
               <div
                 key={item.id}
@@ -779,14 +780,14 @@ onClick={() => {
                 }}
                 onClick={() => handleItemClick(item)}
               >
-                <img
+<img
                   src={item.imageUrl ? getImageUrl(item.imageUrl) : item.image}
                   alt={item.title}
                   style={{ width: '100%', aspectRatio: '1/1', objectFit: 'cover', borderRadius: '8px', display: 'block' }}
                 />
-                <span style={{ display: 'block', width: '100%', fontSize: '11px', textAlign: 'center', marginTop: '6px', fontWeight: '500', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                  {item.title}
-                </span>
+                    <span style={{ display: 'block', width: '100%', fontSize: '13px', textAlign: 'center', marginTop: '6px', fontWeight: '500', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      {item.title}
+                    </span>
               </div>
             ))}
           </div>
@@ -857,14 +858,15 @@ onClick={() => {
               ))}
             </Grid>
 
-            {/* Mobile strict 4-column grid cards */}
-            <Box
-              sx={{
-                display: 'none',
-                '@media (max-width:600px)': { display: 'block' },
-              }}
-            >
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px', width: '100%', padding: '4px' }}>
+        {/* Mobile strict 2-column grid cards */}
+        <Box
+          sx={{
+            display: 'none',
+            '@media (max-width:600px)': { display: 'block' },
+          }}
+        >
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px', width: '100%', padding: '4px' }}>
+
                 {claimedArchivedItems.map((item) => (
                   <div
                     key={item.id}
@@ -885,7 +887,8 @@ onClick={() => {
                       alt={item.title}
                       style={{ width: '100%', aspectRatio: '1/1', objectFit: 'cover', borderRadius: '8px', display: 'block' }}
                     />
-                    <span style={{ display: 'block', width: '100%', fontSize: '11px', textAlign: 'center', marginTop: '6px', fontWeight: '500', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    <span style={{ display: 'block', width: '100%', fontSize: '13px', textAlign: 'center', marginTop: '6px', fontWeight: '500', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+
                       {item.title}
                     </span>
                   </div>

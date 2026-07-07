@@ -370,9 +370,9 @@ const Browse = () => {
         >
           <div
             style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(4, 1fr)',
-              gap: '8px',
+display: 'grid',
+              gridTemplateColumns: 'repeat(2, 1fr)',
+              gap: '12px',
               width: '100%',
               padding: '4px',
             }}
@@ -395,7 +395,7 @@ const Browse = () => {
                 <img
                   src={item.imageUrl ? getImageUrl(item.imageUrl) : item.image}
                   alt={item.title}
-                  style={{
+style={{
                     width: '100%',
                     aspectRatio: '1/1',
                     objectFit: 'cover',
@@ -407,7 +407,7 @@ const Browse = () => {
                   style={{
                     display: 'block',
                     width: '100%',
-                    fontSize: '11px',
+fontSize: '13px',
                     textAlign: 'center',
                     marginTop: '6px',
                     fontWeight: '500',
