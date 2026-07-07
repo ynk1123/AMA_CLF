@@ -16,6 +16,7 @@ const Chat = () => {
   const [selectedItem, setSelectedItem] = useState(null);
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
+  const [loadingMessages, setLoadingMessages] = useState(false);
   const messagesEndRef = useRef(null);
 
   const isMobile = useMediaQuery('(max-width:600px)');
@@ -37,22 +38,25 @@ const Chat = () => {
     }
   }, [items, searchParams]);
 
-  useEffect(() => {
+useEffect(() => {
     if (selectedItem) {
+      // Clear immediately so UI doesn't show stale data while loading
+      setMessages([]);
+      setLoadingMessages(true);
       loadMessages(selectedItem.id);
+    } else {
+      setMessages([]);
     }
   }, [selectedItem]);
 
 // Auto-scroll to center when messages are loaded/updated or item is clicked
-  useEffect(() => {
-    // Delay to ensure DOM is rendered
-    const timer = setTimeout(() => {
-      if (messagesEndRef.current) {
-        messagesEndRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }
-    }, 100);
-    return () => clearTimeout(timer);
-  }, [messages, selectedItem]);
+useEffect(() => {
+    if (!messagesEndRef.current) return;
+    // Scroll after DOM paint (faster than fixed timeout)
+    requestAnimationFrame(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+  }, [messages, selectedItem, loadingMessages]);
 
   const loadItems = async () => {
     try {
