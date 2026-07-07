@@ -1102,23 +1102,77 @@ onClick={() => {
       </Grid>
     )}
   </DialogContent>
-<DialogActions sx={{ p: 2, gap: 1, display: 'flex', justifyContent: 'space-between' }}>
-    <Box sx={{ display: 'flex', gap: 1 }}>
-<Button
+<DialogActions
+    sx={{
+      p: 2,
+      gap: 1,
+      display: 'flex',
+      justifyContent: 'space-between',
+      '@media (max-width:600px)': {
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '8px',
+        width: '100%',
+        p: '12px 16px',
+      },
+    }}
+  >
+    <Box
+      sx={{
+        display: 'flex',
+        gap: 1,
+        '@media (max-width:600px)': {
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '8px',
+          width: '100%',
+        },
+      }}
+    >
+      <Button
         variant="outlined"
         startIcon={<MessageIcon />}
         onClick={handleMessageClick}
         disabled={selectedItem?.status === 'claimed'}
+        sx={{
+          width: { xs: '100%', sm: 'auto' },
+          minHeight: '44px',
+          '@media (max-width:600px)': {
+            width: '100%',
+          },
+          '& .MuiButton-startIcon': {
+            mr: 1,
+          },
+        }}
       >
         Message
       </Button>
     </Box>
-    <Box sx={{ display: 'flex', gap: 1 }}>
+
+    <Box
+      sx={{
+        display: 'flex',
+        gap: 1,
+        '@media (max-width:600px)': {
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '8px',
+          width: '100%',
+        },
+      }}
+    >
       <Button
         variant="contained"
         color="primary"
         onClick={() => setOpenClaimDialog(true)}
         disabled={selectedItem?.status === 'claimed' || selectedItem?.status === 'archived' || selectedItem?.status === 'pending'}
+        sx={{
+          width: { xs: '100%', sm: 'auto' },
+          minHeight: '44px',
+          '@media (max-width:600px)': {
+            width: '100%',
+          },
+        }}
       >
         {selectedItem?.status === 'under_verification' ? 'Claim In Review' : 'Claim Item'}
       </Button>
@@ -1127,6 +1181,13 @@ onClick={() => {
         startIcon={<CalendarMonthIcon />}
         onClick={() => setOpenAppointmentDialog(true)}
         disabled={isGhostItem(selectedItem?.status)}
+        sx={{
+          width: { xs: '100%', sm: 'auto' },
+          minHeight: '44px',
+          '@media (max-width:600px)': {
+            width: '100%',
+          },
+        }}
       >
         Schedule CCTV Review
       </Button>
