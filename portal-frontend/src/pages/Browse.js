@@ -512,7 +512,6 @@ fontSize: '13px',
                       // prefer formatting: username (studentId)
                       const studentId =
                         selectedItem?.studentId ??
-                        selectedItem?.userId ??
                         selectedItem?.User?.studentId;
 
                       const studentIdStr =
