@@ -135,7 +135,24 @@ const getImageUrl = (url) => {
                   <TableRow key={item.id} hover>
                     <TableCell>{item.id}</TableCell><TableCell>{item.title}</TableCell><TableCell>{item.category}</TableCell><TableCell>{item.location}</TableCell>
                     <TableCell><Chip label={item.status} color={getStatusColor(item.status)} size="small" /></TableCell>
-                    <TableCell>{(item?.User?.studentId === undefined || item?.User?.studentId === null || String(item?.User?.studentId).trim() === '' || item?.User?.studentId === 'Unknown') ? 'Admin' : item?.User?.studentId}</TableCell>
+                    <TableCell>{(() => {
+                      const studentId = item?.User?.studentId;
+                      const displayName = item?.User?.displayName;
+
+                      // Force Admin when missing/blank/Unknown
+                      if (
+                        studentId === undefined ||
+                        studentId === null ||
+                        String(studentId).trim() === '' ||
+                        studentId === 'Unknown'
+                      ) {
+                        return 'Admin';
+                      }
+
+                      const studentIdStr = String(studentId).trim();
+                      const username = displayName ? String(displayName).trim() : '';
+                      return username ? `${username} (${studentIdStr})` : studentIdStr;
+                    })()}</TableCell>
 <TableCell>
                       <IconButton size="small" onClick={() => handleViewItem(item)}><VisibilityIcon /></IconButton>
                       {item.status === 'pending' && <Button size="small" onClick={() => handleApprove(item.id)}>Approve</Button>}

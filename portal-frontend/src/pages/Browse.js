@@ -504,7 +504,27 @@ fontSize: '13px',
                       const postedByStr =
                         postedBy === null || postedBy === undefined ? '' : String(postedBy).trim();
 
-                      return !postedByStr || postedByStr.toLowerCase() === 'unknown' ? 'Admin' : postedByStr;
+                      if (!postedByStr || postedByStr.toLowerCase() === 'unknown') {
+                        return 'Admin';
+                      }
+
+                      // If backend provides username-like name + studentId fields separately,
+                      // prefer formatting: username (studentId)
+                      const studentId =
+                        selectedItem?.studentId ??
+                        selectedItem?.userId ??
+                        selectedItem?.User?.studentId;
+
+                      const studentIdStr =
+                        studentId === null || studentId === undefined
+                          ? ''
+                          : String(studentId).trim();
+
+                      if (studentIdStr && postedByStr && postedByStr.toLowerCase() !== 'admin') {
+                        return `${postedByStr} (${studentIdStr})`;
+                      }
+
+                      return postedByStr;
                     })()
                   }
                 </Typography>
