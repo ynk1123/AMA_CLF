@@ -1,7 +1,11 @@
 # TODO
-- [x] Update Browse.js: optimize “Search and Filters” container for mobile (max-width:600px).
-- [ ] Reduce card padding/margins for slimmer height on mobile.
-- [ ] Change mobile fields layout to a 2-column (2x2) grid.
-- [ ] Reduce TextField font-size and input padding/height on mobile; keep select dropdown arrow aligned.
-- [ ] Verify no layout regressions in desktop/tablet.
+
+- [ ] Inspect current Messages/Chat responsive layout implementation.
+- [ ] Implement mobile switching logic in `portal-frontend/src/pages/Chat.js`:
+  - [ ] Detect `max-width: 600px` via media query.
+  - [ ] On mobile: show ONLY items list when no conversation selected.
+  - [ ] On mobile: when an item is selected, hide items list and show ONLY chat panel.
+  - [ ] Add a visible mobile-only "← Back" button to return to list.
+- [ ] Ensure desktop/tablet behavior remains unchanged.
+- [ ] Run frontend lint/build/test (if available) and verify chat flow on mobile width.
 
