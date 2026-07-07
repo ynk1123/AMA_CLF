@@ -110,7 +110,7 @@ const Browse = () => {
       case 'lost':
         return 'warning';
       case 'found':
-        return 'success';
+        return 'warning';
       case 'under_verification':
         return 'error';
       case 'claimed':
