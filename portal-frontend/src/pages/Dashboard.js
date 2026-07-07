@@ -1103,8 +1103,8 @@ onClick={() => {
 
                   const studentId =
                     selectedItem?.studentId ??
-                    selectedItem?.userId ??
                     selectedItem?.User?.studentId;
+
 
                   const studentIdStr =
                     studentId === null || studentId === undefined
