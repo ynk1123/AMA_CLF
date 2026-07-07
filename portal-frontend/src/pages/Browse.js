@@ -139,6 +139,7 @@ const Browse = () => {
   return (
     <Box sx={{ minHeight: '100vh', py: 3 }}>
       <Box className="fade-in" sx={{ px: 4, mt: 4, '@media (max-width:600px)': { mt: 1 } }}>
+
       <Typography
           variant="h3"
           sx={{
@@ -295,14 +296,25 @@ const Browse = () => {
             fontWeight: 700,
             color: '#1A1A2E',
             mb: 1,
-            '@media (max-width:600px)': { mb: '8px !important' },
+            '@media (max-width:600px)': { mb: '0px !important' },
           }}
         >
           📦 {filteredItems.length} Items Found
         </Typography>
 
         {/* Desktop/tablet cards */}
-        <Grid container spacing={2} sx={{ '@media (max-width:600px)': { mt: '0 !important' } }}>
+        <Grid
+          container
+          spacing={2}
+          sx={{
+            '@media (max-width:600px)': {
+              mt: '0 !important',
+              mb: '0 !important',
+              paddingTop: '0 !important',
+            },
+          }}
+        >
+
           {filteredItems.map((item, index) => (
             <Grid item xs={12} sm={6} md={2.4} key={item.id}>
               <Card
