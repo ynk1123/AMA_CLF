@@ -53,9 +53,7 @@ const Navbar = () => {
     handleLanguageClose();
   };
 
-  const getCurrentLanguage = () => {
-    return languages.find(l => l.code === language) || languages[0];
-  };
+
 
 
   return (
@@ -94,6 +92,19 @@ const Navbar = () => {
             height: { xs: 38, sm: 'auto' },
             borderRadius: '6px',
             '&:hover': { backgroundColor: 'rgba(255,255,255,0.15)' },
+            // Desktop: force a balanced square so the globe button doesn't look vertically thin.
+            '@media (min-width: 769px)': {
+              padding: '8px !important',
+              display: 'inline-flex !important',
+              alignItems: 'center !important',
+              justifyContent: 'center !important',
+              // Match the desktop header height (Toolbar minHeight is 64px on sm+)
+              width: '64px !important',
+              height: '64px !important',
+              minWidth: '64px !important',
+              minHeight: '64px !important',
+              boxSizing: 'border-box',
+            },
           }}
         >
           <Box
