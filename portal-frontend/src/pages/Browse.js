@@ -521,7 +521,8 @@ fontSize: '13px',
                           : String(studentId).trim();
 
                       if (studentIdStr && postedByStr && postedByStr.toLowerCase() !== 'admin') {
-                        const studentIdBlurred = studentIdStr.replace(/\d/g, '•');
+                        // Blur the ID part visually: keep length by replacing digits with bullets
+                        const studentIdBlurred = String(studentIdStr).replace(/\d/g, '•');
                         return `${postedByStr} (${studentIdBlurred})`;
                       }
 
