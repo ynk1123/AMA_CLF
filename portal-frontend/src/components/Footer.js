@@ -22,13 +22,13 @@ const Footer = () => {
           pt: '20px !important',
           pb: '16px !important',
         },
-
       }}
     >
       <Container maxWidth="lg">
         {/* Contact - Centered */}
-        <Box sx={{ mb: 2 }}>
-          <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
+        <Box sx={{ mb: 1 }}>
+          <Typography variant="h6" sx={{ fontWeight: 600, mb: 0.5 }}>
+
             {t('contactUs')}
           </Typography>
           <Typography variant="body2" sx={{ opacity: 0.8, mb: 1 }}>
@@ -54,7 +54,8 @@ const Footer = () => {
         </Box>
 
         {/* Copyright */}
-        <Box sx={{ pt: 2, borderTop: '1px solid rgba(255,255,255,0.1)' }}>
+        <Box sx={{ pt: 1, borderTop: '1px solid rgba(255,255,255,0.1)' }}>
+
           <Typography
             variant="body2"
             sx={{
@@ -76,3 +77,4 @@ const Footer = () => {
 };
 
 export default Footer;
+
