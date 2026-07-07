@@ -18,6 +18,11 @@ const Footer = () => {
         py: 3,
         mt: 'auto',
         textAlign: 'center',
+        '@media (max-width:600px)': {
+          pt: '20px !important',
+          pb: '16px !important',
+        },
+
       }}
     >
       <Container maxWidth="lg">
