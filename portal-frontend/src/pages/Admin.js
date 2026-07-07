@@ -135,7 +135,7 @@ const getImageUrl = (url) => {
                   <TableRow key={item.id} hover>
                     <TableCell>{item.id}</TableCell><TableCell>{item.title}</TableCell><TableCell>{item.category}</TableCell><TableCell>{item.location}</TableCell>
                     <TableCell><Chip label={item.status} color={getStatusColor(item.status)} size="small" /></TableCell>
-                    <TableCell>{item.User?.studentId || 'Unknown'}</TableCell>
+                    <TableCell>{(item?.User?.studentId === undefined || item?.User?.studentId === null || String(item?.User?.studentId).trim() === '' || item?.User?.studentId === 'Unknown') ? 'Admin' : item?.User?.studentId}</TableCell>
 <TableCell>
                       <IconButton size="small" onClick={() => handleViewItem(item)}><VisibilityIcon /></IconButton>
                       {item.status === 'pending' && <Button size="small" onClick={() => handleApprove(item.id)}>Approve</Button>}
