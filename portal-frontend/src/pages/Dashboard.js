@@ -1078,8 +1078,6 @@ onClick={() => {
               <strong>Posted by:</strong>{' '}
               {
                 (() => {
-                  // Some backend responses might use different field names/cases.
-                  // Also, some APIs send placeholder objects like User: { studentId: "Unknown" }.
                   const postedBy =
                     selectedItem?.postedBy ??
                     selectedItem?.user ??
@@ -1098,10 +1096,23 @@ onClick={() => {
                     return 'Admin';
                   }
 
-                  // If the backend sent a placeholder like "Unknown (xxxx)" or similar,
-                  // normalize to Admin as well.
+                  // If name includes Unknown, treat as admin.
                   if (postedByStr.toLowerCase().includes('unknown')) {
                     return 'Admin';
+                  }
+
+                  const studentId =
+                    selectedItem?.studentId ??
+                    selectedItem?.userId ??
+                    selectedItem?.User?.studentId;
+
+                  const studentIdStr =
+                    studentId === null || studentId === undefined
+                      ? ''
+                      : String(studentId).trim();
+
+                  if (studentIdStr) {
+                    return `${postedByStr} (${studentIdStr})`;
                   }
 
                   return postedByStr;

@@ -521,7 +521,8 @@ fontSize: '13px',
                           : String(studentId).trim();
 
                       if (studentIdStr && postedByStr && postedByStr.toLowerCase() !== 'admin') {
-                        return `${postedByStr} (${studentIdStr})`;
+                        const studentIdBlurred = studentIdStr.replace(/\d/g, '•');
+                        return `${postedByStr} (${studentIdBlurred})`;
                       }
 
                       return postedByStr;
