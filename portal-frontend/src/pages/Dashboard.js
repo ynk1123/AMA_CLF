@@ -1076,8 +1076,29 @@ onClick={() => {
             </Typography>
             <Typography variant="body1" sx={{ mb: 1 }}>
               <strong>Posted by:</strong>{' '}
-              {selectedItem.User ? `${selectedItem.User.displayName || selectedItem.User.studentId} (${selectedItem.User.studentId})` : 'Unknown'}
+              {
+                (() => {
+                  const postedBy =
+                    selectedItem?.postedBy ??
+                    selectedItem?.user ??
+                    selectedItem?.author ??
+                    selectedItem?.User?.displayName ??
+                    selectedItem?.User?.studentId;
+
+                  const postedByStr =
+                    postedBy === null || postedBy === undefined
+                      ? ''
+                      : String(postedBy).trim();
+
+                  if (!postedByStr || postedByStr.toLowerCase() === 'unknown') {
+                    return 'Admin';
+                  }
+
+                  return postedByStr;
+                })()
+              }
             </Typography>
+
             <Typography variant="body1" sx={{ mb: 2 }}>
               <strong>Status:</strong>{' '}
               <Chip label={selectedItem.status} color={getStatusColor(selectedItem.status)} />

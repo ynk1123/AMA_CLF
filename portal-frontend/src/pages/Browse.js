@@ -490,10 +490,25 @@ fontSize: '13px',
                 <Typography variant="body1" sx={{ mb: 1 }}>
                   <strong>Date:</strong> {new Date(selectedItem.date).toLocaleDateString()}
                 </Typography>
-<Typography variant="body1" sx={{ mb: 1 }}>
+                <Typography variant="body1" sx={{ mb: 1 }}>
                   <strong>Posted by:</strong>{' '}
-                  {selectedItem.User?.displayName || selectedItem.User?.studentId || 'Admin'}
+                  {
+                    (() => {
+                      const postedBy =
+                        selectedItem?.postedBy ??
+                        selectedItem?.user ??
+                        selectedItem?.author ??
+                        selectedItem?.User?.displayName ??
+                        selectedItem?.User?.studentId;
+
+                      const postedByStr =
+                        postedBy === null || postedBy === undefined ? '' : String(postedBy).trim();
+
+                      return !postedByStr || postedByStr.toLowerCase() === 'unknown' ? 'Admin' : postedByStr;
+                    })()
+                  }
                 </Typography>
+
                 <Typography variant="body1" sx={{ mb: 2 }}>
                   <strong>Status:</strong>{' '}
                   <Chip label={selectedItem.status} color={getStatusColor(selectedItem.status)} />
