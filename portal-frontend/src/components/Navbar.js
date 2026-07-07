@@ -98,11 +98,11 @@ const Navbar = () => {
               display: 'inline-flex !important',
               alignItems: 'center !important',
               justifyContent: 'center !important',
-              // Match the desktop header height (Toolbar minHeight is 64px on sm+)
-              width: '64px !important',
-              height: '64px !important',
-              minWidth: '64px !important',
-              minHeight: '64px !important',
+              // Desktop: use a compact square so it doesn't stretch the header height.
+              width: '40px !important',
+              height: '40px !important',
+              minWidth: '40px !important',
+              minHeight: '40px !important',
               boxSizing: 'border-box',
             },
           }}

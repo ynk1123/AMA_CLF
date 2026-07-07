@@ -110,11 +110,16 @@ const Landing = () => {
               gutterBottom
               sx={{
                 fontWeight: 800,
-            fontSize: { xs: '28px !important', sm: '1.45rem', md: '3rem' },
+                fontSize: { xs: '28px !important', sm: '1.45rem', md: '3rem' },
                 lineHeight: { xs: 1.1, sm: 1.2, md: 1.15 },
                 mb: { xs: '8px !important', sm: undefined },
+                // Desktop: make the main title much more prominent (keep mobile as-is).
+                '@media (min-width: 769px)': {
+                  fontSize: '42px !important',
+                },
               }}
             >
+
 
 
               {t('welcomeTitle')}
