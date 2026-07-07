@@ -232,7 +232,8 @@ const Landing = () => {
                     display: 'flex',
                     justifyContent: { xs: 'flex-start', md: 'center' },
                     alignItems: { xs: 'flex-start', md: 'center' },
-                    pt: { xs: 1.5, md: 0 },
+                    pt: { xs: 2.5, md: 0 },
+
                   }}
                 >
                   <SearchIcon
