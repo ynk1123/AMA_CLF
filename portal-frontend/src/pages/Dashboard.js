@@ -679,8 +679,8 @@ onClick={() => {
           variant="h5"
           gutterBottom={false}
           sx={{
-            mt: { xs: 3, sm: 0 },
-            '@media (max-width:600px)': { mt: '24px !important' },
+            mt: { xs: 2, sm: 2.5, md: 3 },
+            mb: { xs: 1.5, sm: 2, md: 2 },
           }}
         >
           Lost and Found Items ({activeItems.length})
