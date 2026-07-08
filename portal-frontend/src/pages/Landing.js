@@ -207,12 +207,14 @@ const Landing = () => {
           {t('features')}
         </Typography>
         <Grid container spacing={{ xs: 0.5, sm: 3, md: 4 }}>
-          <Grid item xs={12} md={4} sx={{ display: 'flex' }}>
+          <Grid item xs={12} md={4} sx={{ display: 'flex', width: '100%' }}>
             <Card
               className="card-hover fade-in stagger-1"
               sx={{
-                height: '100%',
                 width: '100%',
+                height: '100%',
+                display: 'flex',
+                flexDirection: 'column',
                 p: { xs: 1.25, sm: 2, md: 3 },
               }}
             >
@@ -223,7 +225,7 @@ const Landing = () => {
                   flexDirection: { xs: 'row', md: 'block' },
                   textAlign: { xs: 'left', md: 'center' },
                   alignItems: { xs: 'center', md: 'center' },
-                  justifyContent: { xs: 'flex-start', md: 'center' },
+                  justifyContent: { xs: 'flex-start', sm: 'flex-start', md: 'center' },
                   gap: { xs: 1.25, md: 0 },
                   height: '100%',
                 }}
