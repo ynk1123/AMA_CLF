@@ -219,11 +219,11 @@ const Landing = () => {
                 sx={{
                   p: 0,
                   display: { xs: 'flex', md: 'block' },
-                  flexDirection: { xs: 'column', md: 'row' },
-                  textAlign: { xs: 'center', md: 'center' },
-                  alignItems: 'center',
+                  flexDirection: { xs: 'row', md: 'block' },
+                  textAlign: { xs: 'left', md: 'center' },
+                  alignItems: { xs: 'center', md: 'center' },
                   justifyContent: 'center',
-                  gap: { xs: 0.5, md: 0 },
+                  gap: { xs: 1.25, md: 0 },
                   height: '100%',
                 }}
               >
@@ -287,9 +287,12 @@ const Landing = () => {
                 sx={{
                   p: 0,
                   display: { xs: 'flex', md: 'block' },
+                  flexDirection: { xs: 'row', md: 'block' },
                   textAlign: { xs: 'left', md: 'center' },
-                  alignItems: { xs: 'flex-start', md: 'center' },
+                  alignItems: { xs: 'center', md: 'center' },
+                  justifyContent: 'center',
                   gap: { xs: 1.25, md: 0 },
+                  height: '100%',
                 }}
               >
                 <Box
@@ -353,9 +356,12 @@ const Landing = () => {
                 sx={{
                   p: 0,
                   display: { xs: 'flex', md: 'block' },
+                  flexDirection: { xs: 'row', md: 'block' },
                   textAlign: { xs: 'left', md: 'center' },
-                  alignItems: { xs: 'flex-start', md: 'center' },
+                  alignItems: { xs: 'center', md: 'center' },
+                  justifyContent: { xs: 'center', md: 'center' },
                   gap: { xs: 1.25, md: 0 },
+                  height: '100%',
                 }}
               >
                 <Box
