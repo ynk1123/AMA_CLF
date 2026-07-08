@@ -218,18 +218,18 @@ const Landing = () => {
                 p: { xs: 1.25, sm: 2, md: 3 },
               }}
             >
-              <CardContent
-                sx={{
-                  p: 0,
-                  display: { xs: 'flex', md: 'block' },
-                  flexDirection: { xs: 'row', md: 'block' },
-                  textAlign: { xs: 'left', md: 'center' },
+                <CardContent
+                  sx={{
+                    p: 0,
+                    display: { xs: 'flex', md: 'block' },
+                    flexDirection: { xs: 'row', md: 'block' },
+                    textAlign: { xs: 'left', md: 'center' },
                   alignItems: { xs: 'center', md: 'center' },
                   justifyContent: { xs: 'flex-start', sm: 'flex-start', md: 'center' },
                   gap: { xs: 1.25, md: 0 },
-                  height: '100%',
-                }}
-              >
+                    height: '100%',
+                  }}
+                >
                 <Box
                   className="float"
                   sx={{
@@ -366,7 +366,7 @@ const Landing = () => {
                   flexDirection: { xs: 'row', md: 'block' },
                   textAlign: { xs: 'left', md: 'center' },
                   alignItems: { xs: 'center', md: 'center' },
-                  justifyContent: { xs: 'center', md: 'center' },
+                  justifyContent: { xs: 'flex-start', sm: 'flex-start', md: 'center' },
                   gap: { xs: 1.25, md: 0 },
                   height: '100%',
                 }}
