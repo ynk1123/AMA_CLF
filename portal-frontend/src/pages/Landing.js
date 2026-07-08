@@ -212,6 +212,7 @@ const Landing = () => {
               className="card-hover fade-in stagger-1"
               sx={{
                 height: '100%',
+                width: '100%',
                 p: { xs: 1.25, sm: 2, md: 3 },
               }}
             >
@@ -372,7 +373,7 @@ const Landing = () => {
                     mr: { xs: 0.5, md: 0 },
                     display: 'flex',
                     justifyContent: { xs: 'flex-start', md: 'center' },
-                    alignItems: { xs: 'flex-start', md: 'center' },
+                    alignItems: 'center',
                   }}
                 >
                   <VerifiedUserIcon
