@@ -159,13 +159,12 @@ const Browse = () => {
         {/* Filters */}
         <Box
           sx={{
-            mb: 4,
+            mb: { xs: 1, sm: 1.5, md: 4 },
             p: 3,
             backgroundColor: '#fff',
             borderRadius: 2,
             border: '2px solid #FEE2E2',
             '@media (max-width:600px)': {
-              mb: 2,
               p: 1.5,
             },
           }}
