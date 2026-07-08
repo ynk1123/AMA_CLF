@@ -378,7 +378,7 @@ const Landing = () => {
                     mb: { xs: 0, md: 2 },
                     mr: { xs: 0.5, md: 0 },
                     display: 'flex',
-                    justifyContent: { xs: 'flex-start', md: 'center' },
+                    justifyContent: { xs: 'center', md: 'center' },
                     alignItems: 'center',
                   }}
                 >
