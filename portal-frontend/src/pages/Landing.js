@@ -278,11 +278,14 @@ const Landing = () => {
             </Card>
           </Grid>
 
-          <Grid item xs={12} md={4} sx={{ display: 'flex' }}>
+          <Grid item xs={12} md={4} sx={{ display: 'flex', width: '100%' }}>
             <Card
               className="card-hover fade-in stagger-2"
               sx={{
+                width: '100%',
                 height: '100%',
+                display: 'flex',
+                flexDirection: 'column',
                 p: { xs: 1.25, sm: 2, md: 3 },
               }}
             >
