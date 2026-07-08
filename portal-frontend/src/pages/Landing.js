@@ -235,7 +235,7 @@ const Landing = () => {
                     display: 'flex',
                     justifyContent: { xs: 'center', md: 'center' },
                     alignItems: { xs: 'center', md: 'center' },
-                    pt: { xs: 0, md: 0 },
+                    py: { xs: 2, md: 0 },
                   }}
                 >
                   <SearchIcon
@@ -303,8 +303,8 @@ const Landing = () => {
                     mr: { xs: 0.5, md: 0 },
                     display: 'flex',
                     justifyContent: { xs: 'flex-start', md: 'center' },
-                    alignItems: { xs: 'flex-start', md: 'center' },
-                    pt: { xs: 2.5, md: 0 },
+                    alignItems: { xs: 'center', md: 'center' },
+                    pt: { xs: 0, md: 0 },
                   }}
                 >
                   <PostAddIcon
