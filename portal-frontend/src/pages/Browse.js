@@ -302,16 +302,15 @@ const Browse = () => {
           {filteredItems.length} Items Found
         </Typography>
 
-
-
         {/* Desktop/tablet cards */}
         <Grid
           container
           spacing={2}
           sx={{
             '@media (max-width:600px)': {
-              marginTop: '0px !important',
-              paddingTop: '0px !important',
+              mt: '0 !important',
+              mb: '0 !important',
+              paddingTop: '0 !important',
             },
           }}
         >
