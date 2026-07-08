@@ -290,7 +290,7 @@ const Browse = () => {
           </Grid>
         </Box>
 
-          <Typography
+        <Typography
           variant="h6"
           sx={{
             fontWeight: 700,
