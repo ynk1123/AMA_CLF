@@ -296,7 +296,8 @@ const Browse = () => {
             fontWeight: 700,
             color: '#1A1A2E',
             mb: 1,
-            '@media (max-width:600px)': { mb: '8px !important' },
+            mt: 1,
+            '@media (max-width:600px)': { mb: '2 !important', mt: '1 !important' },
           }}
         >
           {filteredItems.length} Items Found
