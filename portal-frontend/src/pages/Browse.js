@@ -164,9 +164,6 @@ const Browse = () => {
             backgroundColor: '#fff',
             borderRadius: 2,
             border: '2px solid #FEE2E2',
-            '@media (max-width:600px)': {
-              p: 1.5,
-            },
           }}
         >
           <Typography
