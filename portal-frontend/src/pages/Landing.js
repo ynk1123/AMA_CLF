@@ -222,7 +222,7 @@ const Landing = () => {
                   flexDirection: { xs: 'row', md: 'block' },
                   textAlign: { xs: 'left', md: 'center' },
                   alignItems: { xs: 'center', md: 'center' },
-                  justifyContent: 'center',
+                  justifyContent: { xs: 'flex-start', md: 'center' },
                   gap: { xs: 1.25, md: 0 },
                   height: '100%',
                 }}
