@@ -192,7 +192,7 @@ const Landing = () => {
       </Box>
 
       {/* Features Section */}
-      <Container sx={{ py: { xs: 4, sm: 7, md: 10 } }}>
+      <Container sx={{ py: { xs: 4, sm: 7, md: 10 }, px: { xs: 2, sm: 3 } }}>
         <Typography
           variant="h4"
           align="center"
@@ -207,7 +207,7 @@ const Landing = () => {
           {t('features')}
         </Typography>
         <Grid container spacing={{ xs: 0.5, sm: 3, md: 4 }}>
-          <Grid item xs={12} md={4}>
+          <Grid item xs={12} md={4} sx={{ display: 'flex' }}>
             <Card
               className="card-hover fade-in stagger-1"
               sx={{
@@ -275,7 +275,7 @@ const Landing = () => {
             </Card>
           </Grid>
 
-          <Grid item xs={12} md={4}>
+          <Grid item xs={12} md={4} sx={{ display: 'flex' }}>
             <Card
               className="card-hover fade-in stagger-2"
               sx={{
@@ -344,7 +344,7 @@ const Landing = () => {
             </Card>
           </Grid>
 
-          <Grid item xs={12} md={4}>
+          <Grid item xs={12} md={4} sx={{ display: 'flex' }}>
             <Card
               className="card-hover fade-in stagger-3"
               sx={{
