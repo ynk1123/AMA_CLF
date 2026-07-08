@@ -219,9 +219,12 @@ const Landing = () => {
                 sx={{
                   p: 0,
                   display: { xs: 'flex', md: 'block' },
-                  textAlign: { xs: 'left', md: 'center' },
-                  alignItems: { xs: 'flex-start', md: 'center' },
-                  gap: { xs: 1.25, md: 0 },
+                  flexDirection: { xs: 'column', md: 'row' },
+                  textAlign: { xs: 'center', md: 'center' },
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: { xs: 0.5, md: 0 },
+                  height: '100%',
                 }}
               >
                 <Box
@@ -230,9 +233,9 @@ const Landing = () => {
                     mb: { xs: 0, md: 2 },
                     mr: { xs: 0.5, md: 0 },
                     display: 'flex',
-                    justifyContent: { xs: 'flex-start', md: 'center' },
-                    alignItems: { xs: 'flex-start', md: 'center' },
-                    pt: { xs: 3.25, md: 0 },
+                    justifyContent: { xs: 'center', md: 'center' },
+                    alignItems: { xs: 'center', md: 'center' },
+                    pt: { xs: 0, md: 0 },
                   }}
                 >
                   <SearchIcon
