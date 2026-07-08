@@ -689,10 +689,11 @@ onClick={() => {
 
 
 
-{/* Desktop/tablet cards */}
+        {/* Desktop/tablet cards */}
         <Grid
           container
           spacing={2}
+          sx={{ display: { xs: 'none', md: 'flex' } }}
         >
           {activeItems.map((item) => (
             <Grid
