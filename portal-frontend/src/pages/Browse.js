@@ -291,9 +291,8 @@ const Browse = () => {
           sx={{
             fontWeight: 700,
             color: '#1A1A2E',
-            mb: 1,
-            mt: 1,
-            '@media (max-width:600px)': { mb: '2 !important', mt: '1 !important' },
+            mt: { xs: 1.5, sm: 2, md: 3 },
+            mb: { xs: 1.5, sm: 2, md: 2 },
           }}
         >
           {filteredItems.length} Items Found
@@ -304,11 +303,7 @@ const Browse = () => {
           container
           spacing={2}
           sx={{
-            '@media (max-width:600px)': {
-              mt: '0 !important',
-              mb: '0 !important',
-              paddingTop: '0 !important',
-            },
+            display: { xs: 'none', md: 'flex' },
           }}
         >
 
