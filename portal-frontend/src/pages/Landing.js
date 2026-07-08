@@ -298,6 +298,7 @@ const Landing = () => {
                     display: 'flex',
                     justifyContent: { xs: 'flex-start', md: 'center' },
                     alignItems: { xs: 'flex-start', md: 'center' },
+                    pt: { xs: 2.5, md: 0 },
                   }}
                 >
                   <PostAddIcon
