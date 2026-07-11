@@ -219,37 +219,7 @@ const getImageUrl = (url) => {
         </Tabs>
       </Box>
 
-      {/* Desktop tabs: reuse the same scrollable tab bar, but keep it visible */}
-      <Box
-        sx={{
-          borderBottom: 1,
-          borderColor: 'divider',
-          mb: 3,
-          display: { xs: 'block', md: 'block' },
-          overflowX: 'auto',
-          '&::-webkit-scrollbar': { display: 'none' },
-          scrollbarWidth: 'none',
-        }}
-      >
-        <Tabs
-          value={tabValue}
-          onChange={(e, v) => setTabValue(v)}
-          variant="scrollable"
-          scrollButtons={false}
-          allowScrollButtonsMobile
-          sx={{
-            minHeight: 48,
-            '& .MuiTabs-indicator': { height: 3 },
-            '& .MuiTab-root': { minHeight: 44, minWidth: 80 },
-          }}
-        >
-          <Tab label="Items" value={0} />
-          <Tab label="Claims" value={1} />
-          <Tab label="Users" value={2} />
-          <Tab label="Locations" value={3} />
-          <Tab label="Appointments" value={4} />
-        </Tabs>
-      </Box>
+
 
 
       {tabValue === 0 && (
