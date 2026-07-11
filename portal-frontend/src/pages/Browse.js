@@ -530,8 +530,8 @@ fontSize: '13px',
                 <Typography variant="h6" sx={{ fontWeight: 700, mt: 2, mb: 1 }}>
                   Description
                 </Typography>
-                <Box sx={{ p: 2, backgroundColor: '#FEE2E2', borderRadius: 1 }}>
-                  <Typography variant="body1">{selectedItem.description || 'No description provided.'}</Typography>
+                  <Box sx={{ p: 2, backgroundColor: '#FEE2E2', borderRadius: 1 }}>
+                  <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap' }}>{selectedItem.description || 'No description provided.'}</Typography>
                 </Box>
               </Grid>
             </Grid>
