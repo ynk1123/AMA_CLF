@@ -1361,7 +1361,14 @@ onClick={() => {
                         </DialogTitle>
                         <DialogContent dividers>
                           {notifications.length === 0 ? (
-                            <Typography variant="body1" sx={{ py: 2, textAlign: 'center', color: 'var(--text-muted)' }}>
+                            <Typography
+                              variant="body1"
+                              sx={{
+                                py: 2,
+                                textAlign: 'center',
+                                color: 'text.secondary !important',
+                              }}
+                            >
                               No notifications yet
                             </Typography>
                           ) : (
@@ -1372,19 +1379,13 @@ onClick={() => {
                                   sx={{
                                     p: 2,
                                     borderRadius: 2,
-                                    backgroundColor:
-                                      notif.type === 'claim_approved' || notif.type === 'item_approved'
-                                        ? 'var(--bg-status-approved)'
-                                        : notif.type === 'claim_rejected'
-                                          ? 'var(--bg-status-pending)'
-                                          : 'var(--bg-surface)',
-                                    color:
-                                      notif.type === 'claim_approved' || notif.type === 'item_approved'
-                                        ? 'var(--text-status-approved)'
-                                        : notif.type === 'claim_rejected'
-                                          ? 'var(--text-status-pending)'
-                                          : 'var(--text-main)',
-                                    border: '1px solid var(--border-muted)',
+                                    border: '1px solid !important',
+                                    borderColor: 'divider !important',
+                                    // Inherit readable light/dark colors regardless of external CSS.
+                                    backgroundColor: 'background.paper !important',
+                                    color: 'text.primary !important',
+                                    // status accent overrides (still theme-safe)
+                                    '& .MuiTypography-root': { color: 'inherit !important' },
                                   }}
                                 >
                                   <Typography variant="subtitle1" sx={{ fontWeight: 600, color: 'inherit' }}>
