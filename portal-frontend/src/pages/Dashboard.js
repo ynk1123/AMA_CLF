@@ -656,18 +656,32 @@ onClick={() => {
                 onChange={(e) => setFilterStatus(e.target.value)}
                 size="small"
                 sx={{
-                  '& .MuiInputBase-root': {
-                    color: 'var(--text-main)',
-                    backgroundColor: 'transparent',
-                  },
                   '& .MuiInputLabel-root': {
                     color: 'var(--text-muted)',
                   },
+                  '& .MuiInputBase-input': {
+                    color: 'var(--text-main)',
+                  },
+                  '& .MuiInputBase-root': {
+                    backgroundColor: 'transparent',
+                    color: 'var(--text-main)',
+                  },
+                  '& .MuiSvgIcon-root': {
+                    color: 'var(--text-muted)',
+                  },
+                  '& .MuiOutlinedInput-notchedOutline': {
+                    borderColor: 'var(--border-muted)',
+                  },
+                  '&:hover .MuiOutlinedInput-notchedOutline': {
+                    borderColor: 'var(--text-muted)',
+                  },
+                  '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                    borderColor: 'var(--accent-red)',
+                  },
                   '@media (max-width:600px)': {
-                    '& .MuiInputBase-root': { minHeight: 34, color: 'var(--text-main)' },
-                    '& .MuiInputLabel-root': { fontSize: 14, color: 'var(--text-muted)' },
-                    '& .MuiSelect-select': { fontSize: 14, py: '6px', color: 'var(--text-main)' },
-                    '& .MuiSvgIcon-root': { fontSize: 18, color: 'var(--text-muted)' },
+                    '& .MuiInputBase-root': { minHeight: 34 },
+                    '& .MuiInputLabel-root': { fontSize: 14 },
+                    '& .MuiSelect-select': { fontSize: 14, py: '6px' },
                   },
                 }}
               >
