@@ -183,7 +183,7 @@ const getImageUrl = (url) => {
           borderBottom: 1,
           borderColor: 'divider',
           mb: 3,
-          display: { xs: 'block', md: 'none' },
+          display: { xs: 'block', md: 'block' },
           overflowX: 'auto',
           whiteSpace: 'nowrap',
           WebkitOverflowScrolling: 'touch',
