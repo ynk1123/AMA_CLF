@@ -177,17 +177,7 @@ const getImageUrl = (url) => {
       </Box>
 
 
-<Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
-        <Tabs value={tabValue} onChange={(e, v) => setTabValue(v)}>
-          <Tab label="Items" />
-          <Tab label="Claims" />
-          <Tab label="Users" />
-          <Tab label="Locations" />
-          <Tab label="Appointments" />
-        </Tabs>
-      </Box>
-
-      {/* Mobile touch-friendly navigation tabs */}
+{/* Mobile touch-friendly navigation tabs */}
       <Box
         sx={{
           borderBottom: 1,
@@ -358,16 +348,31 @@ const getImageUrl = (url) => {
                       variant="outlined"
                       startIcon={<VisibilityIcon />}
                       onClick={() => handleViewItem(item)}
-                      sx={{ minHeight: 44, justifyContent: 'flex-start' }}
+                      sx={{
+                        minHeight: 44,
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        gap: '8px',
+                      }}
                     >
                       View
                     </Button>
 
                     {item.status === 'pending' && (
-                      <Button variant="contained" onClick={() => handleApprove(item.id)} sx={{ minHeight: 44 }}>
+                      <Button
+                        variant="contained"
+                        onClick={() => handleApprove(item.id)}
+                        sx={{
+                          minHeight: 44,
+                          justifyContent: 'center',
+                          alignItems: 'center',
+                          gap: '8px',
+                        }}
+                      >
                         Approve
                       </Button>
                     )}
+
 
                     {item.status !== 'lost' && item.status !== 'found' && (
                       <Button variant="outlined" onClick={() => handleStatusChange(item.id, item.itemType || 'lost')} sx={{ minHeight: 44 }}>
