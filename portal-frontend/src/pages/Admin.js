@@ -101,8 +101,8 @@ const getImageUrl = (url) => {
   };
 
   return (
-    <Container maxWidth="xl" sx={{ mt: 4, mb: 4 }}>
-      <Typography variant="h4" gutterBottom sx={{ fontSize: { xs: 28, sm: 32, md: 36 } }}>Admin Dashboard</Typography>
+    <Container maxWidth="xl" sx={{ mt: 4, mb: 4, px: { xs: 2, sm: 3 } }}>
+    <Typography variant="h4" gutterBottom sx={{ fontSize: { xs: 28, sm: 32, md: 36 } }}>Admin Dashboard</Typography>
 
 
       <Grid container spacing={3} sx={{ mb: 4, display: { xs: 'none', md: 'flex' } }}>
@@ -195,7 +195,9 @@ const getImageUrl = (url) => {
           mb: 3,
           display: { xs: 'block', md: 'none' },
           overflowX: 'auto',
-          '&::-webkit-scrollbar': { display: 'none' },
+          whiteSpace: 'nowrap',
+          WebkitOverflowScrolling: 'touch',
+          '&::-webkit-scrollbar': { width: 0, height: 0 },
           scrollbarWidth: 'none',
         }}
       >
@@ -838,40 +840,51 @@ const getImageUrl = (url) => {
                     </Typography>
                   </Box>
 
-                  <Box sx={{ mt: 1, display: 'flex', flexDirection: 'column', gap: 0.75 }}>
-                    {apt.status === 'pending' && (
-                      <>
-                        <Button
-                          size="large"
-                          variant="contained"
-                          color="success"
-                          onClick={() => handleAppointmentStatusChange(apt.id, 'approved')}
-                          sx={{ minHeight: 44, justifyContent: 'flex-start' }}
-                        >
-                          Approve
-                        </Button>
-                        <Button
-                          size="large"
-                          variant="outlined"
-                          color="error"
-                          onClick={() => handleAppointmentStatusChange(apt.id, 'cancelled')}
-                          sx={{ minHeight: 44, justifyContent: 'flex-start' }}
-                        >
-                          Cancel
-                        </Button>
-                      </>
-                    )}
-                    {apt.status === 'approved' && (
-                      <Button
-                        size="large"
-                        variant="contained"
-                        color="primary"
-                        onClick={() => handleAppointmentStatusChange(apt.id, 'completed')}
-                        sx={{ minHeight: 44, justifyContent: 'flex-start' }}
-                      >
-                        Complete
-                      </Button>
-                    )}
+                  <Box sx={{ mt: 1 }}>
+                    <Grid container spacing={1}>
+                      {apt.status === 'pending' && (
+                        <>
+                          <Grid item xs={6}>
+                            <Button
+                              fullWidth
+                              size="large"
+                              variant="contained"
+                              color="success"
+                              onClick={() => handleAppointmentStatusChange(apt.id, 'approved')}
+                              sx={{ minHeight: 44, justifyContent: 'center' }}
+                            >
+                              Approve
+                            </Button>
+                          </Grid>
+                          <Grid item xs={6}>
+                            <Button
+                              fullWidth
+                              size="large"
+                              variant="outlined"
+                              color="error"
+                              onClick={() => handleAppointmentStatusChange(apt.id, 'cancelled')}
+                              sx={{ minHeight: 44, justifyContent: 'center' }}
+                            >
+                              Cancel
+                            </Button>
+                          </Grid>
+                        </>
+                      )}
+                      {apt.status === 'approved' && (
+                        <Grid item xs={12}>
+                          <Button
+                            fullWidth
+                            size="large"
+                            variant="contained"
+                            color="primary"
+                            onClick={() => handleAppointmentStatusChange(apt.id, 'completed')}
+                            sx={{ minHeight: 44, justifyContent: 'center' }}
+                          >
+                            Complete
+                          </Button>
+                        </Grid>
+                      )}
+                    </Grid>
                   </Box>
                 </Card>
               );
