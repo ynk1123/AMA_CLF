@@ -1018,7 +1018,7 @@ const getImageUrl = (url) => {
                 <Typography variant="body2" color="text.secondary">Location: {selectedItem.location}</Typography>
                 <Typography variant="body2" color="text.secondary">Date: {new Date(selectedItem.date).toLocaleDateString()}</Typography>
                 <Typography variant="body2" color="text.secondary">Status: {selectedItem.status}</Typography>
-                <Typography sx={{ mt: 2 }}><strong>Description:</strong><br />{selectedItem.description}</Typography>
+                <Typography sx={{ mt: 2, whiteSpace: 'pre-wrap' }}><strong>Description:</strong><br />{selectedItem.description}</Typography>
               </Grid>
             </Grid>
           )}
