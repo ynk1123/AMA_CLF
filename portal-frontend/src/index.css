@@ -56,8 +56,22 @@ body.light-mode {
 ::-webkit-scrollbar-thumb:hover { background: var(--accent-red-dark); }
 
 @media (prefers-color-scheme: dark) {
-  /* If user didn't toggle explicitly, keep dark canvas default. */
+  :root {
+    --bg-canvas: #0f172a;
+    --bg-surface: #1e293b;
+    --bg-card-hover: #334155;
+
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
+    --border-muted: #334155;
+
+    --bg-status-approved: #14532d;
+    --text-status-approved: #4ade80;
+    --bg-status-pending: #78350f;
+    --text-status-pending: #fbbf24;
+  }
 }
+
 
 
 

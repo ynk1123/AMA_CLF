@@ -656,11 +656,18 @@ onClick={() => {
                 onChange={(e) => setFilterStatus(e.target.value)}
                 size="small"
                 sx={{
+                  '& .MuiInputBase-root': {
+                    color: 'var(--text-main)',
+                    backgroundColor: 'transparent',
+                  },
+                  '& .MuiInputLabel-root': {
+                    color: 'var(--text-muted)',
+                  },
                   '@media (max-width:600px)': {
-                    '& .MuiInputBase-root': { minHeight: 34 },
-                    '& .MuiInputLabel-root': { fontSize: 14 },
-                    '& .MuiSelect-select': { fontSize: 14, py: '6px' },
-                    '& .MuiSvgIcon-root': { fontSize: 18 },
+                    '& .MuiInputBase-root': { minHeight: 34, color: 'var(--text-main)' },
+                    '& .MuiInputLabel-root': { fontSize: 14, color: 'var(--text-muted)' },
+                    '& .MuiSelect-select': { fontSize: 14, py: '6px', color: 'var(--text-main)' },
+                    '& .MuiSvgIcon-root': { fontSize: 18, color: 'var(--text-muted)' },
                   },
                 }}
               >
@@ -1335,15 +1342,15 @@ onClick={() => {
                         </DialogTitle>
                         <DialogContent dividers>
                           {notifications.length === 0 ? (
-                            <Typography variant="body1" sx={{ py: 2, textAlign: 'center', color: '#666' }}>
+                            <Typography variant="body1" sx={{ py: 2, textAlign: 'center', color: 'var(--text-muted)' }}>
                               No notifications yet
                             </Typography>
                           ) : (
                             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                               {notifications.map((notif) => (
-                                <Box 
+                                <Box
                                   key={notif.id}
-                                sx={{
+                                  sx={{
                                     p: 2,
                                     borderRadius: 2,
                                     backgroundColor:
@@ -1358,13 +1365,13 @@ onClick={() => {
                                         : notif.type === 'claim_rejected'
                                           ? 'var(--text-status-pending)'
                                           : 'var(--text-main)',
-                                    border: '1px solid var(--border-muted)'
+                                    border: '1px solid var(--border-muted)',
                                   }}
                                 >
-                                  <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                                  <Typography variant="subtitle1" sx={{ fontWeight: 600, color: 'inherit' }}>
                                     {notif.title}
                                   </Typography>
-                                  <Typography variant="body2" sx={{ mt: 0.5 }}>
+                                  <Typography variant="body2" sx={{ mt: 0.5, color: 'inherit' }}>
                                     {notif.message}
                                   </Typography>
                                   <Typography variant="caption" sx={{ color: 'var(--text-muted)', mt: 1, display: 'block' }}>
