@@ -1,9 +1,9 @@
 import React from 'react';
 import { HashRouter as Router, Routes, Route } from 'react-router-dom';
-import { ThemeProvider, CssBaseline, Box } from '@mui/material';
+import { ThemeProvider, CssBaseline, Box, useMediaQuery } from '@mui/material';
 import { AuthProvider } from './context/AuthContext';
 import { LanguageProvider } from './context/LanguageContext';
-import theme from './theme';
+import baseTheme from './theme';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Landing from './pages/Landing';
@@ -18,16 +18,39 @@ import ContactUs from './pages/ContactUs';
 import './styles/mobile-animations.css';
 
 
+
 function App() {
+  const prefersDark = useMediaQuery('(prefers-color-scheme: dark)');
+
+  const theme = React.useMemo(() => {
+    return {
+      ...baseTheme,
+      palette: {
+        ...baseTheme.palette,
+        mode: prefersDark ? 'dark' : 'light',
+        background: {
+          ...(baseTheme.palette?.background || {}),
+          default: prefersDark ? '#0B1220' : '#FAFAFA',
+          paper: prefersDark ? '#111B2E' : '#FFFFFF',
+        },
+        text: {
+          ...(baseTheme.palette?.text || {}),
+          primary: prefersDark ? '#E5E7EB' : '#1A1A2E',
+          secondary: prefersDark ? '#A1A1AA' : '#4B5563',
+        },
+      },
+    };
+  }, [prefersDark]);
+
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <LanguageProvider>
         <AuthProvider>
-<Router>
+          <Router>
             <Navbar />
             <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-<Routes>
+              <Routes>
                 <Route path="/" element={<Landing />} />
                 <Route path="/browse" element={<Browse />} />
                 <Route path="/login" element={<Login />} />
@@ -44,7 +67,7 @@ function App() {
                 {/* Fallback: if refresh/deep link fails, still load SPA */}
                 <Route path="*" element={<Landing />} />
               </Routes>
-<Footer />
+              <Footer />
             </Box>
           </Router>
         </AuthProvider>
@@ -52,5 +75,6 @@ function App() {
     </ThemeProvider>
   );
 }
+
 
 export default App;
