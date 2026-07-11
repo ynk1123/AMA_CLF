@@ -546,12 +546,17 @@ onClick={() => {
           sx={{
             mb: 4,
             p: 2,
-            backgroundColor: 'var(--bg-surface)',
+            backgroundColor: 'background.paper !important',
+            color: 'text.primary !important',
             borderRadius: 2,
-            border: '2px solid var(--border-muted)',
+            border: '2px solid divider',
             '@media (max-width:600px)': {
               mb: 2,
               p: 1.5,
+            },
+            // Shield against external CSS forcing a dark card background
+            '&, & *': {
+              color: 'text.primary !important',
             },
           }}
         >
