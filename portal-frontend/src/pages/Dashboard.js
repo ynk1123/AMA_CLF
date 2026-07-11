@@ -1137,7 +1137,7 @@ onClick={() => {
             p: 1,
             mb: 2
           }}>
-            <Typography variant="body1" sx={{ px: 1 }}>
+            <Typography variant="body1" sx={{ px: 1, whiteSpace: 'pre-wrap' }}>
               {selectedItem.description || 'No description provided.'}
             </Typography>
           </Box>
