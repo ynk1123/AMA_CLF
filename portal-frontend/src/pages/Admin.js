@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Container, Typography, Grid, Card, CardContent, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Chip, Box, Tabs, Tab, Dialog, DialogTitle, DialogContent, DialogActions, TextField, IconButton } from '@mui/material';
 import { adminService, appointmentService } from '../services/api';
 import DeleteIcon from '@mui/icons-material/Delete';
-import EditIcon from '@mui/icons-material/Edit';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 
 const Admin = () => {
@@ -103,18 +102,150 @@ const getImageUrl = (url) => {
 
   return (
     <Container maxWidth="xl" sx={{ mt: 4, mb: 4 }}>
-      <Typography variant="h4" gutterBottom>Admin Dashboard</Typography>
+      <Typography variant="h4" gutterBottom sx={{ fontSize: { xs: 28, sm: 32, md: 36 } }}>Admin Dashboard</Typography>
 
-      <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid item xs={6} md={2}><Card sx={{ bgcolor: '#1976d2', color: 'white' }}><CardContent><Typography variant="body2">Total Items</Typography><Typography variant="h4">{stats.totalItems || 0}</Typography></CardContent></Card></Grid>
-        <Grid item xs={6} md={2}><Card sx={{ bgcolor: '#ed6c02', color: 'white' }}><CardContent><Typography variant="body2">Lost</Typography><Typography variant="h4">{stats.totalLost || 0}</Typography></CardContent></Card></Grid>
-        <Grid item xs={6} md={2}><Card sx={{ bgcolor: '#2e7d32', color: 'white' }}><CardContent><Typography variant="body2">Claimed</Typography><Typography variant="h4">{stats.totalClaimed || 0}</Typography></CardContent></Card></Grid>
-        <Grid item xs={6} md={2}><Card sx={{ bgcolor: '#757575', color: 'white' }}><CardContent><Typography variant="body2">Archived</Typography><Typography variant="h4">{stats.totalArchived || 0}</Typography></CardContent></Card></Grid>
-        <Grid item xs={6} md={2}><Card sx={{ bgcolor: '#0288d1', color: 'white' }}><CardContent><Typography variant="body2">Users</Typography><Typography variant="h4">{stats.totalUsers || 0}</Typography></CardContent></Card></Grid>
-        <Grid item xs={6} md={2}><Card sx={{ bgcolor: '#f57c00', color: 'white' }}><CardContent><Typography variant="body2">Pending Apt</Typography><Typography variant="h4">{stats.pendingAppointments || 0}</Typography></CardContent></Card></Grid>
+
+      <Grid container spacing={3} sx={{ mb: 4, display: { xs: 'none', md: 'flex' } }}>
+        <Grid item md={2}><Card sx={{ bgcolor: '#1976d2', color: 'white' }}><CardContent><Typography variant="body2">Total Items</Typography><Typography variant="h4">{stats.totalItems || 0}</Typography></CardContent></Card></Grid>
+        <Grid item md={2}><Card sx={{ bgcolor: '#ed6c02', color: 'white' }}><CardContent><Typography variant="body2">Lost</Typography><Typography variant="h4">{stats.totalLost || 0}</Typography></CardContent></Card></Grid>
+        <Grid item md={2}><Card sx={{ bgcolor: '#2e7d32', color: 'white' }}><CardContent><Typography variant="body2">Claimed</Typography><Typography variant="h4">{stats.totalClaimed || 0}</Typography></CardContent></Card></Grid>
+        <Grid item md={2}><Card sx={{ bgcolor: '#757575', color: 'white' }}><CardContent><Typography variant="body2">Archived</Typography><Typography variant="h4">{stats.totalArchived || 0}</Typography></CardContent></Card></Grid>
+        <Grid item md={2}><Card sx={{ bgcolor: '#0288d1', color: 'white' }}><CardContent><Typography variant="body2">Users</Typography><Typography variant="h4">{stats.totalUsers || 0}</Typography></CardContent></Card></Grid>
+        <Grid item md={2}><Card sx={{ bgcolor: '#f57c00', color: 'white' }}><CardContent><Typography variant="body2">Pending Apt</Typography><Typography variant="h4">{stats.pendingAppointments || 0}</Typography></CardContent></Card></Grid>
       </Grid>
 
+      {/* Mobile: 2x2 stats grid (extra stat visible via horizontal scroll) */}
+      <Box
+        sx={{
+          mb: 3,
+          display: { xs: 'block', md: 'none' },
+        }}
+      >
+        <Grid container spacing={2}>
+          <Grid item xs={6}>
+            <Card sx={{ bgcolor: '#1976d2', color: 'white' }}>
+              <CardContent sx={{ py: 1.1 }}>
+                <Typography variant="body2" sx={{ fontSize: 12.5, lineHeight: 1.2 }}>
+                  Total Items
+                </Typography>
+                <Typography variant="h5" sx={{ fontSize: 20, mt: 0.5, lineHeight: 1.1 }}>
+                  {stats.totalItems || 0}
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+          <Grid item xs={6}>
+            <Card sx={{ bgcolor: '#ed6c02', color: 'white' }}>
+              <CardContent sx={{ py: 1.1 }}>
+                <Typography variant="body2" sx={{ fontSize: 12.5, lineHeight: 1.2 }}>
+                  Lost
+                </Typography>
+                <Typography variant="h5" sx={{ fontSize: 20, mt: 0.5, lineHeight: 1.1 }}>
+                  {stats.totalLost || 0}
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+          <Grid item xs={6}>
+            <Card sx={{ bgcolor: '#2e7d32', color: 'white' }}>
+              <CardContent sx={{ py: 1.1 }}>
+                <Typography variant="body2" sx={{ fontSize: 12.5, lineHeight: 1.2 }}>
+                  Claimed
+                </Typography>
+                <Typography variant="h5" sx={{ fontSize: 20, mt: 0.5, lineHeight: 1.1 }}>
+                  {stats.totalClaimed || 0}
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+          <Grid item xs={6}>
+            <Card sx={{ bgcolor: '#757575', color: 'white' }}>
+              <CardContent sx={{ py: 1.1 }}>
+                <Typography variant="body2" sx={{ fontSize: 12.5, lineHeight: 1.2 }}>
+                  Archived
+                </Typography>
+                <Typography variant="h5" sx={{ fontSize: 20, mt: 0.5, lineHeight: 1.1 }}>
+                  {stats.totalArchived || 0}
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+        </Grid>
+
+        {/* Remaining 2 stats below as another 2x2 grid for fit */}
+        <Grid container spacing={2} sx={{ mt: 2 }}>
+          <Grid item xs={6}>
+            <Card sx={{ bgcolor: '#0288d1', color: 'white' }}>
+              <CardContent sx={{ py: 1.1 }}>
+                <Typography variant="body2" sx={{ fontSize: 12.5, lineHeight: 1.2 }}>
+                  Users
+                </Typography>
+                <Typography variant="h5" sx={{ fontSize: 20, mt: 0.5, lineHeight: 1.1 }}>
+                  {stats.totalUsers || 0}
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+          <Grid item xs={6}>
+            <Card sx={{ bgcolor: '#f57c00', color: 'white' }}>
+              <CardContent sx={{ py: 1.1 }}>
+                <Typography variant="body2" sx={{ fontSize: 12.5, lineHeight: 1.2 }}>
+                  Pending Apt
+                </Typography>
+                <Typography variant="h5" sx={{ fontSize: 20, mt: 0.5, lineHeight: 1.1 }}>
+                  {stats.pendingAppointments || 0}
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+          <Grid item xs={6} />
+          <Grid item xs={6} />
+        </Grid>
+      </Box>
+
 <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
+        <Tabs value={tabValue} onChange={(e, v) => setTabValue(v)}>
+          <Tab label="Items" />
+          <Tab label="Claims" />
+          <Tab label="Users" />
+          <Tab label="Locations" />
+          <Tab label="Appointments" />
+        </Tabs>
+      </Box>
+
+      {/* Mobile touch-friendly navigation tabs */}
+      <Box
+        sx={{
+          borderBottom: 1,
+          borderColor: 'divider',
+          mb: 3,
+          display: { xs: 'block', md: 'none' },
+          overflowX: 'auto',
+          '&::-webkit-scrollbar': { display: 'none' },
+          scrollbarWidth: 'none',
+        }}
+      >
+        <Tabs
+          value={tabValue}
+          onChange={(e, v) => setTabValue(v)}
+          variant="scrollable"
+          scrollButtons={false}
+          allowScrollButtonsMobile
+          sx={{
+            minHeight: 48,
+            '& .MuiTabs-indicator': { height: 3 },
+            '& .MuiTab-root': { minHeight: 44, minWidth: 80 },
+          }}
+        >
+          <Tab label="Items" value={0} />
+          <Tab label="Claims" value={1} />
+          <Tab label="Users" value={2} />
+          <Tab label="Locations" value={3} />
+          <Tab label="Appointments" value={4} />
+        </Tabs>
+      </Box>
+
+      <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3, display: { xs: 'none', md: 'block' } }}>
         <Tabs value={tabValue} onChange={(e, v) => setTabValue(v)}>
           <Tab label="Items" />
           <Tab label="Claims" />
@@ -127,118 +258,364 @@ const getImageUrl = (url) => {
       {tabValue === 0 && (
         <>
           <Typography variant="h5" gutterBottom>All Items</Typography>
-          <TableContainer component={Paper}>
-            <Table>
-              <TableHead><TableRow sx={{ bgcolor: '#f5f5f5' }}><TableCell><strong>ID</strong></TableCell><TableCell><strong>Title</strong></TableCell><TableCell><strong>Category</strong></TableCell><TableCell><strong>Location</strong></TableCell><TableCell><strong>Status</strong></TableCell><TableCell><strong>By</strong></TableCell><TableCell><strong>Actions</strong></TableCell></TableRow></TableHead>
-              <TableBody>
-                {items.map((item) => (
-                  <TableRow key={item.id} hover>
-                    <TableCell>{item.id}</TableCell><TableCell>{item.title}</TableCell><TableCell>{item.category}</TableCell><TableCell>{item.location}</TableCell>
-                    <TableCell><Chip label={item.status} color={getStatusColor(item.status)} size="small" /></TableCell>
-                    <TableCell>{(() => {
-                      const studentId = item?.User?.studentId;
-                      const displayName = item?.User?.displayName;
 
-                      // Force Admin when missing/blank/Unknown
-                      if (
-                        studentId === undefined ||
-                        studentId === null ||
-                        String(studentId).trim() === '' ||
-                        studentId === 'Unknown'
-                      ) {
-                        return 'Admin';
-                      }
 
-                      const studentIdStr = String(studentId).trim();
-                      const username = displayName ? String(displayName).trim() : '';
-                      return username ? `${username} (${studentIdStr})` : studentIdStr;
-                    })()}</TableCell>
-<TableCell>
-                      <IconButton size="small" onClick={() => handleViewItem(item)}><VisibilityIcon /></IconButton>
-                      {item.status === 'pending' && <Button size="small" onClick={() => handleApprove(item.id)}>Approve</Button>}
-                      {item.status !== 'lost' && item.status !== 'found' && <Button size="small" onClick={() => handleStatusChange(item.id, item.itemType || 'lost')}>Restore</Button>}
-                      {(item.status === 'lost' || item.status === 'found') && <Button size="small" onClick={() => handleStatusChange(item.id, 'claimed')}>Claim</Button>}
-                      <Button size="small" onClick={() => handleStatusChange(item.id, 'archived')}>Archive</Button>
-                      <IconButton size="small" onClick={() => handleDeleteItem(item.id)} color="error"><DeleteIcon /></IconButton>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        </>
-      )}
-
-{tabValue === 1 && (
-        <>
-          <Typography variant="h5" gutterBottom>Pending Claims</Typography>
-          {pendingClaims.length === 0 ? (
-            <Paper sx={{ p: 4, textAlign: 'center' }}>
-              <Typography variant="body1" color="text.secondary">No pending claims</Typography>
-            </Paper>
-          ) : (
+          {/* Desktop/tablet table */}
+          <Box sx={{ display: { xs: 'none', md: 'block' } }}>
             <TableContainer component={Paper}>
               <Table>
-                <TableHead><TableRow sx={{ bgcolor: '#f5f5f5' }}><TableCell><strong>Claim ID</strong></TableCell><TableCell><strong>Item</strong></TableCell><TableCell><strong>Claimed By</strong></TableCell><TableCell><strong>Answer</strong></TableCell><TableCell><strong>Status</strong></TableCell><TableCell><strong>Actions</strong></TableCell></TableRow></TableHead>
+                <TableHead>
+                  <TableRow sx={{ bgcolor: '#f5f5f5' }}>
+                    <TableCell><strong>ID</strong></TableCell>
+                    <TableCell><strong>Title</strong></TableCell>
+                    <TableCell><strong>Category</strong></TableCell>
+                    <TableCell><strong>Location</strong></TableCell>
+                    <TableCell><strong>Status</strong></TableCell>
+                    <TableCell><strong>By</strong></TableCell>
+                    <TableCell><strong>Actions</strong></TableCell>
+                  </TableRow>
+                </TableHead>
                 <TableBody>
-                  {pendingClaims.map((claim) => (
-                    <TableRow key={claim.id} hover>
-                      <TableCell>{claim.id}</TableCell>
-                      <TableCell>{claim.Item?.title || 'Unknown'}</TableCell>
-                      <TableCell>{claim.User?.displayName || claim.User?.studentId || 'Unknown'}</TableCell>
-                      <TableCell>{claim.answer || '-'}</TableCell>
-                      <TableCell><Chip label={claim.status} color={claim.status === 'pending' ? 'warning' : 'success'} size="small" /></TableCell>
+                  {items.map((item) => (
+                    <TableRow key={item.id} hover>
+                      <TableCell>{item.id}</TableCell>
+                      <TableCell>{item.title}</TableCell>
+                      <TableCell>{item.category}</TableCell>
+                      <TableCell>{item.location}</TableCell>
                       <TableCell>
-                        <Button size="small" onClick={() => handleClaimApproval(claim.id, 'approved')} color="success">Approve</Button>
-                        <Button size="small" onClick={() => handleClaimApproval(claim.id, 'rejected')} color="error">Reject</Button>
+                        <Chip label={item.status} color={getStatusColor(item.status)} size="small" />
+                      </TableCell>
+                      <TableCell>
+                        {(() => {
+                          const studentId = item?.User?.studentId;
+                          const displayName = item?.User?.displayName;
+
+                          // Force Admin when missing/blank/Unknown
+                          if (
+                            studentId === undefined ||
+                            studentId === null ||
+                            String(studentId).trim() === '' ||
+                            studentId === 'Unknown'
+                          ) {
+                            return 'Admin';
+                          }
+
+                          const studentIdStr = String(studentId).trim();
+                          const username = displayName ? String(displayName).trim() : '';
+                          return username ? `${username} (${studentIdStr})` : studentIdStr;
+                        })()}
+                      </TableCell>
+                      <TableCell>
+                        <IconButton size="small" onClick={() => handleViewItem(item)}>
+                          <VisibilityIcon />
+                        </IconButton>
+                        {item.status === 'pending' && (
+                          <Button size="small" onClick={() => handleApprove(item.id)}>
+                            Approve
+                          </Button>
+                        )}
+                        {item.status !== 'lost' && item.status !== 'found' && (
+                          <Button size="small" onClick={() => handleStatusChange(item.id, item.itemType || 'lost')}>
+                            Restore
+                          </Button>
+                        )}
+                        {(item.status === 'lost' || item.status === 'found') && (
+                          <Button size="small" onClick={() => handleStatusChange(item.id, 'claimed')}>
+                            Claim
+                          </Button>
+                        )}
+                        <Button size="small" onClick={() => handleStatusChange(item.id, 'archived')}>
+                          Archive
+                        </Button>
+                        <IconButton size="small" onClick={() => handleDeleteItem(item.id)} color="error">
+                          <DeleteIcon />
+                        </IconButton>
                       </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
               </Table>
             </TableContainer>
+          </Box>
+
+          {/* Mobile cards */}
+          <Box sx={{ display: { xs: 'block', md: 'none' } }}>
+            {items.map((item) => {
+              const studentId = item?.User?.studentId;
+              const displayName = item?.User?.displayName;
+
+              const byText = (() => {
+                if (
+                  studentId === undefined ||
+                  studentId === null ||
+                  String(studentId).trim() === '' ||
+                  studentId === 'Unknown'
+                ) {
+                  return 'Admin';
+                }
+                const studentIdStr = String(studentId).trim();
+                const username = displayName ? String(displayName).trim() : '';
+                return username ? `${username} (${studentIdStr})` : studentIdStr;
+              })();
+
+              return (
+                <Card key={item.id} sx={{ mb: 2, p: 1.25 }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 1 }}>
+                    <Box sx={{ minWidth: 0 }}>
+                      <Typography variant="subtitle1" sx={{ fontWeight: 700, fontSize: 16, mb: 0.25 }} noWrap>
+                        {item.title}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary" sx={{ fontSize: 13 }}>
+                        ID: {item.id}
+                      </Typography>
+                    </Box>
+                    <Chip label={item.status} color={getStatusColor(item.status)} size="small" />
+                  </Box>
+
+                  <Box sx={{ mt: 1, display: 'grid', gap: 0.5 }}>
+                    <Typography variant="body2" sx={{ fontSize: 14 }}>
+                      <strong>Category:</strong> {item.category}
+                    </Typography>
+                    <Typography variant="body2" sx={{ fontSize: 14 }}>
+                      <strong>Location:</strong> {item.location}
+                    </Typography>
+                    <Typography variant="body2" sx={{ fontSize: 14 }}>
+                      <strong>By:</strong> {byText}
+                    </Typography>
+                  </Box>
+
+                  <Box sx={{ mt: 1, display: 'flex', flexDirection: 'column', gap: 0.75 }}>
+                    <Button
+                      variant="outlined"
+                      startIcon={<VisibilityIcon />}
+                      onClick={() => handleViewItem(item)}
+                      sx={{ minHeight: 44, justifyContent: 'flex-start' }}
+                    >
+                      View
+                    </Button>
+
+                    {item.status === 'pending' && (
+                      <Button variant="contained" onClick={() => handleApprove(item.id)} sx={{ minHeight: 44 }}>
+                        Approve
+                      </Button>
+                    )}
+
+                    {item.status !== 'lost' && item.status !== 'found' && (
+                      <Button variant="outlined" onClick={() => handleStatusChange(item.id, item.itemType || 'lost')} sx={{ minHeight: 44 }}>
+                        Restore
+                      </Button>
+                    )}
+
+                    {(item.status === 'lost' || item.status === 'found') && (
+                      <Button variant="outlined" onClick={() => handleStatusChange(item.id, 'claimed')} sx={{ minHeight: 44 }}>
+                        Claim
+                      </Button>
+                    )}
+
+                    <Button variant="outlined" onClick={() => handleStatusChange(item.id, 'archived')} sx={{ minHeight: 44 }}>
+                      Archive
+                    </Button>
+
+                    <Button
+                      variant="outlined"
+                      color="error"
+                      onClick={() => handleDeleteItem(item.id)}
+                      sx={{ minHeight: 44, borderColor: 'error.main' }}
+                      startIcon={<DeleteIcon />}
+                    >
+                      Delete
+                    </Button>
+                  </Box>
+                </Card>
+              );
+            })}
+          </Box>
+        </>
+      )}
+
+      {tabValue === 1 && (
+        <>
+          <Typography variant="h5" gutterBottom>Pending Claims</Typography>
+
+          {pendingClaims.length === 0 ? (
+            <Paper sx={{ p: 4, textAlign: 'center' }}>
+              <Typography variant="body1" color="text.secondary">No pending claims</Typography>
+            </Paper>
+          ) : (
+            <>
+              {/* Desktop/tablet table */}
+              <Box sx={{ display: { xs: 'none', md: 'block' } }}>
+                <TableContainer component={Paper}>
+                  <Table>
+                    <TableHead>
+                      <TableRow sx={{ bgcolor: '#f5f5f5' }}>
+                        <TableCell><strong>Claim ID</strong></TableCell>
+                        <TableCell><strong>Item</strong></TableCell>
+                        <TableCell><strong>Claimed By</strong></TableCell>
+                        <TableCell><strong>Answer</strong></TableCell>
+                        <TableCell><strong>Status</strong></TableCell>
+                        <TableCell><strong>Actions</strong></TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {pendingClaims.map((claim) => (
+                        <TableRow key={claim.id} hover>
+                          <TableCell>{claim.id}</TableCell>
+                          <TableCell>{claim.Item?.title || 'Unknown'}</TableCell>
+                          <TableCell>{claim.User?.displayName || claim.User?.studentId || 'Unknown'}</TableCell>
+                          <TableCell>{claim.answer || '-'}</TableCell>
+                          <TableCell>
+                            <Chip label={claim.status} color={claim.status === 'pending' ? 'warning' : 'success'} size="small" />
+                          </TableCell>
+                          <TableCell>
+                            <Button size="small" onClick={() => handleClaimApproval(claim.id, 'approved')} color="success">Approve</Button>
+                            <Button size="small" onClick={() => handleClaimApproval(claim.id, 'rejected')} color="error">Reject</Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              </Box>
+
+              {/* Mobile cards */}
+              <Box sx={{ display: { xs: 'block', md: 'none' } }}>
+                {pendingClaims.map((claim) => {
+                  const statusColor = claim.status === 'pending' ? 'warning' : 'success';
+                  const claimedBy = claim.User?.displayName || claim.User?.studentId || 'Unknown';
+
+                  return (
+                    <Card key={claim.id} sx={{ mb: 2, p: 1.25 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 1 }}>
+                        <Box sx={{ minWidth: 0 }}>
+                          <Typography variant="subtitle1" sx={{ fontWeight: 700, fontSize: 16, lineHeight: 1.2 }}>
+                            Claim #{claim.id}
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary" sx={{ fontSize: 13, mt: 0.5 }}>
+                            Item: {claim.Item?.title || 'Unknown'}
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary" sx={{ fontSize: 13, mt: 0.5 }}>
+                            Claimed By: {claimedBy}
+                          </Typography>
+                        </Box>
+                        <Chip label={claim.status} color={statusColor} size="small" />
+                      </Box>
+
+                      <Box sx={{ mt: 1 }}>
+                        <Typography variant="body2" sx={{ fontSize: 14 }}>
+                          <strong>Answer:</strong> {claim.answer || '-'}
+                        </Typography>
+                      </Box>
+
+                      <Box sx={{ mt: 1, display: 'flex', flexDirection: 'column', gap: 0.75 }}>
+                        <Button
+                          size="large"
+                          variant="contained"
+                          color="success"
+                          onClick={() => handleClaimApproval(claim.id, 'approved')}
+                          sx={{ minHeight: 44, justifyContent: 'flex-start' }}
+                        >
+                          Approve
+                        </Button>
+                        <Button
+                          size="large"
+                          variant="outlined"
+                          color="error"
+                          onClick={() => handleClaimApproval(claim.id, 'rejected')}
+                          sx={{ minHeight: 44, justifyContent: 'flex-start' }}
+                        >
+                          Reject
+                        </Button>
+                      </Box>
+                    </Card>
+                  );
+                })}
+              </Box>
+            </>
           )}
 
           {/* Show ALL Claims History */}
           <Box sx={{ mt: 4 }}>
             <Typography variant="h5" gutterBottom>All Claims History</Typography>
+
             {allClaims.length === 0 ? (
               <Paper sx={{ p: 4, textAlign: 'center' }}>
                 <Typography variant="body1" color="text.secondary">No claims history</Typography>
               </Paper>
             ) : (
-              <TableContainer component={Paper}>
-                <Table>
-                  <TableHead>
-                    <TableRow sx={{ bgcolor: '#e0e0e0' }}>
-                      <TableCell><strong>Claim ID</strong></TableCell>
-                      <TableCell><strong>Item</strong></TableCell>
-                      <TableCell><strong>Claimed By</strong></TableCell>
-                      <TableCell><strong>Answer</strong></TableCell>
-                      <TableCell><strong>Status</strong></TableCell>
-                      <TableCell><strong>Date</strong></TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {allClaims.map((claim) => (
-                      <TableRow key={claim.id} hover>
-                        <TableCell>{claim.id}</TableCell>
-                        <TableCell>{claim.Item?.title || 'Unknown'}</TableCell>
-                        <TableCell>{claim.User?.displayName || claim.User?.studentId || 'Unknown'}</TableCell>
-                        <TableCell>{claim.answer || '-'}</TableCell>
-                        <TableCell>
-                          <Chip 
-                            label={claim.status} 
-                            color={claim.status === 'approved' ? 'success' : claim.status === 'rejected' ? 'error' : 'warning'} 
-                            size="small" 
-                          />
-                        </TableCell>
-                        <TableCell>{claim.createdAt ? new Date(claim.createdAt).toLocaleDateString() : '-'}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
+              <>
+                {/* Desktop/tablet table */}
+                <Box sx={{ display: { xs: 'none', md: 'block' } }}>
+                  <TableContainer component={Paper}>
+                    <Table>
+                      <TableHead>
+                        <TableRow sx={{ bgcolor: '#e0e0e0' }}>
+                          <TableCell><strong>Claim ID</strong></TableCell>
+                          <TableCell><strong>Item</strong></TableCell>
+                          <TableCell><strong>Claimed By</strong></TableCell>
+                          <TableCell><strong>Answer</strong></TableCell>
+                          <TableCell><strong>Status</strong></TableCell>
+                          <TableCell><strong>Date</strong></TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {allClaims.map((claim) => (
+                          <TableRow key={claim.id} hover>
+                            <TableCell>{claim.id}</TableCell>
+                            <TableCell>{claim.Item?.title || 'Unknown'}</TableCell>
+                            <TableCell>{claim.User?.displayName || claim.User?.studentId || 'Unknown'}</TableCell>
+                            <TableCell>{claim.answer || '-'}</TableCell>
+                            <TableCell>
+                              <Chip
+                                label={claim.status}
+                                color={claim.status === 'approved' ? 'success' : claim.status === 'rejected' ? 'error' : 'warning'}
+                                size="small"
+                              />
+                            </TableCell>
+                            <TableCell>{claim.createdAt ? new Date(claim.createdAt).toLocaleDateString() : '-'}</TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                </Box>
+
+                {/* Mobile cards */}
+                <Box sx={{ display: { xs: 'block', md: 'none' } }}>
+                  {allClaims.map((claim) => {
+                    const claimedBy = claim.User?.displayName || claim.User?.studentId || 'Unknown';
+                    const cardStatusColor = claim.status === 'approved' ? 'success' : claim.status === 'rejected' ? 'error' : 'warning';
+
+                    return (
+                      <Card key={claim.id} sx={{ mb: 2, p: 1.25 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 1 }}>
+                          <Box sx={{ minWidth: 0 }}>
+                            <Typography variant="subtitle1" sx={{ fontWeight: 700, fontSize: 16, lineHeight: 1.2 }}>
+                              Claim #{claim.id}
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary" sx={{ fontSize: 13, mt: 0.5 }}>
+                              Item: {claim.Item?.title || 'Unknown'}
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary" sx={{ fontSize: 13, mt: 0.5 }}>
+                              Claimed By: {claimedBy}
+                            </Typography>
+                          </Box>
+                          <Chip label={claim.status} color={cardStatusColor} size="small" />
+                        </Box>
+
+                        <Box sx={{ mt: 1, display: 'grid', gap: 0.5 }}>
+                          <Typography variant="body2" sx={{ fontSize: 14 }}>
+                            <strong>Answer:</strong> {claim.answer || '-'}
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary" sx={{ fontSize: 13 }}>
+                            Date: {claim.createdAt ? new Date(claim.createdAt).toLocaleDateString() : '-'}
+                          </Typography>
+                        </Box>
+                      </Card>
+                    );
+                  })}
+                </Box>
+              </>
             )}
           </Box>
         </>
