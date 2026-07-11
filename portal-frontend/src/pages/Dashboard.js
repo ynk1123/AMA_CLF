@@ -521,11 +521,12 @@ onClick={() => {
               setNotificationsViewedCountInStorage(notifications.length);
               setNotificationCount(0); // hide badge after viewing
             }}
-            sx={{ 
-              backgroundColor: '#f5f5f5',
-              '&:hover': { backgroundColor: '#e0e0e0' }
+            sx={{
+              backgroundColor: 'var(--bg-card-hover)',
+              '&:hover': { backgroundColor: 'var(--bg-card-hover)' }
             }}
 >
+
             <Badge badgeContent={notificationCount} color="error">
               <NotificationsIcon />
             </Badge>
@@ -545,9 +546,9 @@ onClick={() => {
           sx={{
             mb: 4,
             p: 2,
-            backgroundColor: '#f5f5f5',
+            backgroundColor: 'var(--bg-surface)',
             borderRadius: 2,
-            border: '2px solid #FEE2E2',
+            border: '2px solid var(--border-muted)',
             '@media (max-width:600px)': {
               mb: 2,
               p: 1.5,
@@ -1342,15 +1343,22 @@ onClick={() => {
                               {notifications.map((notif) => (
                                 <Box 
                                   key={notif.id}
-                                  sx={{ 
-                                    p: 2, 
-                                    borderRadius: 2, 
-backgroundColor: notif.type === 'claim_approved' ? '#E8F5E9' : 
-                                                notif.type === 'claim_rejected' ? '#FFEBEE' : 
-                                                notif.type === 'appointment' ? '#E3F2FD' :
-                                                notif.type === 'item_approved' ? '#E8F5E9' :
-                                                notif.type === 'item_posted' ? '#E3F2FD' : '#FFF3E0',
-                                    border: '1px solid #ddd'
+                                sx={{
+                                    p: 2,
+                                    borderRadius: 2,
+                                    backgroundColor:
+                                      notif.type === 'claim_approved' || notif.type === 'item_approved'
+                                        ? 'var(--bg-status-approved)'
+                                        : notif.type === 'claim_rejected'
+                                          ? 'var(--bg-status-pending)'
+                                          : 'var(--bg-surface)',
+                                    color:
+                                      notif.type === 'claim_approved' || notif.type === 'item_approved'
+                                        ? 'var(--text-status-approved)'
+                                        : notif.type === 'claim_rejected'
+                                          ? 'var(--text-status-pending)'
+                                          : 'var(--text-main)',
+                                    border: '1px solid var(--border-muted)'
                                   }}
                                 >
                                   <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
@@ -1359,7 +1367,7 @@ backgroundColor: notif.type === 'claim_approved' ? '#E8F5E9' :
                                   <Typography variant="body2" sx={{ mt: 0.5 }}>
                                     {notif.message}
                                   </Typography>
-                                  <Typography variant="caption" sx={{ color: '#666', mt: 1, display: 'block' }}>
+                                  <Typography variant="caption" sx={{ color: 'var(--text-muted)', mt: 1, display: 'block' }}>
                                     {new Date(notif.time).toLocaleDateString()}
                                   </Typography>
                                 </Box>
