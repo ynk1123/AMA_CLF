@@ -452,16 +452,25 @@ const getImageUrl = (url) => {
                   const claimedBy = claim.User?.displayName || claim.User?.studentId || 'Unknown';
 
                   return (
-                    <Card key={claim.id} sx={{ mb: 2, p: 1.25 }}>
+                    <Card
+                      key={claim.id}
+                      sx={{
+                        mb: 2,
+                        p: 1.5,
+                        border: '1px solid rgba(0,0,0,0.06)',
+                        boxShadow: '0 1px 8px rgba(0,0,0,0.06)',
+                        borderRadius: 2,
+                      }}
+                    >
                       <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 1 }}>
                         <Box sx={{ minWidth: 0 }}>
-                          <Typography variant="subtitle1" sx={{ fontWeight: 700, fontSize: 16, lineHeight: 1.2 }}>
+                          <Typography variant="subtitle1" sx={{ fontWeight: 800, fontSize: 17, lineHeight: 1.15 }}>
                             Claim #{claim.id}
                           </Typography>
-                          <Typography variant="body2" color="text.secondary" sx={{ fontSize: 13, mt: 0.5 }}>
+                          <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 700, fontSize: 14, mt: 0.5 }}>
                             Item: {claim.Item?.title || 'Unknown'}
                           </Typography>
-                          <Typography variant="body2" color="text.secondary" sx={{ fontSize: 13, mt: 0.5 }}>
+                          <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 700, fontSize: 14, mt: 0.5 }}>
                             Claimed By: {claimedBy}
                           </Typography>
                         </Box>
@@ -743,26 +752,131 @@ const getImageUrl = (url) => {
         </>
       )}
 
-{tabValue === 4 && (
+      {tabValue === 4 && (
         <>
           <Typography variant="h5" gutterBottom>CCTV Review Appointments</Typography>
-          <TableContainer component={Paper}>
-            <Table>
-              <TableHead><TableRow sx={{ bgcolor: '#f5f5f5' }}><TableCell><strong>ID</strong></TableCell><TableCell><strong>Date</strong></TableCell><TableCell><strong>Time</strong></TableCell><TableCell><strong>Location</strong></TableCell><TableCell><strong>Status</strong></TableCell><TableCell><strong>Actions</strong></TableCell></TableRow></TableHead>
-              <TableBody>
-                {appointments.map((apt) => (
-                  <TableRow key={apt.id} hover>
-                    <TableCell>{apt.id}</TableCell><TableCell>{new Date(apt.date).toLocaleDateString()}</TableCell><TableCell>{apt.time}</TableCell><TableCell>{apt.location}</TableCell>
-                    <TableCell><Chip label={apt.status} color={getAppointmentStatusColor(apt.status)} size="small" /></TableCell>
-                    <TableCell>
-                      {apt.status === 'pending' && <><Button size="small" onClick={() => handleAppointmentStatusChange(apt.id, 'approved')}>Approve</Button><Button size="small" onClick={() => handleAppointmentStatusChange(apt.id, 'cancelled')}>Cancel</Button></>}
-                      {apt.status === 'approved' && <Button size="small" onClick={() => handleAppointmentStatusChange(apt.id, 'completed')}>Complete</Button>}
-                    </TableCell>
+
+          {/* Desktop/tablet table */}
+          <Box sx={{ display: { xs: 'none', md: 'block' } }}>
+            <TableContainer component={Paper}>
+              <Table>
+                <TableHead>
+                  <TableRow sx={{ bgcolor: '#f5f5f5' }}>
+                    <TableCell><strong>ID</strong></TableCell>
+                    <TableCell><strong>Date</strong></TableCell>
+                    <TableCell><strong>Time</strong></TableCell>
+                    <TableCell><strong>Location</strong></TableCell>
+                    <TableCell><strong>Status</strong></TableCell>
+                    <TableCell><strong>Actions</strong></TableCell>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
+                </TableHead>
+                <TableBody>
+                  {appointments.map((apt) => (
+                    <TableRow key={apt.id} hover>
+                      <TableCell>{apt.id}</TableCell>
+                      <TableCell>{new Date(apt.date).toLocaleDateString()}</TableCell>
+                      <TableCell>{apt.time}</TableCell>
+                      <TableCell>{apt.location}</TableCell>
+                      <TableCell>
+                        <Chip label={apt.status} color={getAppointmentStatusColor(apt.status)} size="small" />
+                      </TableCell>
+                      <TableCell>
+                        {apt.status === 'pending' && (
+                          <>
+                            <Button size="small" onClick={() => handleAppointmentStatusChange(apt.id, 'approved')}>Approve</Button>
+                            <Button size="small" onClick={() => handleAppointmentStatusChange(apt.id, 'cancelled')}>Cancel</Button>
+                          </>
+                        )}
+                        {apt.status === 'approved' && (
+                          <Button size="small" onClick={() => handleAppointmentStatusChange(apt.id, 'completed')}>Complete</Button>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </Box>
+
+          {/* Mobile cards */}
+          <Box sx={{ display: { xs: 'block', md: 'none' } }}>
+            {appointments.map((apt) => {
+              const cardStatusColor = getAppointmentStatusColor(apt.status);
+              const dateText = apt.date ? new Date(apt.date).toLocaleDateString() : '-';
+
+              return (
+                <Card
+                  key={apt.id}
+                  sx={{
+                    mb: 2,
+                    p: 1.5,
+                    border: '1px solid rgba(0,0,0,0.06)',
+                    boxShadow: '0 1px 8px rgba(0,0,0,0.06)',
+                    borderRadius: 2,
+                  }}
+                >
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 1 }}>
+                    <Box sx={{ minWidth: 0 }}>
+                      <Typography variant="subtitle1" sx={{ fontWeight: 800, fontSize: 16, lineHeight: 1.15 }}>
+                        Appointment #{apt.id}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 700, fontSize: 14, mt: 0.5 }}>
+                        Date: {dateText}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 700, fontSize: 14, mt: 0.5 }}>
+                        Time: {apt.time}
+                      </Typography>
+                    </Box>
+                    <Chip label={apt.status} color={cardStatusColor} size="small" />
+                  </Box>
+
+                  <Box sx={{ mt: 1 }}>
+                    <Typography variant="body2" sx={{ fontSize: 14, fontWeight: 700 }}>
+                      Location: <Typography component="span" variant="body2" sx={{ fontWeight: 600 }}>
+                        {apt.location}
+                      </Typography>
+                    </Typography>
+                  </Box>
+
+                  <Box sx={{ mt: 1, display: 'flex', flexDirection: 'column', gap: 0.75 }}>
+                    {apt.status === 'pending' && (
+                      <>
+                        <Button
+                          size="large"
+                          variant="contained"
+                          color="success"
+                          onClick={() => handleAppointmentStatusChange(apt.id, 'approved')}
+                          sx={{ minHeight: 44, justifyContent: 'flex-start' }}
+                        >
+                          Approve
+                        </Button>
+                        <Button
+                          size="large"
+                          variant="outlined"
+                          color="error"
+                          onClick={() => handleAppointmentStatusChange(apt.id, 'cancelled')}
+                          sx={{ minHeight: 44, justifyContent: 'flex-start' }}
+                        >
+                          Cancel
+                        </Button>
+                      </>
+                    )}
+                    {apt.status === 'approved' && (
+                      <Button
+                        size="large"
+                        variant="contained"
+                        color="primary"
+                        onClick={() => handleAppointmentStatusChange(apt.id, 'completed')}
+                        sx={{ minHeight: 44, justifyContent: 'flex-start' }}
+                      >
+                        Complete
+                      </Button>
+                    )}
+                  </Box>
+                </Card>
+              );
+            })}
+          </Box>
         </>
       )}
 
