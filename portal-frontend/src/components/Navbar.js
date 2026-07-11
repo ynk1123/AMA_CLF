@@ -57,11 +57,10 @@ const Navbar = () => {
   const handleLanguageSelect = (code) => {
     changeLanguage(code);
     handleLanguageClose();
-
-
-
+  };
 
   return (
+
     <AppBar position="static" className="fade-in">
       <Toolbar sx={{ minHeight: { xs: 60, sm: 64 } }}>
         <SearchIcon sx={{ mr: 1, fontSize: { xs: 20, sm: 28 }, display: { xs: 'none', sm: 'inline-flex' } }} />
