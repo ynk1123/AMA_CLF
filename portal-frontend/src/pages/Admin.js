@@ -709,18 +709,23 @@ const getImageUrl = (url) => {
                         borderRadius: 2,
                       }}
                     >
-                      <Typography
-                        variant="subtitle1"
-                        sx={{
-                          fontWeight: 800,
-                          fontSize: 16,
-                          lineHeight: 1.15,
-                          mb: 0.75,
-                          wordBreak: 'break-word',
-                        }}
-                      >
-                        {user.email}
-                      </Typography>
+                      <Box sx={{ mb: 0.75 }}>
+                        <Typography
+                          variant="subtitle1"
+                          sx={{
+                            fontWeight: 800,
+                            fontSize: 16,
+                            lineHeight: 1.15,
+                            wordBreak: 'break-word',
+                          }}
+                        >
+                          {user.displayName || 'Unknown'}
+                          {user.studentId ? ` (${user.studentId})` : ''}
+                        </Typography>
+                        <Typography variant="body2" sx={{ mt: 0.4 }}>
+                          <strong>Email:</strong> {user.email}
+                        </Typography>
+                      </Box>
 
                       <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 1 }}>
                         <Chip label={roleText} color={roleColor} size="small" />
