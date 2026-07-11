@@ -1394,7 +1394,7 @@ onClick={() => {
                                   <Typography variant="body2" sx={{ mt: 0.5, color: 'inherit' }}>
                                     {notif.message}
                                   </Typography>
-                                  <Typography variant="caption" sx={{ color: 'var(--text-muted)', mt: 1, display: 'block' }}>
+                                  <Typography variant="caption" sx={{ color: 'text.secondary !important', mt: 1, display: 'block' }}>
                                     {new Date(notif.time).toLocaleDateString()}
                                   </Typography>
                                 </Box>
