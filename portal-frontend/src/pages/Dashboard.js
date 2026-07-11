@@ -545,20 +545,30 @@ return (
           >
             Welcome, {user?.displayName || user?.studentId}
           </Typography>
-<IconButton 
+          <IconButton
             color="primary"
-onClick={() => {
+            onClick={() => {
               setOpenNotificationDialog(true);
               setNotificationsViewed(true);
               setNotificationsViewedInStorage(true);
               setNotificationsViewedCountInStorage(notifications.length);
               setNotificationCount(0); // hide badge after viewing
             }}
-            sx={{
-              backgroundColor: 'var(--bg-card-hover)',
-              '&:hover': { backgroundColor: 'var(--bg-card-hover)' }
+            sx={(theme) => {
+              const isDark = theme.palette.mode === 'dark';
+              return {
+                backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.04)',
+                '&:hover': {
+                  backgroundColor: isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.06)'
+                },
+                // ensure icon itself follows theme (fix "black themed" icon)
+                color: theme.palette.text.primary,
+                '& .MuiSvgIcon-root': {
+                  color: theme.palette.text.primary
+                }
+              };
             }}
->
+          >
 
             <Badge badgeContent={notificationCount} color="error">
               <NotificationsIcon />
