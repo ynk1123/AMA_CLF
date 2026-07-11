@@ -163,10 +163,38 @@ button { cursor: pointer; font-family: inherit; }
   animation: shimmer 1.5s infinite;
 }
 
-/* Smooth transitions */
-* {
+/* Smooth transitions (scoped)
+   Avoid applying transition to every element (can cause “broken”/janky animation on mobile).
+*/
+button,
+a,
+.card-hover {
   transition: all 0.2s ease;
 }
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .float,
+  .float-more,
+  .float-wide,
+  .pulse,
+  .bounce,
+  .rotate,
+  .rotate-reverse,
+  .shimmer {
+    animation: none !important;
+  }
+}
+
 
 /* Mobile layout safety */
 html, body {
