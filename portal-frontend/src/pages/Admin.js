@@ -122,9 +122,9 @@ const getImageUrl = (url) => {
         }}
       >
         <Grid container spacing={2}>
-          <Grid item xs={6}>
+          <Grid item xs={6} sm={4}>
             <Card sx={{ bgcolor: '#1976d2', color: 'white' }}>
-              <CardContent sx={{ py: 1.1 }}>
+              <CardContent sx={{ py: 1.05 }}>
                 <Typography variant="body2" sx={{ fontSize: 12.5, lineHeight: 1.2 }}>Total Items</Typography>
                 <Typography variant="h5" sx={{ fontSize: 20, mt: 0.5, lineHeight: 1.1 }}>{stats.totalItems || 0}</Typography>
               </CardContent>
