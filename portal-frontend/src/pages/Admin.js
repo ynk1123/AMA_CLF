@@ -634,32 +634,127 @@ const getImageUrl = (url) => {
               </Button>
             </Paper>
           ) : (
-            <TableContainer component={Paper}>
-              <Table>
-                <TableHead><TableRow sx={{ bgcolor: '#f5f5f5' }}><TableCell><strong>ID</strong></TableCell><TableCell><strong>Student ID</strong></TableCell><TableCell><strong>Name</strong></TableCell><TableCell><strong>Email</strong></TableCell><TableCell><strong>Role</strong></TableCell><TableCell><strong>Status</strong></TableCell><TableCell><strong>Actions</strong></TableCell></TableRow></TableHead>
-                <TableBody>
-                  {users.map((user) => (
-                    <TableRow key={user.id} hover>
-                      <TableCell>{user.id}</TableCell><TableCell>{user.studentId}</TableCell><TableCell>{user.displayName}</TableCell><TableCell>{user.email}</TableCell>
-                      <TableCell><Chip label={user.role} color={user.role === 'admin' ? 'error' : 'default'} size="small" /></TableCell>
-                      <TableCell><Chip label={user.status || 'active'} color={(user.status || 'active') === 'active' ? 'success' : 'warning'} size="small" /></TableCell>
-                      <TableCell>
-                        {user.role !== 'admin' && (
-                          <>
-                            {(user.status || 'active') === 'active' ? (
-                              <Button size="small" onClick={() => handleSuspendUser(user.id)} color="warning">Suspend</Button>
-                            ) : (
-                              <Button size="small" onClick={() => handleReactivateUser(user.id)} color="success">Reactivate</Button>
+            <>
+              {/* Desktop/tablet table */}
+              <Box sx={{ display: { xs: 'none', md: 'block' } }}>
+                <TableContainer component={Paper}>
+                  <Table>
+                    <TableHead>
+                      <TableRow sx={{ bgcolor: '#f5f5f5' }}>
+                        <TableCell><strong>ID</strong></TableCell>
+                        <TableCell><strong>Student ID</strong></TableCell>
+                        <TableCell><strong>Name</strong></TableCell>
+                        <TableCell><strong>Email</strong></TableCell>
+                        <TableCell><strong>Role</strong></TableCell>
+                        <TableCell><strong>Status</strong></TableCell>
+                        <TableCell><strong>Actions</strong></TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {users.map((user) => (
+                        <TableRow key={user.id} hover>
+                          <TableCell>{user.id}</TableCell>
+                          <TableCell>{user.studentId}</TableCell>
+                          <TableCell>{user.displayName}</TableCell>
+                          <TableCell>{user.email}</TableCell>
+                          <TableCell>
+                            <Chip label={user.role} color={user.role === 'admin' ? 'error' : 'default'} size="small" />
+                          </TableCell>
+                          <TableCell>
+                            <Chip
+                              label={user.status || 'active'}
+                              color={(user.status || 'active') === 'active' ? 'success' : 'warning'}
+                              size="small"
+                            />
+                          </TableCell>
+                          <TableCell>
+                            {user.role !== 'admin' && (
+                              <>
+                                {(user.status || 'active') === 'active' ? (
+                                  <Button size="small" onClick={() => handleSuspendUser(user.id)} color="warning">Suspend</Button>
+                                ) : (
+                                  <Button size="small" onClick={() => handleReactivateUser(user.id)} color="success">Reactivate</Button>
+                                )}
+                                <Button size="small" onClick={() => handleDeleteUser(user.id)} color="error">Delete</Button>
+                              </>
                             )}
-                            <Button size="small" onClick={() => handleDeleteUser(user.id)} color="error">Delete</Button>
-                          </>
-                        )}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              </Box>
+
+              {/* Mobile cards */}
+              <Box sx={{ display: { xs: 'block', md: 'none' }, px: 0 }}>
+                {users.map((user) => {
+                  const statusText = user.status || 'active';
+                  const roleText = user.role === 'admin' ? 'Admin' : 'Student';
+
+                  const statusColor = statusText === 'active' ? 'success' : 'warning';
+                  const roleColor = user.role === 'admin' ? 'error' : 'default';
+
+                  const canSuspendReactivate = user.role !== 'admin';
+                  const isActive = statusText === 'active';
+
+                  return (
+                    <Card
+                      key={user.id}
+                      sx={{
+                        mb: 2,
+                        p: 1.5,
+                        border: '1px solid rgba(0,0,0,0.06)',
+                        boxShadow: '0 1px 8px rgba(0,0,0,0.06)',
+                        borderRadius: 2,
+                      }}
+                    >
+                      <Typography
+                        variant="subtitle1"
+                        sx={{
+                          fontWeight: 800,
+                          fontSize: 16,
+                          lineHeight: 1.15,
+                          mb: 0.75,
+                          wordBreak: 'break-word',
+                        }}
+                      >
+                        {user.email}
+                      </Typography>
+
+                      <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 1 }}>
+                        <Chip label={roleText} color={roleColor} size="small" />
+                        <Chip label={isActive ? 'Active' : 'Inactive'} color={statusColor} size="small" />
+                      </Box>
+
+                      {/* Action row */}
+                      <Box sx={{ mt: 1, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1 }}>
+                        <Button
+                          fullWidth
+                          variant="contained"
+                          color={isActive ? 'warning' : 'success'}
+                          onClick={() => (isActive ? handleSuspendUser(user.id) : handleReactivateUser(user.id))}
+                          disabled={!canSuspendReactivate}
+                          sx={{ minHeight: 44, justifyContent: 'center' }}
+                        >
+                          {isActive ? 'Suspend' : 'Reactivate'}
+                        </Button>
+                        <Button
+                          fullWidth
+                          variant="outlined"
+                          color="error"
+                          onClick={() => handleDeleteUser(user.id)}
+                          disabled={!canSuspendReactivate}
+                          sx={{ minHeight: 44, justifyContent: 'center' }}
+                        >
+                          Delete
+                        </Button>
+                      </Box>
+                    </Card>
+                  );
+                })}
+              </Box>
+            </>
           )}
         </>
       )}
