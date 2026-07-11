@@ -114,11 +114,14 @@ const getImageUrl = (url) => {
         <Grid item md={2}><Card sx={{ bgcolor: '#f57c00', color: 'white' }}><CardContent><Typography variant="body2">Pending Apt</Typography><Typography variant="h4">{stats.pendingAppointments || 0}</Typography></CardContent></Card></Grid>
       </Grid>
 
-      {/* Mobile: auto-wrapping stats grid */}
+      {/* Mobile: fixed-size responsive stats grid (prevents edge cut-off) */}
       <Box
         sx={{
           mb: 3,
           display: { xs: 'block', md: 'none' },
+          overflow: 'hidden',
+          width: '100%',
+          px: 0.5,
         }}
       >
         <Grid container spacing={2}>
