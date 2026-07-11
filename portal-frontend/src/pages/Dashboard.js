@@ -1414,13 +1414,15 @@ onClick={() => {
                                     const variant = innerStatus ? statusCardVariants[innerStatus] : null;
 
                                     const paletteDivider = theme.palette.divider;
+                                    const isDark = theme.palette.mode === 'dark';
+
                                     const bg = variant
-                                      ? theme.palette.mode === 'dark'
+                                      ? isDark
                                         ? variant.bg.dark
                                         : variant.bg.light
                                       : theme.palette.background.paper;
                                     const fg = variant
-                                      ? theme.palette.mode === 'dark'
+                                      ? isDark
                                         ? variant.fg.dark
                                         : variant.fg.light
                                       : theme.palette.text.primary;
