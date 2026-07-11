@@ -76,7 +76,8 @@ useEffect(() => {
     }
   };
 
-const [sendingMessage, setSendingMessage] = useState(false);
+  const [sendingMessage, setSendingMessage] = useState(false);
+  const [justSentMessageId, setJustSentMessageId] = useState(null);
 
   const handleSendMessage = async () => {
     if (!newMessage.trim() || !selectedItem || sendingMessage) {
@@ -84,6 +85,7 @@ const [sendingMessage, setSendingMessage] = useState(false);
     }
 
     setSendingMessage(true);
+    setJustSentMessageId(null);
     try {
       const response = await messageService.createMessage({
         content: newMessage,
@@ -92,7 +94,11 @@ const [sendingMessage, setSendingMessage] = useState(false);
 
       // Backend returns created message including User, so append instead of reloading all messages.
       if (response?.data) {
-        setMessages(prev => [...prev, response.data]);
+        setMessages(prev => {
+          const next = [...prev, response.data];
+          return next;
+        });
+        setJustSentMessageId(response.data.id ?? null);
       }
       setNewMessage('');
     } catch (err) {
@@ -231,7 +237,12 @@ const formatDateTime = (timestamp) => {
                       </Box>
                     ) : (
                       messages.map((message, index) => (
-                        <Box key={message.id || index} sx={{ mb: 3 }} className={`fade-in stagger-${Math.min(index + 1, 4)}`}>
+                        <Box
+                          key={message.id || index}
+                          sx={{ mb: 3 }}
+                          className={`fade-in stagger-${Math.min(index + 1, 4)}${justSentMessageId && (message.id === justSentMessageId) ? ' bbai-pop' : ''}`}
+                        >
+
                           <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
                             <Avatar sx={{ backgroundColor: '#DC2626', mr: 2, width: 40, height: 40, fontWeight: 700 }}>
                               {message.User?.studentId?.charAt(0) || '?'}
@@ -293,6 +304,7 @@ const formatDateTime = (timestamp) => {
                         variant="contained"
                         onClick={handleSendMessage}
                         disabled={sendingMessage}
+                        className="bbai-tap-press"
                         sx={{ backgroundColor: '#DC2626', '&:hover': { backgroundColor: '#B91C1C' } }}
                       >
                         <SendIcon />

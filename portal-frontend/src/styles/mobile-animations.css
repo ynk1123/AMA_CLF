@@ -1,0 +1,37 @@
+/* Mobile animation helpers for Chat UX */
+
+@keyframes bbaiPop {
+  from {
+    transform: scale(0.98);
+    opacity: 0.7;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* When a message is sent, we can add this class to the latest message */
+.bbai-pop {
+  animation: bbaiPop 260ms ease-out;
+}
+
+/* Button tap feedback (works better than relying on hover on touch devices) */
+@keyframes bbaiTap {
+  0% { transform: scale(1); }
+  50% { transform: scale(0.98); }
+  100% { transform: scale(1); }
+}
+
+.bbai-tap-press {
+  animation: bbaiTap 120ms ease-out;
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .bbai-pop,
+  .bbai-tap-press {
+    animation: none !important;
+  }
+}
+

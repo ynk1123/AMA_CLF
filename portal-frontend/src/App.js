@@ -15,6 +15,8 @@ import Dashboard from './pages/Dashboard';
 import Admin from './pages/Admin';
 import Chat from './pages/Chat';
 import ContactUs from './pages/ContactUs';
+import './styles/mobile-animations.css';
+
 
 function App() {
   return (
