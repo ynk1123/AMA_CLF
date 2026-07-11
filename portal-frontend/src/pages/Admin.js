@@ -114,7 +114,7 @@ const getImageUrl = (url) => {
         <Grid item md={2}><Card sx={{ bgcolor: '#f57c00', color: 'white' }}><CardContent><Typography variant="body2">Pending Apt</Typography><Typography variant="h4">{stats.pendingAppointments || 0}</Typography></CardContent></Card></Grid>
       </Grid>
 
-      {/* Mobile: 2x2 stats grid (extra stat visible via horizontal scroll) */}
+      {/* Mobile: auto-wrapping stats grid */}
       <Box
         sx={{
           mb: 3,
@@ -125,83 +125,54 @@ const getImageUrl = (url) => {
           <Grid item xs={6}>
             <Card sx={{ bgcolor: '#1976d2', color: 'white' }}>
               <CardContent sx={{ py: 1.1 }}>
-                <Typography variant="body2" sx={{ fontSize: 12.5, lineHeight: 1.2 }}>
-                  Total Items
-                </Typography>
-                <Typography variant="h5" sx={{ fontSize: 20, mt: 0.5, lineHeight: 1.1 }}>
-                  {stats.totalItems || 0}
-                </Typography>
+                <Typography variant="body2" sx={{ fontSize: 12.5, lineHeight: 1.2 }}>Total Items</Typography>
+                <Typography variant="h5" sx={{ fontSize: 20, mt: 0.5, lineHeight: 1.1 }}>{stats.totalItems || 0}</Typography>
               </CardContent>
             </Card>
           </Grid>
           <Grid item xs={6}>
             <Card sx={{ bgcolor: '#ed6c02', color: 'white' }}>
               <CardContent sx={{ py: 1.1 }}>
-                <Typography variant="body2" sx={{ fontSize: 12.5, lineHeight: 1.2 }}>
-                  Lost
-                </Typography>
-                <Typography variant="h5" sx={{ fontSize: 20, mt: 0.5, lineHeight: 1.1 }}>
-                  {stats.totalLost || 0}
-                </Typography>
+                <Typography variant="body2" sx={{ fontSize: 12.5, lineHeight: 1.2 }}>Lost</Typography>
+                <Typography variant="h5" sx={{ fontSize: 20, mt: 0.5, lineHeight: 1.1 }}>{stats.totalLost || 0}</Typography>
               </CardContent>
             </Card>
           </Grid>
           <Grid item xs={6}>
             <Card sx={{ bgcolor: '#2e7d32', color: 'white' }}>
               <CardContent sx={{ py: 1.1 }}>
-                <Typography variant="body2" sx={{ fontSize: 12.5, lineHeight: 1.2 }}>
-                  Claimed
-                </Typography>
-                <Typography variant="h5" sx={{ fontSize: 20, mt: 0.5, lineHeight: 1.1 }}>
-                  {stats.totalClaimed || 0}
-                </Typography>
+                <Typography variant="body2" sx={{ fontSize: 12.5, lineHeight: 1.2 }}>Claimed</Typography>
+                <Typography variant="h5" sx={{ fontSize: 20, mt: 0.5, lineHeight: 1.1 }}>{stats.totalClaimed || 0}</Typography>
               </CardContent>
             </Card>
           </Grid>
           <Grid item xs={6}>
             <Card sx={{ bgcolor: '#757575', color: 'white' }}>
               <CardContent sx={{ py: 1.1 }}>
-                <Typography variant="body2" sx={{ fontSize: 12.5, lineHeight: 1.2 }}>
-                  Archived
-                </Typography>
-                <Typography variant="h5" sx={{ fontSize: 20, mt: 0.5, lineHeight: 1.1 }}>
-                  {stats.totalArchived || 0}
-                </Typography>
+                <Typography variant="body2" sx={{ fontSize: 12.5, lineHeight: 1.2 }}>Archived</Typography>
+                <Typography variant="h5" sx={{ fontSize: 20, mt: 0.5, lineHeight: 1.1 }}>{stats.totalArchived || 0}</Typography>
               </CardContent>
             </Card>
           </Grid>
-        </Grid>
-
-        {/* Remaining 2 stats below as another 2x2 grid for fit */}
-        <Grid container spacing={2} sx={{ mt: 2 }}>
           <Grid item xs={6}>
             <Card sx={{ bgcolor: '#0288d1', color: 'white' }}>
               <CardContent sx={{ py: 1.1 }}>
-                <Typography variant="body2" sx={{ fontSize: 12.5, lineHeight: 1.2 }}>
-                  Users
-                </Typography>
-                <Typography variant="h5" sx={{ fontSize: 20, mt: 0.5, lineHeight: 1.1 }}>
-                  {stats.totalUsers || 0}
-                </Typography>
+                <Typography variant="body2" sx={{ fontSize: 12.5, lineHeight: 1.2 }}>Users</Typography>
+                <Typography variant="h5" sx={{ fontSize: 20, mt: 0.5, lineHeight: 1.1 }}>{stats.totalUsers || 0}</Typography>
               </CardContent>
             </Card>
           </Grid>
           <Grid item xs={6}>
             <Card sx={{ bgcolor: '#f57c00', color: 'white' }}>
               <CardContent sx={{ py: 1.1 }}>
-                <Typography variant="body2" sx={{ fontSize: 12.5, lineHeight: 1.2 }}>
-                  Pending Apt
-                </Typography>
-                <Typography variant="h5" sx={{ fontSize: 20, mt: 0.5, lineHeight: 1.1 }}>
-                  {stats.pendingAppointments || 0}
-                </Typography>
+                <Typography variant="body2" sx={{ fontSize: 12.5, lineHeight: 1.2 }}>Pending Apt</Typography>
+                <Typography variant="h5" sx={{ fontSize: 20, mt: 0.5, lineHeight: 1.1 }}>{stats.pendingAppointments || 0}</Typography>
               </CardContent>
             </Card>
           </Grid>
-          <Grid item xs={6} />
-          <Grid item xs={6} />
         </Grid>
       </Box>
+
 
 <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
         <Tabs value={tabValue} onChange={(e, v) => setTabValue(v)}>
