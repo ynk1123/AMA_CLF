@@ -88,9 +88,10 @@ const Navbar = () => {
         <IconButton
           color="inherit"
           onClick={() => {
-            // Cycle: system -> light -> dark -> system
-            const next = mode === 'system' ? 'light' : mode === 'light' ? 'dark' : 'system';
+            // Toggle light <-> dark (default is light)
+            const next = mode === 'dark' ? 'light' : 'dark';
             setMode(next);
+
           }}
           sx={{
             mr: 1.0,

@@ -20,12 +20,15 @@ export function ThemeModeProvider({ children }) {
   };
 
   const [mode, setMode] = React.useState(() => {
+    // Default must be LIGHT (original design).
+    // Stored values: 'light' | 'dark'
     try {
-      return localStorage.getItem('lf_theme_mode') || 'system';
+      return localStorage.getItem('lf_theme_mode') || 'light';
     } catch {
-      return 'system';
+      return 'light';
     }
   });
+
 
   React.useEffect(() => {
     try {
@@ -50,7 +53,8 @@ export function ThemeModeProvider({ children }) {
     };
   }, []);
 
-  const resolvedMode = mode === 'system' ? (systemPrefersDark ? 'dark' : 'light') : mode;
+  const resolvedMode = mode;
+
 
   return (
     <ThemeModeContext.Provider value={{ mode, setMode, resolvedMode }}>
