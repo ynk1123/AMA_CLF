@@ -308,7 +308,7 @@ const getImageUrl = (url) => {
           </Box>
 
           {/* Mobile cards */}
-          <Box sx={{ display: { xs: 'block', md: 'none' } }}>
+          <Box sx={{ display: { xs: 'block', md: 'none' }, px: 0 }}>
             {items.map((item) => {
               const studentId = item?.User?.studentId;
               const displayName = item?.User?.displayName;
