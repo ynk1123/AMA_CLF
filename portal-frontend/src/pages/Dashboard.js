@@ -57,6 +57,39 @@ const Dashboard = () => {
       }
     };
 
+    // Notification inner card styling (Approved vs Pending)
+    // Uses theme tokens via sx + palette.mode-aware callbacks.
+    const statusCardVariants = {
+      approved: {
+        bg: {
+          light: '#e6f4ea',
+          dark: '#14532d'
+        },
+        fg: {
+          light: '#137333',
+          dark: '#4ade80'
+        }
+      },
+      pending: {
+        bg: {
+          light: '#fef3c7',
+          dark: '#7c2d12'
+        },
+        fg: {
+          light: '#9a3412',
+          dark: '#fbbf24'
+        }
+      }
+    };
+
+    const getNotificationInnerStatus = (notifType) => {
+      // Note: your loader sets item_posted/item_pending/item_approved.
+      if (notifType === 'item_posted' || notifType === 'item_approved') return 'approved';
+      if (notifType === 'item_pending') return 'pending';
+      // claims/appointments can fall back to neutral (no status background requirement)
+      return null;
+    };
+
     const itemImageStyles = {
       width: '100%',
       height: 120,
@@ -1376,16 +1409,32 @@ onClick={() => {
                               {notifications.map((notif) => (
                                 <Box
                                   key={notif.id}
-                                  sx={{
-                                    p: 2,
-                                    borderRadius: 2,
-                                    border: '1px solid !important',
-                                    borderColor: 'divider !important',
-                                    // Inherit readable light/dark colors regardless of external CSS.
-                                    backgroundColor: 'background.paper !important',
-                                    color: 'text.primary !important',
-                                    // status accent overrides (still theme-safe)
-                                    '& .MuiTypography-root': { color: 'inherit !important' },
+                                  sx={(theme) => {
+                                    const innerStatus = getNotificationInnerStatus(notif.type);
+                                    const variant = innerStatus ? statusCardVariants[innerStatus] : null;
+
+                                    const paletteDivider = theme.palette.divider;
+                                    const bg = variant
+                                      ? theme.palette.mode === 'dark'
+                                        ? variant.bg.dark
+                                        : variant.bg.light
+                                      : theme.palette.background.paper;
+                                    const fg = variant
+                                      ? theme.palette.mode === 'dark'
+                                        ? variant.fg.dark
+                                        : variant.fg.light
+                                      : theme.palette.text.primary;
+
+                                    return {
+                                      p: 2,
+                                      borderRadius: 2,
+                                      border: `1px solid ${paletteDivider}`,
+                                      backgroundColor: bg,
+                                      color: fg,
+                                      '& .MuiTypography-root': { color: 'inherit' },
+                                      // subtle separation, responsive to theme mode
+                                      boxShadow: innerStatus ? theme.shadows[0] : 'none',
+                                    };
                                   }}
                                 >
                                   <Typography variant="subtitle1" sx={{ fontWeight: 600, color: 'inherit' }}>
