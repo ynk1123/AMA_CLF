@@ -1,6 +1,9 @@
 import React from 'react';
 import { HashRouter as Router, Routes, Route } from 'react-router-dom';
-import { ThemeProvider, CssBaseline, Box, useMediaQuery } from '@mui/material';
+import { ThemeProvider, CssBaseline, Box } from '@mui/material';
+import { ThemeModeProvider, useThemeMode } from './context/ThemeModeContext';
+
+
 import { AuthProvider } from './context/AuthContext';
 import { LanguageProvider } from './context/LanguageContext';
 import baseTheme from './theme';
@@ -17,10 +20,9 @@ import Chat from './pages/Chat';
 import ContactUs from './pages/ContactUs';
 import './styles/mobile-animations.css';
 
-
-
-function App() {
-  const prefersDark = useMediaQuery('(prefers-color-scheme: dark)');
+function ThemedApp() {
+  const { resolvedMode } = useThemeMode();
+  const prefersDark = resolvedMode === 'dark';
 
   const theme = React.useMemo(() => {
     return {
@@ -41,6 +43,7 @@ function App() {
       },
     };
   }, [prefersDark]);
+
 
   return (
     <ThemeProvider theme={theme}>
@@ -76,5 +79,11 @@ function App() {
   );
 }
 
+export default function App() {
+  return (
+    <ThemeModeProvider>
+      <ThemedApp />
+    </ThemeModeProvider>
+  );
+}
 
-export default App;

@@ -5,9 +5,13 @@ import ForumIcon from '@mui/icons-material/Forum';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import SearchIcon from '@mui/icons-material/Search';
 import LanguageIcon from '@mui/icons-material/Language';
+import Brightness4Icon from '@mui/icons-material/Brightness4';
+import Brightness7Icon from '@mui/icons-material/Brightness7';
+import { useThemeMode } from '../context/ThemeModeContext';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import { useNavigate } from 'react-router-dom';
+
 
 const languages = [
   { code: 'en', name: 'English', flag: '🇺🇸' },
@@ -25,7 +29,9 @@ const languages = [
 const Navbar = () => {
   const { user, logout } = useAuth();
   const { t, language, changeLanguage } = useLanguage();
+  const { mode, setMode, resolvedMode } = useThemeMode();
   const navigate = useNavigate();
+
   const [langAnchor, setLangAnchor] = React.useState(null);
   const [mobileMenuAnchor, setMobileMenuAnchor] = React.useState(null);
 
@@ -51,7 +57,6 @@ const Navbar = () => {
   const handleLanguageSelect = (code) => {
     changeLanguage(code);
     handleLanguageClose();
-  };
 
 
 
@@ -78,10 +83,35 @@ const Navbar = () => {
           {t('campusLostAndFound')}
         </Typography>
 
+
+
+        {/* Dark mode selector */}
+        <IconButton
+          color="inherit"
+          onClick={() => {
+            // Cycle: system -> light -> dark -> system
+            const next = mode === 'system' ? 'light' : mode === 'light' ? 'dark' : 'system';
+            setMode(next);
+          }}
+          sx={{
+            mr: 1.0,
+            border: '1px solid rgba(255,255,255,0.3)',
+            width: { xs: 38, sm: 40 },
+            height: { xs: 38, sm: 40 },
+            borderRadius: '6px',
+            '&:hover': { backgroundColor: 'rgba(255,255,255,0.15)' },
+          }}
+          aria-label="toggle dark mode"
+        >
+          {resolvedMode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />}
+        </IconButton>
+
         {/* Language selector (mobile: icon-only in a square box) */}
         <Button
           color="inherit"
           onClick={handleLanguageClick}
+
+
           sx={{
             mr: 1.0,
             fontWeight: 600,
