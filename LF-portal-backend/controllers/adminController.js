@@ -228,7 +228,17 @@ exports.deleteUser = async (req, res) => {
     
     // Delete the user
     await user.destroy();
-    res.json({ message: 'User, their items, and messages deleted successfully' });
+
+    // IMPORTANT: return refreshed state so UI doesn't require a manual refresh.
+    const remainingUsers = await User.findAll({
+      attributes: ['id', 'studentId', 'displayName', 'email', 'role', 'status', 'createdAt', 'is_verified'],
+      order: [['createdAt', 'DESC']]
+    });
+
+    res.json({
+      message: 'User, their items, and messages deleted successfully',
+      users: remainingUsers
+    });
   } catch (err) {
     console.error('Error deleting user:', err);
     res.status(400).json({ message: 'Failed to delete user', error: err.message });
