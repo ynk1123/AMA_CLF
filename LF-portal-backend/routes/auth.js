@@ -133,24 +133,27 @@ router.post('/register', async (req, res) => {
 
     // Strict validation: only allow properly formatted @gmail.com addresses.
     if (typeof email !== 'string' || email.trim().length === 0) {
-      return res.status(400).json({ error: 'Registration is restricted to valid @gmail.com accounts only.' });
+      return res.status(400).json({ error: 'Invalid email address.' });
     }
 
     const normalizedEmail = email.trim();
     const gmailOnlyRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
     if (!gmailOnlyRegex.test(normalizedEmail)) {
-      return res.status(400).json({ error: 'Registration is restricted to valid @gmail.com accounts only.' });
+      return res.status(400).json({ error: 'Invalid email address. Only valid @gmail.com accounts are allowed.' });
     }
 
     // DNS MX lookup check (ensures the domain has mail records).
-    await new Promise((resolve, reject) => {
-      dns.resolveMx(normalizedEmail.split('@')[1], (err) => {
-        if (err) return reject(err);
-        resolve();
+    const domain = normalizedEmail.split('@')[1];
+    try {
+      await new Promise((resolve, reject) => {
+        dns.resolveMx(domain, (err) => {
+          if (err) return reject(err);
+          resolve();
+        });
       });
-    }).catch(() => {
-      return res.status(400).json({ error: 'Registration is restricted to valid @gmail.com accounts only.' });
-    });
+    } catch {
+      return res.status(400).json({ error: 'Invalid email address. Gmail domain mail records not found.' });
+    }
 
 
     const existingUser = await User.findOne({ where: { studentId } });
@@ -201,7 +204,7 @@ router.post('/register', async (req, res) => {
         <p>Thanks for registering with LF Portal. Please verify your email address by clicking the button below:</p>
         <p style="margin: 20px 0;"><a href="${verifyURL}" style="display: inline-block; padding: 12px 20px; background: #111827; color: #ffffff; text-decoration: none; border-radius: 6px;">Verify Email</a></p>
         <p>If the button doesn't work, copy and paste this link into your browser:</p>
-        <p><a href="${verifyURL}">${verifyURL}</a></p>
+        <p>${verifyURL}</p>
         <p>This link will work until your email is verified.</p>
       `,
     }).catch((emailErr) => {
