@@ -22,8 +22,9 @@ const Register = () => {
     setSuccess('');
     try {
       await authService.register(formData);
-      setSuccess('Registration successful! Redirecting...');
-      setTimeout(() => navigate('/'), 2000);
+      setSuccess('Registration successful! Check your email to verify your account, then log in.');
+      // Do not auto-redirect before email verification
+
     } catch (err) {
       setError(err.response?.data?.message || 'Registration failed');
     }
