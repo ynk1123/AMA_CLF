@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+
 import { Box, Container, Typography, Grid, TextField, Button, List, ListItem, ListItemAvatar, Avatar, ListItemText, Divider, IconButton, Paper, useMediaQuery } from '@mui/material';
 import { useAuth } from '../context/AuthContext';
 import { useSearchParams } from 'react-router-dom';
@@ -287,7 +288,15 @@ const formatDateTime = (timestamp) => {
                         placeholder={sendingMessage ? 'Sending...' : `Message about ${selectedItem.title}...`}
                         value={newMessage}
                         onChange={(e) => setNewMessage(e.target.value)}
-                        onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                        onPaste={(e) => {
+                          // keep default paste behavior; bugfix placeholder to avoid interfering events
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' && !e.shiftKey) {
+                            e.preventDefault();
+                            handleSendMessage();
+                          }
+                        }}
                         variant="outlined"
                         size="small"
                         disabled={sendingMessage}
