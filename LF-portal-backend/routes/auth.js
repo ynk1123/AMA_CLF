@@ -239,8 +239,14 @@ router.get('/verify-email', async (req, res) => {
     const user = await User.findOne({ where: { verification_token: token } });
 
     if (!user) {
-      return res.status(400).json({ message: 'Invalid or expired verification token' });
+      // Debug-friendly response. If user exists but token was already cleared,
+      // they may have clicked the link twice.
+      return res.status(404).json({
+        message: 'Not found verification token',
+        hint: 'This token may have been used already or the account was created with a different token.'
+      });
     }
+
 
     user.is_verified = true;
     user.verification_token = null;
