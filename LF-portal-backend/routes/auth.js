@@ -163,6 +163,10 @@ router.post('/register', async (req, res) => {
 
     const verifyURL = `${backendBaseURL || 'http://localhost:5000'}/api/auth/verify-email?token=${verificationToken}`;
 
+    // DEBUG for Render logs: confirm the clickable link being emailed
+    console.log('📨 Verification link being emailed:', verifyURL);
+
+
     sendEmail({
       to: userEmail,
       subject: 'Verify your LF Portal email',
@@ -242,7 +246,9 @@ router.get('/verify-email', async (req, res) => {
     user.verification_token = null;
     await user.save();
 
-    return res.status(200).json({ message: 'Email verified successfully. You can now log in.' });
+    const frontendBaseURL = process.env.FRONTEND_URL || 'https://ama-clf-1.onrender.com';
+    return res.redirect(`${frontendBaseURL}/login`);
+
   } catch (err) {
     return res.status(500).json({ message: 'Something went wrong verifying email' });
   }
