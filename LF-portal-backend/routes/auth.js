@@ -131,6 +131,28 @@ router.post('/register', async (req, res) => {
   try {
     const { studentId, displayName, password, email } = req.body;
 
+    // Strict validation: only allow properly formatted @gmail.com addresses.
+    if (typeof email !== 'string' || email.trim().length === 0) {
+      return res.status(400).json({ error: 'Registration is restricted to valid @gmail.com accounts only.' });
+    }
+
+    const normalizedEmail = email.trim();
+    const gmailOnlyRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
+    if (!gmailOnlyRegex.test(normalizedEmail)) {
+      return res.status(400).json({ error: 'Registration is restricted to valid @gmail.com accounts only.' });
+    }
+
+    // DNS MX lookup check (ensures the domain has mail records).
+    await new Promise((resolve, reject) => {
+      dns.resolveMx(normalizedEmail.split('@')[1], (err) => {
+        if (err) return reject(err);
+        resolve();
+      });
+    }).catch(() => {
+      return res.status(400).json({ error: 'Registration is restricted to valid @gmail.com accounts only.' });
+    });
+
+
     const existingUser = await User.findOne({ where: { studentId } });
     if (existingUser) {
       return res.status(400).json({ message: 'Student ID already registered' });
