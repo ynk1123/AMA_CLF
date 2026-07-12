@@ -212,21 +212,30 @@ exports.deleteUser = async (req, res) => {
       return res.status(403).json({ message: 'Cannot delete admin accounts' });
     }
     
-    // Delete all items posted by this user first
+    // Delete dependent rows BEFORE deleting the user to satisfy FK constraints.
+
+    // 1) Delete claims made by this user (FK: Claims.userId -> Users.id)
+    const userClaims = await Claim.findAll({ where: { userId } });
+    for (const c of userClaims) {
+      await c.destroy();
+    }
+    console.log(`Deleted ${userClaims.length} claims for user ${userId}`);
+
+    // 2) Delete all items posted by this user first (and their dependent rows via existing logic)
     const userItems = await Item.findAll({ where: { userId } });
     for (const item of userItems) {
       await item.destroy();
     }
     console.log(`Deleted ${userItems.length} items for user ${userId}`);
-    
-    // Delete all messages by this user
+
+    // 3) Delete all messages by this user
     const userMessages = await Message.findAll({ where: { userId } });
     for (const msg of userMessages) {
       await msg.destroy();
     }
     console.log(`Deleted ${userMessages.length} messages for user ${userId}`);
-    
-    // Delete the user
+
+    // 4) Delete the user
     await user.destroy();
 
     // IMPORTANT: return refreshed state so UI doesn't require a manual refresh.

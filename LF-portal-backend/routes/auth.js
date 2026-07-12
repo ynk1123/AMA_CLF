@@ -241,7 +241,8 @@ router.get('/verify-email', async (req, res) => {
     if (!user) {
       // Token might have been used already (verification_token cleared) or it's not the latest.
     const frontendBaseURL = process.env.FRONTEND_URL || 'https://ama-clf-1.onrender.com';
-    return res.redirect(`${frontendBaseURL}/#/login`);
+    // Use hash route so it always lands on the React login page.
+    return res.redirect(`${frontendBaseURL}/#/login?verified=1`);
     }
 
 
