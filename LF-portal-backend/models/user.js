@@ -16,7 +16,7 @@ const User = sequelize.define('User', {
     type: DataTypes.STRING,
     allowNull: false,
   },
-password: {
+  password: {
     type: DataTypes.STRING,
     allowNull: false,
   },
@@ -25,7 +25,7 @@ password: {
     allowNull: true,
     unique: true,
   },
-role: {
+  role: {
     type: DataTypes.ENUM('student', 'admin'),
     defaultValue: 'student',
   },
@@ -33,6 +33,18 @@ role: {
     type: DataTypes.ENUM('active', 'suspended'),
     defaultValue: 'active',
   },
+
+  // Email verification
+  is_verified: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+    defaultValue: false,
+  },
+  verification_token: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
 });
 
 module.exports = User;
+

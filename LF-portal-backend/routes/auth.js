@@ -1,6 +1,7 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 const User = require('../models/user');
 const dns = require('dns');
 
@@ -150,13 +151,43 @@ router.post('/register', async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 12);
+
+    const verificationToken = crypto.randomBytes(32).toString('hex');
+    const userEmail = email || studentId + '@campus.edu';
+
+    // Store token + mark unverified
     const user = await User.create({
       studentId,
       displayName,
       password: hashedPassword,
-      email: email || studentId + '@campus.edu'
+      email: userEmail,
+      is_verified: false,
+      verification_token: verificationToken,
     });
 
+    // Send verification email (fire-and-forget)
+    const verifyURL = `${process.env.BACKEND_URL || 'http://localhost:5000'}/api/auth/verify-email?token=${verificationToken}`;
+
+    sendEmail({
+      to: userEmail,
+      subject: 'Verify your LF Portal email',
+      text: `Please verify your email by clicking this link:\n\n${verifyURL}\n\nIf you did not create an account, you can ignore this email.`,
+      html: `
+        <p>Hello ${displayName || ''},</p>
+        <p>Thanks for registering with LF Portal. Please verify your email address by clicking the button below:</p>
+        <p style="margin: 20px 0;"><a href="${verifyURL}" style="display: inline-block; padding: 12px 20px; background: #111827; color: #ffffff; text-decoration: none; border-radius: 6px;">Verify Email</a></p>
+        <p>If the button doesn't work, copy and paste this link into your browser:</p>
+        <p><a href="${verifyURL}">${verifyURL}</a></p>
+        <p>This link will work until your email is verified.</p>
+      `,
+    }).catch((emailErr) => {
+      // Don’t block registration response
+      // eslint-disable-next-line no-console
+      console.log('❁ SendGrid send error (verification email):', emailErr?.message || emailErr);
+    });
+
+    // (Optional) keep your current behavior of returning JWT on registration.
+    // If you want stricter UX, you can return 201 without token.
     const token = jwt.sign({ id: user.id }, JWT_SECRET, { expiresIn: '7d' });
     res.status(201).json({ token, user: { id: user.id, studentId: user.studentId, role: 'student' } });
   } catch (err) {
@@ -182,6 +213,10 @@ router.post('/login', async (req, res) => {
       return res.status(403).json({ message: 'Your account has been suspended. Contact admin for help.' });
     }
 
+    if (user.is_verified === false) {
+      return res.status(403).json({ message: 'Please verify your email address before logging in.' });
+    }
+
     const token = jwt.sign({ id: user.id }, JWT_SECRET, { expiresIn: '7d' });
     res.json({
       token,
@@ -195,6 +230,33 @@ router.post('/login', async (req, res) => {
     });
   } catch (err) {
     res.status(400).json({ message: 'Login failed' });
+  }
+});
+
+// VERIFY EMAIL
+router.get('/verify-email', async (req, res) => {
+  try {
+    const token = req.query.token;
+    if (!token || typeof token !== 'string') {
+      return res.status(400).json({ message: 'Missing or invalid token' });
+    }
+
+    // Find user with exact verification token
+    const user = await User.findOne({ where: { verification_token: token } });
+
+    if (!user) {
+      return res.status(400).json({ message: 'Invalid or expired verification token' });
+    }
+
+    // Flip verified flag + clear token
+    user.is_verified = true;
+    user.verification_token = null;
+    await user.save();
+
+    // Success UX: JSON or redirect to frontend
+    return res.status(200).json({ message: 'Email verified successfully. You can now log in.' });
+  } catch (err) {
+    return res.status(500).json({ message: 'Something went wrong verifying email' });
   }
 });
 
