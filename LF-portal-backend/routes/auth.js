@@ -125,6 +125,9 @@ router.post('/resetPassword/:id/:token', async (req, res) => {
 
 // REGISTER
 router.post('/register', async (req, res) => {
+  // Always normalize inputs first
+  // (prevents duplicate/invalid emails from creating multiple un-verifiable accounts)
+
   try {
     const { studentId, displayName, password, email } = req.body;
 
@@ -238,6 +241,7 @@ router.get('/verify-email', async (req, res) => {
 
     const user = await User.findOne({ where: { verification_token: token } });
 
+    // If token isn't found, redirect to login.
     if (!user) {
       // Token might have been used already (verification_token cleared) or it's not the latest.
     const frontendBaseURL = process.env.FRONTEND_URL || 'https://ama-clf-1.onrender.com';
@@ -251,8 +255,15 @@ router.get('/verify-email', async (req, res) => {
     user.verification_token = null;
     await user.save();
 
+    // Tell the browser before redirecting (still ends up on the React login route).
     const frontendBaseURL = process.env.FRONTEND_URL || 'https://ama-clf-1.onrender.com';
-    return res.redirect(`${frontendBaseURL}/login`);
+    return res
+      .status(200)
+      .send(`<html><body style="font-family: Arial, sans-serif; padding: 24px;">
+        <h2>Verification successful 🎉</h2>
+        <p>Redirecting you to login...</p>
+        <script>setTimeout(() => { window.location.href = '${frontendBaseURL}/#/login?verified=1'; }, 1200);</script>
+      </body></html>`);
 
   } catch (err) {
     return res.status(500).json({ message: 'Something went wrong verifying email' });
