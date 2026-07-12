@@ -96,7 +96,6 @@ exports.getAllUsers = async (req, res) => {
   try {
     console.log('Fetching all users...');
     const users = await User.findAll({
-      where: { is_verified: true },
       attributes: ['id', 'studentId', 'displayName', 'email', 'role', 'status', 'createdAt', 'is_verified']
     });
 
