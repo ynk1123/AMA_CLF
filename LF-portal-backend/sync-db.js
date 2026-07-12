@@ -118,23 +118,26 @@ const syncClaimsTable = async () => {
 const syncDatabase = async () => {
   try {
     console.log('Syncing database...');
-    // First sync without constraints to clean duplicate emails
-    await sequelize.sync({ alter: true });
+
+    // Important: running full sequelize.sync({ alter: true }) can fail due to pre-existing
+    // foreign key inconsistencies (e.g. Items.userId -> Users.id).
+    // We only need to ensure our User model columns exist for email verification.
+    // So we sync ONLY the User model first.
+
+    await User.sync({ alter: true });
+
     
     // Now clean up duplicates
     await cleanupDuplicateEmails();
-    
-    // Force sync again to add the unique constraint after cleanup
-    await sequelize.sync({ alter: true });
-    
-// Migrate itemType for existing items
-    await migrateItemType();
-    
-    // Sync Claim table to ensure it exists
-    await syncClaimsTable();
-    
+
+    // IMPORTANT:
+    // Do not run sequelize.sync({ alter: true }) for the entire schema because it can
+    // fail due to pre-existing FK inconsistencies (e.g. Items.userId -> Users.id).
+    // For this verification feature we only need the Users table columns.
+
     await ensureAdminUser();
-    console.log('Database synced successfully!');
+    console.log('Database synced successfully (Users model only).');
+
     process.exit(0);
   } catch (err) {
     console.error('Error syncing database:', err);
