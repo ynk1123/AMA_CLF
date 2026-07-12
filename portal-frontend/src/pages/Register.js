@@ -3,6 +3,7 @@ import { Box, Container, TextField, Button, Typography, Paper, Alert } from '@mu
 import { useNavigate } from 'react-router-dom';
 import { authService } from '../services/api';
 
+
 const Register = () => {
   const [formData, setFormData] = useState({
     studentId: '',
@@ -12,7 +13,9 @@ const Register = () => {
   });
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
+
 
   const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
@@ -20,14 +23,17 @@ const Register = () => {
     e.preventDefault();
     setError('');
     setSuccess('');
+    setIsSubmitting(true);
     try {
       await authService.register(formData);
       setSuccess('Registration successful! Check your email to verify your account, then log in.');
       // Do not auto-redirect before email verification
-
     } catch (err) {
       setError(err.response?.data?.message || 'Registration failed');
+    } finally {
+      setIsSubmitting(false);
     }
+
   };
 
   return (
@@ -83,24 +89,29 @@ const Register = () => {
           <TextField
             fullWidth label="Student ID" name="studentId" value={formData.studentId}
             onChange={handleChange} margin="normal" required sx={{ mb: 2 }}
+            disabled={isSubmitting}
           />
           <TextField
             fullWidth label="Display Name" name="displayName" value={formData.displayName}
             onChange={handleChange} margin="normal" required sx={{ mb: 2 }}
+            disabled={isSubmitting}
           />
           <TextField
             fullWidth label="Email" name="email" type="email" value={formData.email}
             onChange={handleChange} margin="normal" required sx={{ mb: 2 }}
+            disabled={isSubmitting}
           />
           <TextField
             fullWidth label="Password" name="password" type="password" value={formData.password}
             onChange={handleChange} margin="normal" required sx={{ mb: 2 }}
+            disabled={isSubmitting}
           />
           <Button
             type="submit"
             fullWidth
             variant="contained"
             className="btn-pulse"
+            disabled={isSubmitting}
             sx={{ 
               mt: 1,
               backgroundColor: '#DC2626',
@@ -111,8 +122,9 @@ const Register = () => {
               '&:hover': { backgroundColor: '#B91C1C' }
             }}
           >
-            Create Account
+            {isSubmitting ? 'Creating...' : 'Create Account'}
           </Button>
+
         </Box>
 
         <Typography variant="body2" align="center" sx={{ mt: 3, color: '#4B5563' }}>

@@ -55,13 +55,11 @@ router.post('/requestPasswordReset', async (req, res) => {
       userEmail = user.studentId + '@campus.edu';
     }
 
-const secret = JWT_SECRET + user.password;
+    const secret = JWT_SECRET + user.password;
     const token = jwt.sign({ id: user.id, email: userEmail }, secret, { expiresIn: '30m' });
 
     // Use hash route so it works even when server/Render rewrites don't forward deep links.
-const resetURL = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/#/reset-password/${user.id}/${token}`;
-
-    console.log('ℹ️ ResetURL being emailed:', resetURL);
+    const resetURL = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/#/reset-password/${user.id}/${token}`;
 
     // Respond immediately (don’t block on email).
     res.status(200).json({ message: 'A reset email was sent!' });
@@ -84,8 +82,6 @@ const resetURL = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/#/reset
       .catch((emailErr) => {
         console.log('❁ SendGrid send error:', emailErr?.message || emailErr);
       });
-
-    console.log('ℹ️ Password reset link generated for user:', userEmail);
   } catch (error) {
     console.log('Error:', error);
     res.status(500).json({ message: 'Something went wrong' });
@@ -97,13 +93,10 @@ router.post('/resetPassword/:id/:token', async (req, res) => {
   const { id, token } = req.params;
   const { password } = req.body;
 
-  console.log('🔐 Reset attempt - ID:', id, 'Token:', token ? 'present' : 'MISSING', 'Password:', password ? 'present' : 'MISSING');
-
   try {
     const user = await User.findByPk(id);
 
     if (!user) {
-      console.log('❌ User not found:', id);
       return res.status(400).json({ message: 'User not found!' });
     }
 
@@ -111,9 +104,7 @@ router.post('/resetPassword/:id/:token', async (req, res) => {
 
     try {
       jwt.verify(token, secret);
-      console.log('✅ Token verified successfully');
     } catch (e) {
-      console.log('❌ Token verification failed:', e.message);
       return res.status(400).json({ message: 'Invalid or expired token!' });
     }
 
@@ -125,7 +116,6 @@ router.post('/resetPassword/:id/:token', async (req, res) => {
     user.password = encryptedPassword;
     await user.save();
 
-    console.log('✅ Password reset successful for user:', user.studentId);
     res.status(200).json({ message: 'Password has been reset successfully!' });
   } catch (error) {
     console.log('❌ Reset error:', error);
@@ -165,8 +155,13 @@ router.post('/register', async (req, res) => {
       verification_token: verificationToken,
     });
 
-    // Send verification email (fire-and-forget)
-    const verifyURL = `${process.env.BACKEND_URL || 'http://localhost:5000'}/api/auth/verify-email?token=${verificationToken}`;
+    // IMPORTANT: use deployed backend URL (Render domain), not localhost.
+    const backendBaseURL = process.env.BACKEND_URL;
+    if (!backendBaseURL) {
+      console.warn('BACKEND_URL missing; cannot generate reachable verification link for users.');
+    }
+
+    const verifyURL = `${backendBaseURL || 'http://localhost:5000'}/api/auth/verify-email?token=${verificationToken}`;
 
     sendEmail({
       to: userEmail,
@@ -181,13 +176,9 @@ router.post('/register', async (req, res) => {
         <p>This link will work until your email is verified.</p>
       `,
     }).catch((emailErr) => {
-      // Don’t block registration response
-      // eslint-disable-next-line no-console
       console.log('❁ SendGrid send error (verification email):', emailErr?.message || emailErr);
     });
 
-    // (Optional) keep your current behavior of returning JWT on registration.
-    // If you want stricter UX, you can return 201 without token.
     const token = jwt.sign({ id: user.id }, JWT_SECRET, { expiresIn: '7d' });
     res.status(201).json({ token, user: { id: user.id, studentId: user.studentId, role: 'student' } });
   } catch (err) {
@@ -241,19 +232,16 @@ router.get('/verify-email', async (req, res) => {
       return res.status(400).json({ message: 'Missing or invalid token' });
     }
 
-    // Find user with exact verification token
     const user = await User.findOne({ where: { verification_token: token } });
 
     if (!user) {
       return res.status(400).json({ message: 'Invalid or expired verification token' });
     }
 
-    // Flip verified flag + clear token
     user.is_verified = true;
     user.verification_token = null;
     await user.save();
 
-    // Success UX: JSON or redirect to frontend
     return res.status(200).json({ message: 'Email verified successfully. You can now log in.' });
   } catch (err) {
     return res.status(500).json({ message: 'Something went wrong verifying email' });
