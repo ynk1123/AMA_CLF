@@ -81,17 +81,20 @@ useEffect(() => {
   const [justSentMessageId, setJustSentMessageId] = useState(null);
 
   const handleSendMessage = async () => {
-    if (!newMessage.trim() || !selectedItem || sendingMessage) {
+    const trimmed = newMessage.trim();
+    if (!trimmed || !selectedItem || sendingMessage) {
       return;
     }
+
 
     setSendingMessage(true);
     setJustSentMessageId(null);
     try {
       const response = await messageService.createMessage({
-        content: newMessage,
+        content: trimmed,
         itemId: selectedItem.id
       });
+
 
       // Backend returns created message including User, so append instead of reloading all messages.
       if (response?.data) {
@@ -102,9 +105,13 @@ useEffect(() => {
         setJustSentMessageId(response.data.id ?? null);
       }
       setNewMessage('');
+      // Ensure messages are refreshed from DB (prevents “message only appears after refresh”).
+      await loadMessages(selectedItem.id);
+
     } catch (err) {
       console.error('Failed to send message:', err.response?.data || err.message);
-      alert('Failed to send message. Please try again.');
+      alert(`Failed to send message. ${err.response?.data?.message || err.message}`);
+
     } finally {
       setSendingMessage(false);
     }
