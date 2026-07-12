@@ -239,13 +239,11 @@ router.get('/verify-email', async (req, res) => {
     const user = await User.findOne({ where: { verification_token: token } });
 
     if (!user) {
-      // Debug-friendly response. If user exists but token was already cleared,
-      // they may have clicked the link twice.
-      return res.status(404).json({
-        message: 'Not found verification token',
-        hint: 'This token may have been used already or the account was created with a different token.'
-      });
+      // Token might have been used already (verification_token cleared) or it's not the latest.
+      const frontendBaseURL = process.env.FRONTEND_URL || 'https://ama-clf-1.onrender.com';
+      return res.redirect(`${frontendBaseURL}/login`);
     }
+
 
 
     user.is_verified = true;
