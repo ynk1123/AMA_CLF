@@ -447,10 +447,18 @@ const formatDateTime = (timestamp) => {
                         disabled={sendingMessage}
                         sx={{
                           '& .MuiOutlinedInput-root': {
-                            backgroundColor: '#fff',
-                            '& fieldset': { borderColor: '#DC2626' },
-                            '&:hover fieldset': { borderColor: '#B91C1C' },
-                            '&.Mui-focused fieldset': { borderColor: '#DC2626' }
+                            backgroundColor: 'background.paper',
+                            '& fieldset': { borderColor: 'divider' },
+                            '&:hover fieldset': { borderColor: 'text.secondary' },
+                            '&.Mui-focused fieldset': { borderColor: 'primary.main' }
+                          },
+                          '& .MuiInputBase-input': {
+                            color: 'text.primary !important',
+                            '-webkit-text-fill-color': 'text.primary !important',
+                          },
+                          '& .MuiInputBase-input::placeholder': {
+                            color: 'text.secondary !important',
+                            opacity: 1,
                           }
                         }}
                       />
