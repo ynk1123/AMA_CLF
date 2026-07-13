@@ -45,6 +45,27 @@ const Dashboard = () => {
       description: ''
     });
 
+    const getRelativePostTime = (isoString) => {
+      const targetDate = isoString || isoString === 0 ? new Date(isoString) : null;
+      if (!targetDate || Number.isNaN(targetDate.getTime())) return '';
+
+      const now = new Date();
+      const diffMs = now.getTime() - targetDate.getTime();
+      const diffSeconds = Math.floor(diffMs / 1000);
+
+      const absSeconds = Math.abs(diffSeconds);
+      const suffix = diffSeconds >= 0 ? 'ago' : 'from now';
+
+      const minutes = Math.floor(absSeconds / 60);
+      const hours = Math.floor(absSeconds / 3600);
+      const days = Math.floor(absSeconds / 86400);
+
+      if (absSeconds < 60) return `just now`;
+      if (minutes < 60) return `${minutes} min ${suffix}`;
+      if (hours < 24) return `${hours} hr ${suffix}`;
+      return `${days} day ${suffix}`;
+    };
+
     const itemCardStyles = {
       borderRadius: 3,
       boxShadow: 3,
@@ -772,6 +793,10 @@ return (
                   <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 600, fontSize: '0.9rem' }}>
                     {item.title}
                   </Typography>
+                  <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mb: 1, fontStyle: 'italic' }}>
+                    Posted: {getRelativePostTime(item.created_at || item.createdAt)}
+                  </Typography>
+
                   {item.imageUrl && (
                     <Box component="img" src={getImageUrl(item.imageUrl)} alt={item.title} sx={itemImageStyles} />
                   )}
@@ -877,6 +902,10 @@ return (
                       <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 600, fontSize: '0.9rem' }}>
                         {item.title}
                       </Typography>
+                      <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mb: 1, fontStyle: 'italic' }}>
+                        Posted: {getRelativePostTime(item.created_at || item.createdAt)}
+                      </Typography>
+
                       {item.imageUrl && (
                         <Box component="img" src={getImageUrl(item.imageUrl)} alt={item.title} sx={itemImageStyles} />
                       )}

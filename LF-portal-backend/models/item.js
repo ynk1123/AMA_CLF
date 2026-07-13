@@ -59,6 +59,12 @@ date: {
     type: DataTypes.DATE,
     defaultValue: DataTypes.NOW,
   },
+  // When the post was created (server-side timestamp)
+  created_at: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: DataTypes.NOW,
+  },
   updatedAt: {
     type: DataTypes.DATE,
     defaultValue: DataTypes.NOW,
