@@ -39,32 +39,46 @@ const Chat = () => {
     }
   }, [items, searchParams]);
 
+  const selectedItemId = selectedItem?.id ?? null;
+
+  // IMPORTANT:
+  // - Only fetch on item switch
+  // - Never clear messages on "loading"
+  // - Use optimistic append on send, and do NOT re-fetch after POST
+  //   to prevent GET responses overwriting the UI and causing flash/vanish.
   const lastSelectedItemIdRef = useRef(null);
 
   useEffect(() => {
-    if (!selectedItem) {
-      lastSelectedItemIdRef.current = null;
+    if (selectedItemId == null) {
       setMessages([]);
+      lastSelectedItemIdRef.current = null;
       return;
     }
 
-    const nextId = selectedItem.id;
-    // Only reload when switching to a different item, not on incidental re-renders
-    if (lastSelectedItemIdRef.current !== nextId) {
-      lastSelectedItemIdRef.current = nextId;
+    if (lastSelectedItemIdRef.current !== selectedItemId) {
+      lastSelectedItemIdRef.current = selectedItemId;
       setLoadingMessages(true);
-      loadMessages(nextId);
+      messageService
+        .getMessages(selectedItemId)
+        .then((response) => {
+          setMessages(response.data);
+        })
+        .catch((err) => {
+          console.error('Failed to load messages:', err?.response?.data || err.message);
+        })
+        .finally(() => {
+          setLoadingMessages(false);
+        });
     }
-  }, [selectedItem]);
+  }, [selectedItemId]);
 
-// Auto-scroll to center when messages are loaded/updated or item is clicked
-useEffect(() => {
+  // Auto-scroll to center when messages are loaded/updated or item is clicked
+  useEffect(() => {
     if (!messagesEndRef.current) return;
-    // Scroll after DOM paint (faster than fixed timeout)
     requestAnimationFrame(() => {
       messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     });
-  }, [messages, selectedItem, loadingMessages]);
+  }, [messages, selectedItemId, loadingMessages]);
 
   const loadItems = async () => {
     try {
@@ -75,45 +89,51 @@ useEffect(() => {
     }
   };
 
-  const loadMessages = async (itemId) => {
-    try {
-      const response = await messageService.getMessages(itemId);
-      setMessages(response.data);
-    } catch (err) {
-      console.error('Failed to load messages:', err?.response?.data || err.message);
-    } finally {
-      setLoadingMessages(false);
-    }
-  };
-
   const [sendingMessage, setSendingMessage] = useState(false);
   const [justSentMessageId, setJustSentMessageId] = useState(null);
 
   const handleSendMessage = async () => {
     const trimmed = newMessage.trim();
-    if (!trimmed || !selectedItem || sendingMessage) {
-      return;
-    }
-
+    if (!trimmed || !selectedItem || sendingMessage) return;
 
     setSendingMessage(true);
     setJustSentMessageId(null);
+
+    // Optimistic message that will never disappear due to GET overwrite.
+    const optimisticId = `tmp-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+    const optimisticMessage = {
+      id: optimisticId,
+      content: trimmed,
+      itemId: selectedItem.id,
+      timestamp: new Date().toISOString(),
+      User: user
+        ? { studentId: user.studentId, displayName: user.displayName }
+        : null
+    };
+
+    // 1) Immediately show the message
+    setMessages((prev) => [...prev, optimisticMessage]);
+    setNewMessage('');
+
     try {
+      // 2) Send to backend
       const response = await messageService.createMessage({
         content: trimmed,
         itemId: selectedItem.id
       });
 
+      const created = response?.data;
 
-      // To avoid transient “flash then vanish” state, refresh from DB once POST succeeds.
-      setJustSentMessageId(response?.data?.id ?? null);
-      setNewMessage('');
-      await loadMessages(selectedItem.id);
-
+      // 3) Replace optimistic with real server message
+      if (created && created.id != null) {
+        setMessages((prev) => prev.map((m) => (m.id === optimisticId ? created : m)));
+        setJustSentMessageId(created.id);
+      }
     } catch (err) {
+      // Revert optimistic on failure
+      setMessages((prev) => prev.filter((m) => m.id !== optimisticId));
       console.error('Failed to send message:', err.response?.data || err.message);
       alert(`Failed to send message. ${err.response?.data?.message || err.message}`);
-
     } finally {
       setSendingMessage(false);
     }
