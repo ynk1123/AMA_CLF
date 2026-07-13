@@ -108,11 +108,17 @@ router.post('/resetPassword/:id/:token', async (req, res) => {
       return res.status(400).json({ message: 'Invalid or expired token!' });
     }
 
-    if (typeof password !== 'string' || password.trim().length < 6) {
-      return res.status(400).json({ message: 'Password must be at least 6 characters' });
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+
+    if (typeof password !== 'string' || !passwordRegex.test(password)) {
+      return res.status(400).json({
+        message:
+          'Password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character.'
+      });
     }
 
-    const encryptedPassword = await bcrypt.hash(password.trim(), 12);
+    const encryptedPassword = await bcrypt.hash(password, 12);
+
     user.password = encryptedPassword;
     await user.save();
 
