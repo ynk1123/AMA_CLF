@@ -1123,16 +1123,19 @@ return (
         </Grid>
         <Grid item xs={12} md={6}>
           <Box
-            sx={{
-              width: '100%',
-              backgroundColor: '#ebe3e3',
+            sx={(theme) => ({
+              backgroundColor:
+                theme.palette.mode === 'dark'
+                  ? 'rgba(255, 255, 255, 0.08)'
+                  : '#ebe3e3',
+              color: 'text.primary',
               borderRadius: 1,
-              py: 1,
-              px: 2,
-              mb: 1
-            }}
+              padding: '4px 8px',
+            })}
           >
-            <Typography variant="h6" sx={{ fontWeight: 600}}>DETAILS</Typography>
+            <Typography variant="h6" sx={{ fontWeight: 600, color: 'text.primary' }}>
+              DETAILS
+            </Typography>
           </Box>
 
           <Box sx={{ px: 2 }}>
