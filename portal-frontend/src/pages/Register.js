@@ -87,10 +87,18 @@ const Register = () => {
 
         <Box component="form" onSubmit={handleRegister}>
           <TextField
-            fullWidth label="Student ID" name="studentId" value={formData.studentId}
-            onChange={handleChange} margin="normal" required sx={{ mb: 2 }}
+            fullWidth
+            label="Student ID"
+            name="studentId"
+            value={formData.studentId}
+            onChange={handleChange}
+            margin="normal"
+            required
+            inputProps={{ inputMode: 'numeric', pattern: '\\d{11}', maxLength: 11 }}
+            sx={{ mb: 2 }}
             disabled={isSubmitting}
           />
+
           <TextField
             fullWidth label="Display Name" name="displayName" value={formData.displayName}
             onChange={handleChange} margin="normal" required sx={{ mb: 2 }}

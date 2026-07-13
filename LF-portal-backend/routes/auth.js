@@ -144,6 +144,15 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ error: 'Invalid email address.' });
     }
 
+    // Strict validation: Student ID must be exactly 11 digits (numbers only)
+    const studentIdRegex = /^\d{11}$/;
+    if (typeof studentId !== 'string' || !studentIdRegex.test(studentId)) {
+      return res.status(400).json({
+        message: 'Student ID must be exactly 11 digits and contain numbers only.'
+      });
+    }
+
+
     const normalizedEmail = email.trim();
     const gmailOnlyRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
     if (!gmailOnlyRegex.test(normalizedEmail)) {
