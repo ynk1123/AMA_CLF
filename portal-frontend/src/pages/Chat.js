@@ -351,10 +351,17 @@ const formatDateTime = (timestamp) => {
                   </Box>
 
                   {/* Messages */}
-                  <Box sx={{ flexGrow: 1, overflow: 'auto', p: 2, backgroundColor: '#fff' }}>
+                  <Box
+                    sx={(theme) => ({
+                      flexGrow: 1,
+                      overflow: 'auto',
+                      p: 2,
+                      backgroundColor: theme.palette.background.default,
+                    })}
+                  >
                     {messages.length === 0 ? (
                       <Box sx={{ textAlign: 'center', mt: 4 }}>
-                        <Typography variant="body1" sx={{ color: '#4B5563' }}>
+                        <Typography variant="body1" sx={{ color: 'text.primary' }}>
                           No messages yet. Start the conversation!
                         </Typography>
                       </Box>
