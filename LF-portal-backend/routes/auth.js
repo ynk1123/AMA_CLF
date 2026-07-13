@@ -220,9 +220,7 @@ router.post('/register', async (req, res) => {
         <p>Hello ${displayName || ''},</p>
         <p>Thanks for registering with LF Portal. Please verify your email address by clicking the button below:</p>
         <p style="margin: 20px 0;"><a href="${verifyURL}" style="display: inline-block; padding: 12px 20px; background: #111827; color: #ffffff; text-decoration: none; border-radius: 6px;">Verify Email</a></p>
-        <p>If the button doesn't work, copy and paste this link into your browser:</p>
-        <p>${verifyURL}</p>
-        <p>This link will work until your email is verified.</p>
+
       `,
     }).catch((emailErr) => {
       console.log('❁ SendGrid send error (verification email):', emailErr?.message || emailErr);
