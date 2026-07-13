@@ -39,14 +39,21 @@ const Chat = () => {
     }
   }, [items, searchParams]);
 
-useEffect(() => {
-    if (selectedItem) {
-      // Clear immediately so UI doesn't show stale data while loading
+  const lastSelectedItemIdRef = useRef(null);
+
+  useEffect(() => {
+    if (!selectedItem) {
+      lastSelectedItemIdRef.current = null;
       setMessages([]);
+      return;
+    }
+
+    const nextId = selectedItem.id;
+    // Only reload when switching to a different item, not on incidental re-renders
+    if (lastSelectedItemIdRef.current !== nextId) {
+      lastSelectedItemIdRef.current = nextId;
       setLoadingMessages(true);
-      loadMessages(selectedItem.id);
-    } else {
-      setMessages([]);
+      loadMessages(nextId);
     }
   }, [selectedItem]);
 
@@ -73,7 +80,9 @@ useEffect(() => {
       const response = await messageService.getMessages(itemId);
       setMessages(response.data);
     } catch (err) {
-      console.error('Failed to load messages');
+      console.error('Failed to load messages:', err?.response?.data || err.message);
+    } finally {
+      setLoadingMessages(false);
     }
   };
 
@@ -96,16 +105,9 @@ useEffect(() => {
       });
 
 
-      // Backend returns created message including User, so append instead of reloading all messages.
-      if (response?.data) {
-        setMessages(prev => {
-          const next = [...prev, response.data];
-          return next;
-        });
-        setJustSentMessageId(response.data.id ?? null);
-      }
+      // To avoid transient “flash then vanish” state, refresh from DB once POST succeeds.
+      setJustSentMessageId(response?.data?.id ?? null);
       setNewMessage('');
-      // Ensure messages are refreshed from DB (prevents “message only appears after refresh”).
       await loadMessages(selectedItem.id);
 
     } catch (err) {
