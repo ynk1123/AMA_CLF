@@ -718,13 +718,13 @@ return (
                     color: 'var(--text-muted)',
                   },
                   '& .MuiOutlinedInput-notchedOutline': {
-                    borderColor: 'var(--border-muted)',
+                    borderColor: 'divider',
                   },
                   '&:hover .MuiOutlinedInput-notchedOutline': {
-                    borderColor: 'var(--text-muted)',
+                    borderColor: 'text.secondary',
                   },
                   '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                    borderColor: 'var(--accent-red)',
+                    borderColor: 'primary.main',
                   },
                   '@media (max-width:600px)': {
                     '& .MuiInputBase-root': { minHeight: 34 },
