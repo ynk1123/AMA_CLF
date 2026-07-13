@@ -41,9 +41,7 @@ const Chat = () => {
 
   const selectedItemId = selectedItem?.id ?? null;
 
-  useEffect(() => {
-    console.log('🧱 [Chat] render: selectedItem exists?', !!selectedItem, 'selectedItemId:', selectedItemId);
-  }, [selectedItem, selectedItemId, messages.length]);
+  // (no debug logging in production)
 
   // IMPORTANT:
   // - Only fetch on item switch
@@ -54,12 +52,9 @@ const Chat = () => {
   const fetchSeqRef = useRef(0);
 
   useEffect(() => {
-    console.log('📌 [Chat] selectedItemId changed:', selectedItemId);
-
     // Do NOT clear messages when selectedItemId is temporarily null.
     // Clearing here is what causes the brief vanish.
     if (selectedItemId == null) {
-      console.log('🧹 [Chat] selectedItemId temporarily null; NOT clearing messages');
       lastSelectedItemIdRef.current = null;
       return;
     }
@@ -86,7 +81,7 @@ const Chat = () => {
           // Drop stale errors too
           if (fetchSeq !== fetchSeqRef.current) return;
 
-          console.error('Failed to load messages:', err?.response?.data || err.message);
+          console.error('Failed to load messages.');
         })
         .finally(() => {
           if (fetchSeq !== fetchSeqRef.current) return;
@@ -145,29 +140,9 @@ const Chat = () => {
       }
     };
 
-    // 1) EXACT payload being appended
-    console.log('🟦 Optimistic Message Appended:', optimisticMsg);
-    console.log('🟦 selectedItem.id sending:', selectedItem?.id);
-
-    // 2) Append using functional update, then log the resulting array
+    // Append using functional update
     setMessages((prev) => {
       const next = [...prev, optimisticMsg];
-
-      // EXACT array content immediately after append computation
-      console.log('🟨 State Array Content (immediately after append):', next);
-
-      // Helpful: show the fields your JSX render loop consumes
-      console.log(
-        '🧾 Render-loop keys snapshot (content + author fields):',
-        next.map((m) => ({
-          id: m?.id,
-          content: m?.content,
-          timestamp: m?.timestamp,
-          studentId: m?.User?.studentId,
-          displayName: m?.User?.displayName
-        }))
-      );
-
       return next;
     });
 
@@ -246,26 +221,13 @@ const Chat = () => {
   const handleDeleteMessage = async (messageId) => {
     if (user.role !== 'admin') return;
 
-    const currentId = selectedItem?.id ?? null;
-    if (currentId == null) return;
-
     try {
       await messageService.deleteMessage(messageId);
 
-      // Trigger a refresh by re-loading the current item id.
-      // (We intentionally do not call any non-existent loadMessages() helper.)
-      setLoadingMessages(true);
-      messageService
-        .getMessages(currentId)
-        .then((response) => setMessages(response.data))
-        .catch((err) => {
-          console.error('Failed to load messages after delete:', err?.response?.data || err.message);
-        })
-        .finally(() => {
-          setLoadingMessages(false);
-        });
+      // Immediate local state sync (no refresh needed)
+      setMessages((current) => current.filter((msg) => msg.id !== messageId));
     } catch (err) {
-      console.error('Failed to delete message');
+      console.error('Failed to delete message:', err?.response?.data || err.message);
     }
   };
 
@@ -389,8 +351,7 @@ const formatDateTime = (timestamp) => {
                       messages.map((message, index) => (
                         <Box
                           key={message.id || index}
-                          sx={{ mb: 3 }}
-                          style={{ opacity: 1, display: 'block' }}
+                          sx={{ mb: 3, opacity: 1, display: 'block' }}
                         >
 
                           <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
@@ -400,7 +361,7 @@ const formatDateTime = (timestamp) => {
                             <Box sx={{ flexGrow: 1 }}>
                               <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
                                 <Typography variant="subtitle1" sx={{ color: '#1A1A2E', fontWeight: 700, mr: 1 }}>
-                                  {message.User?.displayName || 'Unknown'}
+                                  {message.User?.displayName || user?.displayName || 'Unknown'}
                                 </Typography>
                                 <Typography variant="caption" sx={{ color: '#6B7280', mr: 2, fontWeight: 500 }}>
                                   ({message.User?.studentId || '?'})
