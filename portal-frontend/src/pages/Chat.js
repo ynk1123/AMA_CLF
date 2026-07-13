@@ -450,12 +450,29 @@ const formatDateTime = (timestamp) => {
                   </Box>
                 </Paper>
               ) : (
-                <Paper className="fade-in" sx={{ backgroundColor: '#fff', borderRadius: 2, p: 4, textAlign: 'center', height: 700, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', border: '2px solid #FEE2E2' }}>
+                <Paper
+                  className="fade-in"
+                  sx={{
+                    backgroundColor: (theme) => theme.palette.background.default,
+                    borderRadius: 2,
+                    p: 4,
+                    textAlign: 'center',
+                    height: 700,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    border: '2px solid #FEE2E2',
+                  }}
+                >
                   <ForumIcon sx={{ fontSize: 80, color: '#DC2626', mb: 2 }} />
-                  <Typography variant="h5" sx={{ color: '#1A1A2E', fontWeight: 600, mb: 2 }}>
+                  <Typography
+                    variant="h5"
+                    sx={{ color: 'text.primary', fontWeight: 600, mb: 2 }}
+                  >
                     Welcome to Inquiry & Chat
                   </Typography>
-                  <Typography variant="body1" sx={{ color: '#4B5563' }}>
+                  <Typography variant="body1" sx={{ color: 'text.secondary' }}>
                     Select an item from the list to view and send messages.
                   </Typography>
                 </Paper>
