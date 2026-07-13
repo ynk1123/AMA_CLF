@@ -115,7 +115,10 @@ router.post('/resetPassword/:id/:token', async (req, res) => {
 
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
 
-    if (typeof password !== 'string' || !passwordRegex.test(password)) {
+    const normalizedPassword = typeof password === 'string' ? password.trim() : password;
+
+    if (typeof normalizedPassword !== 'string' || !passwordRegex.test(normalizedPassword)) {
+
       return res.status(400).json({
         message:
           'Password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character.'
@@ -165,12 +168,15 @@ router.post('/register', async (req, res) => {
     }
 
     // Password complexity validation (MUST run before hashing/SendGrid/DB writes)
-    if (typeof password !== 'string' || !passwordRegex.test(password)) {
+    const normalizedPassword = typeof password === 'string' ? password.trim() : password;
+
+    if (typeof normalizedPassword !== 'string' || !passwordRegex.test(normalizedPassword)) {
       return res.status(400).json({
         message:
           'Password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character.'
       });
     }
+
 
 
     // DNS MX lookup check (ensures the domain has mail records).
@@ -199,7 +205,8 @@ router.post('/register', async (req, res) => {
       }
     }
 
-    const hashedPassword = await bcrypt.hash(password, 12);
+    const hashedPassword = await bcrypt.hash(normalizedPassword, 12);
+
 
     const verificationToken = crypto.randomBytes(32).toString('hex');
     const userEmail = email || studentId + '@campus.edu';
