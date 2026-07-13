@@ -50,7 +50,10 @@ const Chat = () => {
   const fetchSeqRef = useRef(0);
 
   useEffect(() => {
+    console.log('📌 [Chat] selectedItemId changed:', selectedItemId);
+
     if (selectedItemId == null) {
+      console.log('🧹 [Chat] Clearing messages because selectedItemId is null');
       setMessages([]);
       lastSelectedItemIdRef.current = null;
       return;
