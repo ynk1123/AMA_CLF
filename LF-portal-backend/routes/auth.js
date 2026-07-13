@@ -131,6 +131,8 @@ router.post('/register', async (req, res) => {
   try {
     const { studentId, displayName, password, email } = req.body;
 
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+
     // Strict validation: only allow properly formatted @gmail.com addresses.
     if (typeof email !== 'string' || email.trim().length === 0) {
       return res.status(400).json({ error: 'Invalid email address.' });
@@ -141,6 +143,15 @@ router.post('/register', async (req, res) => {
     if (!gmailOnlyRegex.test(normalizedEmail)) {
       return res.status(400).json({ error: 'Invalid email address. Only valid @gmail.com accounts are allowed.' });
     }
+
+    // Password complexity validation (MUST run before hashing/SendGrid/DB writes)
+    if (typeof password !== 'string' || !passwordRegex.test(password)) {
+      return res.status(400).json({
+        message:
+          'Password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character.'
+      });
+    }
+
 
     // DNS MX lookup check (ensures the domain has mail records).
     const domain = normalizedEmail.split('@')[1];
