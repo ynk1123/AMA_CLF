@@ -113,7 +113,8 @@ router.post('/resetPassword/:id/:token', async (req, res) => {
       return res.status(400).json({ message: 'Invalid or expired token!' });
     }
 
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@#$!%*?&])[A-Za-z\d@#$!%*?&]{8,}$/;
+
 
     const normalizedPassword = typeof password === 'string' ? password.trim() : password;
 
@@ -170,7 +171,10 @@ router.post('/register', async (req, res) => {
     // Password complexity validation (MUST run before hashing/SendGrid/DB writes)
     const normalizedPassword = typeof password === 'string' ? password.trim() : password;
 
+
+
     if (typeof normalizedPassword !== 'string' || !passwordRegex.test(normalizedPassword)) {
+
       return res.status(400).json({
         message:
           'Password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character.'
