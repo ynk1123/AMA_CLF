@@ -113,10 +113,12 @@ router.post('/resetPassword/:id/:token', async (req, res) => {
       return res.status(400).json({ message: 'Invalid or expired token!' });
     }
 
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@#$!%*?&])[A-Za-z\d@#$!%*?&]{8,}$/;
-
+    // Password must contain: lowercase, uppercase, digit, and at least one special char.
+    // Allowed characters include '_' and common punctuation (avoid rejecting passwords like "Sibuyas_Power08!" ).
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_])[A-Za-z\d_\W]{8,}$/;
 
     const normalizedPassword = typeof password === 'string' ? password.trim() : password;
+
 
     if (typeof normalizedPassword !== 'string' || !passwordRegex.test(normalizedPassword)) {
 
