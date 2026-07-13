@@ -704,28 +704,11 @@ return (
                 onChange={(e) => setFilterStatus(e.target.value)}
                 size="small"
                 sx={{
-                  '& .MuiInputLabel-root': {
-                    color: 'var(--text-muted)',
-                  },
-                  '& .MuiInputBase-input': {
-                    color: 'var(--text-main)',
-                  },
-                  '& .MuiInputBase-root': {
-                    backgroundColor: 'transparent',
-                    color: 'var(--text-main)',
-                  },
-                  '& .MuiSvgIcon-root': {
-                    color: 'var(--text-muted)',
-                  },
-                  '& .MuiOutlinedInput-notchedOutline': {
-                    borderColor: 'divider',
-                  },
-                  '&:hover .MuiOutlinedInput-notchedOutline': {
-                    borderColor: 'text.secondary',
-                  },
-                  '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                    borderColor: 'primary.main',
-                  },
+                  color: 'text.primary',
+                  '& .MuiOutlinedInput-notchedOutline': { borderColor: 'divider' },
+                  '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'text.secondary' },
+                  '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: 'primary.main' },
+                  '& .MuiSvgIcon-root': { color: 'text.secondary' },
                   '@media (max-width:600px)': {
                     '& .MuiInputBase-root': { minHeight: 34 },
                     '& .MuiInputLabel-root': { fontSize: 14 },
