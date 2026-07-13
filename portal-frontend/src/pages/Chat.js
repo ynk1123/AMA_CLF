@@ -52,9 +52,10 @@ const Chat = () => {
   useEffect(() => {
     console.log('📌 [Chat] selectedItemId changed:', selectedItemId);
 
+    // Do NOT clear messages when selectedItemId is temporarily null.
+    // Clearing here is what causes the brief vanish.
     if (selectedItemId == null) {
-      console.log('🧹 [Chat] Clearing messages because selectedItemId is null');
-      setMessages([]);
+      console.log('🧹 [Chat] selectedItemId temporarily null; NOT clearing messages');
       lastSelectedItemIdRef.current = null;
       return;
     }
