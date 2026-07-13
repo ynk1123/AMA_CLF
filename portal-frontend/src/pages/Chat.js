@@ -242,7 +242,7 @@ const formatDateTime = (timestamp) => {
   };
 
   return (
-    <Box sx={{ minHeight: '100vh', backgroundColor: '#FAFAFA' }}>
+    <Box sx={{ minHeight: '100vh', backgroundColor: 'background.default' }}>
       <Container maxWidth="xl" sx={{ py: 4, '@media (max-width:600px)': { py: 2 } }}>
 
         <Box className="fade-in" sx={{ mb: 4 }}>
@@ -259,26 +259,37 @@ const formatDateTime = (timestamp) => {
           {/* Items List (hide entirely on mobile when a chat is selected) */}
           {(!isMobile || !selectedItem) && (
             <Grid item xs={12} md={4}>
-              <Paper className="card-hover fade-in" sx={{ borderRadius: 2, overflow: 'hidden', border: '2px solid #FEE2E2' }}>
+              <Paper
+                className="card-hover fade-in"
+                sx={(theme) => ({
+                  borderRadius: 2,
+                  overflow: 'hidden',
+                  backgroundColor: theme.palette.background.paper,
+                  border: `1px solid ${theme.palette.divider}`,
+                })}
+              >
                 <Box sx={{ p: 2, backgroundColor: '#DC2626', borderBottom: '2px solid #B91C1C' }}>
                   <Typography variant="h6" sx={{ color: '#fff', fontWeight: 600 }}>
                     <SearchIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
                     Items
                   </Typography>
                 </Box>
-                <List sx={{ maxHeight: 600, overflow: 'auto' }}>
+                <List sx={(theme) => ({ maxHeight: 600, overflow: 'auto', bgcolor: theme.palette.background.paper })}>
                   {items.map((item, index) => (
                     <React.Fragment key={item.id}>
                       <ListItem
                         button
                         onClick={() => setSelectedItem(item)}
                         className={`card-hover fade-in stagger-${Math.min(index + 1, 4)}`}
-                        sx={{
-                          backgroundColor: selectedItem?.id === item.id ? '#FEE2E2' : 'transparent',
-                          '&:hover': { backgroundColor: '#FEE2E2' },
+                        sx={(theme) => ({
+                          backgroundColor:
+                            selectedItem?.id === item.id
+                              ? theme.palette.action.selected
+                              : 'transparent',
+                          '&:hover': { backgroundColor: theme.palette.action.hover },
                           py: 2,
-                          cursor: 'pointer'
-                        }}
+                          cursor: 'pointer',
+                        })}
                       >
                         <ListItemAvatar>
                           <Avatar sx={{ backgroundColor: '#DC2626', fontWeight: 700 }}>
@@ -287,18 +298,18 @@ const formatDateTime = (timestamp) => {
                         </ListItemAvatar>
                         <ListItemText
                           primary={
-                            <Typography variant="subtitle1" sx={{ color: '#1A1A2E', fontWeight: 600 }}>
+                            <Typography variant="subtitle1" sx={{ color: 'text.primary', fontWeight: 600 }}>
                               {item.title}
                             </Typography>
                           }
                           secondary={
-                            <Typography variant="body2" sx={{ color: '#4B5563' }}>
+                            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
                               {item.category} • {item.location}
                             </Typography>
                           }
                         />
                       </ListItem>
-                      <Divider sx={{ backgroundColor: '#FEE2E2' }} />
+                      <Divider sx={{ backgroundColor: 'divider' }} />
                     </React.Fragment>
                   ))}
                 </List>
