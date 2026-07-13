@@ -145,7 +145,7 @@ router.post('/register', async (req, res) => {
   try {
     const { studentId, displayName, password, email } = req.body;
 
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@#$!%*?&])[A-Za-z\d@#$!%*?&]{8,}$/;
 
     // Strict validation: only allow properly formatted @gmail.com addresses.
     if (typeof email !== 'string' || email.trim().length === 0) {
