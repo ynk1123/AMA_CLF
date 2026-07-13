@@ -41,6 +41,10 @@ const Chat = () => {
 
   const selectedItemId = selectedItem?.id ?? null;
 
+  useEffect(() => {
+    console.log('🧱 [Chat] render: selectedItem exists?', !!selectedItem, 'selectedItemId:', selectedItemId);
+  }, [selectedItem, selectedItemId, messages.length]);
+
   // IMPORTANT:
   // - Only fetch on item switch
   // - Never clear messages on "loading"
@@ -386,7 +390,7 @@ const formatDateTime = (timestamp) => {
                         <Box
                           key={message.id || index}
                           sx={{ mb: 3 }}
-                          className={`fade-in stagger-${Math.min(index + 1, 4)}${justSentMessageId && (message.id === justSentMessageId) ? ' bbai-pop' : ''}`}
+                          className={`${justSentMessageId && (message.id === justSentMessageId) ? ' bbai-pop' : ''}`.trim()}
                         >
 
                           <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
