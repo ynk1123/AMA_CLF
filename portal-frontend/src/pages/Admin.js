@@ -857,11 +857,24 @@ const getImageUrl = (url) => {
                 {locationStats
                   .sort((a, b) => (b.count || 0) - (a.count || 0))
                   .map((stat, index) => (
-                    <TableRow key={index} hover sx={{ bgcolor: index % 2 === 0 ? '#f5f5f5' : 'white' }}>
-                      <TableCell>{index + 1}</TableCell>
-                      <TableCell><strong>{stat.location}</strong></TableCell>
-                      <TableCell><Chip label={stat.count || 0} color={index < 3 ? 'error' : 'default'} size="small" /></TableCell>
+                    <TableRow
+                      key={index}
+                      hover
+                      sx={(theme) => ({
+                        bgcolor: 'background.paper',
+                        '& td': {
+                          color: 'text.primary',
+                        },
+                      })}
+                    >
+                      <TableCell sx={{ color: 'text.primary' }}>{index + 1}</TableCell>
                       <TableCell>
+                        <strong style={{ color: 'inherit' }}>{stat.location}</strong>
+                      </TableCell>
+                      <TableCell>
+                        <Chip label={stat.count || 0} color={index < 3 ? 'error' : 'default'} size="small" />
+                      </TableCell>
+                      <TableCell sx={{ color: 'text.primary' }}>
                         {Math.round(((stat.count || 0) / (locationStats.reduce((sum, s) => sum + (s.count || 0), 0) || 1)) * 100)}%
                       </TableCell>
                     </TableRow>
@@ -871,22 +884,51 @@ const getImageUrl = (url) => {
           </TableContainer>
 
           {/* Top 3 Hotspots */}
-          <Paper sx={{ p: 3, mt: 3, bgcolor: '#fff3e0' }}>
-            <Typography variant="h6" gutterBottom> Top 3 Hotspot Locations</Typography>
+          <Paper
+            sx={{
+              p: 3,
+              mt: 3,
+              bgcolor: (theme) =>
+                theme.palette.mode === 'dark'
+                  ? 'rgba(255, 255, 255, 0.03)'
+                  : '#fff3e0',
+            }}
+          >
+            <Typography variant="h6" gutterBottom>
+              Top 3 Hotspot Locations
+            </Typography>
             <Grid container spacing={2}>
               {locationStats.slice(0, 3).map((stat, index) => (
                 <Grid item xs={12} md={4} key={index}>
-                  <Box sx={{ 
-                    p: 2, 
-                    bgcolor: 'white', 
-                    borderRadius: 2, 
-                    textAlign: 'center',
-                    border: index === 0 ? '3px solid gold' : index === 1 ? '3px solid silver' : '3px solid #cd7f32'
-                  }}>
-                    <Typography variant="h4" color={index === 0 ? 'warning.main' : '#666'}>#{index + 1}</Typography>
-                    <Typography variant="h6">{stat.location}</Typography>
-                    <Typography variant="h4" color="primary">{stat.count || 0}</Typography>
-                    <Typography variant="body2" color="text.secondary">items lost</Typography>
+                  <Box
+                    sx={{
+                      p: 2,
+                      bgcolor: (theme) =>
+                        theme.palette.mode === 'dark'
+                          ? 'rgba(255, 255, 255, 0.05)'
+                          : 'white',
+                      borderRadius: 2,
+                      textAlign: 'center',
+                      border:
+                        index === 0
+                          ? '3px solid gold'
+                          : index === 1
+                            ? '3px solid silver'
+                            : '3px solid #cd7f32',
+                    }}
+                  >
+                    <Typography variant="h4" sx={{ color: 'text.primary' }}>
+                      #{index + 1}
+                    </Typography>
+                    <Typography variant="h6" sx={{ color: 'text.primary' }}>
+                      {stat.location}
+                    </Typography>
+                    <Typography variant="h4" sx={{ color: 'text.primary' }}>
+                      {stat.count || 0}
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                      items lost
+                    </Typography>
                   </Box>
                 </Grid>
               ))}
