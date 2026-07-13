@@ -126,6 +126,9 @@ const Chat = () => {
     // - message.User.displayName
     // - message.timestamp
     // - message.id (used as key)
+    // For admin, backend returns studentId/displayName nowhere (admin login returns only studentId:'ADMIN', role:'admin').
+    // So we hardcode a stable admin displayName to avoid brief “Unknown” flicker.
+
     const tempId = Date.now().toString();
     const nowIso = new Date().toISOString();
 
