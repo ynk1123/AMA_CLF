@@ -141,9 +141,25 @@ const Chat = () => {
 
   const handleDeleteMessage = async (messageId) => {
     if (user.role !== 'admin') return;
+
+    const currentId = selectedItem?.id ?? null;
+    if (currentId == null) return;
+
     try {
       await messageService.deleteMessage(messageId);
-      loadMessages(selectedItem.id);
+
+      // Trigger a refresh by re-loading the current item id.
+      // (We intentionally do not call any non-existent loadMessages() helper.)
+      setLoadingMessages(true);
+      messageService
+        .getMessages(currentId)
+        .then((response) => setMessages(response.data))
+        .catch((err) => {
+          console.error('Failed to load messages after delete:', err?.response?.data || err.message);
+        })
+        .finally(() => {
+          setLoadingMessages(false);
+        });
     } catch (err) {
       console.error('Failed to delete message');
     }
