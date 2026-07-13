@@ -114,19 +114,26 @@ router.post('/resetPassword/:id/:token', async (req, res) => {
     }
 
     // Password must contain: lowercase, uppercase, digit, and at least one special char.
-    // Allowed characters include '_' and common punctuation (avoid rejecting passwords like "Sibuyas_Power08!" ).
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_])[A-Za-z\d_\W]{8,}$/;
+    // Future-proof: allow all non-whitespace symbols (including '_'), while still requiring a special/non-alphanumeric character.
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*(?:[^A-Za-z\d]|.*_))[^\s]{8,}$/;
 
     const normalizedPassword = typeof password === 'string' ? password.trim() : password;
 
 
-    if (typeof normalizedPassword !== 'string' || !passwordRegex.test(normalizedPassword)) {
+    const pwLower = /[a-z]/.test(normalizedPassword);
+    const pwUpper = /[A-Z]/.test(normalizedPassword);
+    const pwDigit = /\d/.test(normalizedPassword);
+    const pwSpecial = /[^A-Za-z\d]/.test(normalizedPassword) || /_/.test(normalizedPassword);
+    const pwMatchesRegex = typeof normalizedPassword === 'string' ? passwordRegex.test(normalizedPassword) : false;
+
+    if (typeof normalizedPassword !== 'string' || !pwMatchesRegex) {
 
       return res.status(400).json({
         message:
           'Password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character.'
       });
     }
+
 
     const encryptedPassword = await bcrypt.hash(password, 12);
 
@@ -148,7 +155,8 @@ router.post('/register', async (req, res) => {
   try {
     const { studentId, displayName, password, email } = req.body;
 
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@#$!%*?&])[A-Za-z\d@#$!%*?&]{8,}$/;
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*(?:[^A-Za-z\d]|.*_))[^\s]{8,}$/;
+
 
     // Strict validation: only allow properly formatted @gmail.com addresses.
     if (typeof email !== 'string' || email.trim().length === 0) {
@@ -173,9 +181,25 @@ router.post('/register', async (req, res) => {
     // Password complexity validation (MUST run before hashing/SendGrid/DB writes)
     const normalizedPassword = typeof password === 'string' ? password.trim() : password;
 
+    const pwLower = typeof normalizedPassword === 'string' ? /[a-z]/.test(normalizedPassword) : false;
+    const pwUpper = typeof normalizedPassword === 'string' ? /[A-Z]/.test(normalizedPassword) : false;
+    const pwDigit = typeof normalizedPassword === 'string' ? /\d/.test(normalizedPassword) : false;
+    const pwSpecial = typeof normalizedPassword === 'string' ? /[^A-Za-z\d]/.test(normalizedPassword) || /_/.test(normalizedPassword) : false;
+    const pwMatchesRegex = typeof normalizedPassword === 'string' ? passwordRegex.test(normalizedPassword) : false;
 
+    console.log('TEMP_PW_REGISTER_VALIDATE', {
+      typeofPassword: typeof password,
+      normalizedLength: typeof normalizedPassword === 'string' ? normalizedPassword.length : null,
+      pwLower,
+      pwUpper,
+      pwDigit,
+      pwSpecial,
+      pwMatchesRegex,
+      normalizedPasswordPreview: typeof normalizedPassword === 'string' ? normalizedPassword.slice(0, 24) : null
+    });
 
-    if (typeof normalizedPassword !== 'string' || !passwordRegex.test(normalizedPassword)) {
+    if (typeof normalizedPassword !== 'string' || !pwMatchesRegex) {
+
 
       return res.status(400).json({
         message:
