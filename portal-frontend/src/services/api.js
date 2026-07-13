@@ -17,7 +17,7 @@ const api = axios.create({
 
 // JWT Token interceptor
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
+  const token = sessionStorage.getItem('token');
   if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
@@ -32,8 +32,8 @@ api.interceptors.response.use(
       const isAuthLoginAttempt = url.includes('/auth/login') || url.includes('/auth/admin-login');
 
       if (!isAuthLoginAttempt) {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
+        sessionStorage.removeItem('token');
+        sessionStorage.removeItem('user');
         // Keep SPA navigation within the app.
         window.history.pushState({}, '', '/login');
       }
