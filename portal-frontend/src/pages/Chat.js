@@ -378,15 +378,16 @@ const formatDateTime = (timestamp) => {
                             </Avatar>
                             <Box sx={{ flexGrow: 1 }}>
                               <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
-                                <Typography variant="subtitle1" sx={{ color: '#1A1A2E', fontWeight: 700, mr: 1 }}>
+                                <Typography variant="subtitle1" sx={{ color: 'text.primary', fontWeight: 700, mr: 1 }}>
                                   {message.User?.displayName || user?.displayName || 'Unknown'}
                                 </Typography>
-                                <Typography variant="caption" sx={{ color: '#6B7280', mr: 2, fontWeight: 500 }}>
+                                <Typography variant="caption" sx={{ color: 'text.secondary', mr: 2, fontWeight: 500 }}>
                                   ({message.User?.studentId || '?'})
                                 </Typography>
-                                <Typography variant="caption" sx={{ color: '#4B5563' }}>
+                                <Typography variant="caption" sx={{ color: 'text.secondary' }}>
                                   {formatDateTime(message.timestamp)}
                                 </Typography>
+
                                 {user.role === 'admin' && (
                                   <IconButton
                                     size="small"
@@ -397,9 +398,17 @@ const formatDateTime = (timestamp) => {
                                   </IconButton>
                                 )}
                               </Box>
-                              <Typography variant="body1" sx={{ color: '#1A1A2E', whiteSpace: 'pre-wrap' }}>
+                              <Typography
+                                variant="body1"
+                                sx={{
+                                  color: 'text.primary',
+                                  whiteSpace: 'pre-wrap',
+                                  wordBreak: 'break-word',
+                                }}
+                              >
                                 {message.content}
                               </Typography>
+
                             </Box>
                           </Box>
                         </Box>
@@ -409,12 +418,20 @@ const formatDateTime = (timestamp) => {
                   </Box>
 
                   {/* Message Input */}
-                  <Box sx={{ p: 2, backgroundColor: '#FEE2E2', borderTop: '2px solid #DC2626' }}>
+                  <Box
+                    sx={(theme) => ({
+                      p: 2,
+                      backgroundColor: 'background.paper',
+                      borderTop: '2px solid',
+                      borderColor: 'primary.main',
+                    })}
+                  >
                     <Box sx={{ display: 'flex', gap: 1 }}>
                       <TextField
                         fullWidth
                         placeholder={sendingMessage ? 'Sending...' : `Message about ${selectedItem.title}...`}
                         value={newMessage}
+
                         onChange={(e) => setNewMessage(e.target.value)}
                         onPaste={(e) => {
                           // keep default paste behavior; bugfix placeholder to avoid interfering events
