@@ -88,15 +88,18 @@ const Login = () => {
           overflow: 'hidden',
         }}
       >
-        {/* Corner decoration */}
-        <Box sx={{
-          position: 'absolute',
-          top: 0,
-          right: 0,
-          width: 80,
-          height: 80,
-          background: 'linear-gradient(135deg, transparent 50%, #FEE2E2 50%)',
-        }} />
+        {/* Corner decoration (Dark Mode: hide harsh triangle) */}
+        <Box
+          sx={(theme) => ({
+            position: 'absolute',
+            top: 0,
+            right: 0,
+            width: 80,
+            height: 80,
+            display: theme.palette.mode === 'dark' ? 'none' : 'block',
+            background: 'linear-gradient(135deg, transparent 50%, #FEE2E2 50%)',
+          })}
+        />
 
         <Typography 
           variant="h3" 
@@ -190,16 +193,56 @@ const Login = () => {
         </Box>
       </Paper>
 
-      <Dialog open={forgotDialog} onClose={() => setForgotDialog(false)} maxWidth="sm" fullWidth>
+      <Dialog
+        open={forgotDialog}
+        onClose={() => setForgotDialog(false)}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{
+          sx: {
+            backgroundColor: 'background.paper',
+          },
+        }}
+      >
         <DialogTitle sx={{ fontWeight: 700, color: '#DC2626' }}>{t('resetPassword')}</DialogTitle>
+
         <DialogContent>
-          <Typography sx={{ mb: 2, color: '#4B5563' }}>{t('enterStudentIdOrEmail')}</Typography>
-          <TextField fullWidth label={t('studentIdOrEmail')} value={forgotInput} onChange={(e) => setForgotInput(e.target.value)} margin="normal" />
+          <Typography sx={{ mb: 2, color: 'text.secondary' }}>{t('enterStudentIdOrEmail')}</Typography>
+
+          <TextField
+            fullWidth
+            label={t('studentIdOrEmail')}
+            value={forgotInput}
+            onChange={(e) => setForgotInput(e.target.value)}
+            margin="normal"
+            InputLabelProps={{ sx: { color: 'text.secondary' } }}
+            sx={{
+              '& .MuiInputBase-input': { color: 'text.primary' },
+              '& .MuiOutlinedInput-notchedOutline': { borderColor: 'divider' },
+              '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'text.secondary' },
+              '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: 'primary.main' },
+            }}
+          />
+
           {forgotMessage && <Alert severity="info" sx={{ mt: 2 }}>{forgotMessage}</Alert>}
         </DialogContent>
+
         <DialogActions>
           <Button onClick={() => setForgotDialog(false)}>{t('cancel')}</Button>
-          <Button onClick={handleForgotPassword} variant="contained" disabled={forgotLoading || !forgotInput} sx={{ backgroundColor: '#DC2626' }}>
+
+          <Button
+            onClick={handleForgotPassword}
+            variant="contained"
+            disabled={forgotLoading || !forgotInput}
+            sx={{
+              backgroundColor: '#DC2626',
+              color: 'text.primary',
+              '&.Mui-disabled': {
+                backgroundColor: (theme) => theme.palette.action.disabledBackground,
+                color: (theme) => theme.palette.action.disabled,
+              },
+            }}
+          >
             {forgotLoading ? t('sending') : t('sendResetLink')}
           </Button>
         </DialogActions>
