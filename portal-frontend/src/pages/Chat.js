@@ -61,7 +61,11 @@ const Chat = () => {
       messageService
         .getMessages(selectedItemId)
         .then((response) => {
-          setMessages(response.data);
+          // Prevent the in-flight POST from being overwritten by an older GET.
+          // This is the main reason for "flash then vanish".
+          if (!isPostingRef.current) {
+            setMessages(response.data);
+          }
         })
         .catch((err) => {
           console.error('Failed to load messages:', err?.response?.data || err.message);
@@ -92,10 +96,13 @@ const Chat = () => {
   const [sendingMessage, setSendingMessage] = useState(false);
   const [justSentMessageId, setJustSentMessageId] = useState(null);
 
+  const isPostingRef = useRef(false);
+
   const handleSendMessage = async () => {
     const trimmed = newMessage.trim();
     if (!trimmed || !selectedItem || sendingMessage) return;
 
+    isPostingRef.current = true;
     setSendingMessage(true);
     setJustSentMessageId(null);
 
@@ -135,6 +142,7 @@ const Chat = () => {
       console.error('Failed to send message:', err.response?.data || err.message);
       alert(`Failed to send message. ${err.response?.data?.message || err.message}`);
     } finally {
+      isPostingRef.current = false;
       setSendingMessage(false);
     }
   };
