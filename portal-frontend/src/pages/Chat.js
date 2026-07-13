@@ -390,7 +390,7 @@ const formatDateTime = (timestamp) => {
                         <Box
                           key={message.id || index}
                           sx={{ mb: 3 }}
-                          className={`${justSentMessageId && (message.id === justSentMessageId) ? ' bbai-pop' : ''}`.trim()}
+                          style={{ opacity: 1, display: 'block' }}
                         >
 
                           <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
