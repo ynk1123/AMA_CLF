@@ -1,7 +1,12 @@
 import React, { useState } from 'react';
-import { Box, Container, TextField, Button, Typography, Paper, Alert } from '@mui/material';
+import { Box, Container, TextField, Button, Typography, Paper, Alert, InputAdornment, IconButton } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { authService } from '../services/api';
+import Visibility from '@mui/icons-material/Visibility';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';
+
+
+
 
 
 const Register = () => {
@@ -14,7 +19,11 @@ const Register = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = React.useState(false);
+  const handleClickShowPassword = () => setShowPassword((show) => !show);
+  const handleMouseDownPassword = (event) => event.preventDefault();
   const navigate = useNavigate();
+
 
 
   const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -110,10 +119,26 @@ const Register = () => {
             disabled={isSubmitting}
           />
           <TextField
-            fullWidth label="Password" name="password" type="password" value={formData.password}
+            fullWidth label="Password" name="password" type={showPassword ? 'text' : 'password'} value={formData.password}
             onChange={handleChange} margin="normal" required sx={{ mb: 2 }}
             disabled={isSubmitting}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    aria-label="toggle password visibility"
+                    onClick={handleClickShowPassword}
+                    onMouseDown={handleMouseDownPassword}
+                    edge="end"
+                    sx={{ color: 'text.secondary' }}
+                  >
+                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
           />
+
           <Button
             type="submit"
             fullWidth
