@@ -21,8 +21,7 @@ api.interceptors.request.use((config) => {
   if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
-me
-// Handle 401 errors.
+ // Handle 401 errors.
 // IMPORTANT: do NOT hard-navigate on 401 for the login endpoint itself,
 api.interceptors.response.use(
   (response) => response,
