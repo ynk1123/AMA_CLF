@@ -47,6 +47,7 @@ const Chat = () => {
   // - Use optimistic append on send, and do NOT re-fetch after POST
   //   to prevent GET responses overwriting the UI and causing flash/vanish.
   const lastSelectedItemIdRef = useRef(null);
+  const fetchSeqRef = useRef(0);
 
   useEffect(() => {
     if (selectedItemId == null) {
@@ -58,19 +59,29 @@ const Chat = () => {
     if (lastSelectedItemIdRef.current !== selectedItemId) {
       lastSelectedItemIdRef.current = selectedItemId;
       setLoadingMessages(true);
+
+      // Request token: only apply the latest GET result.
+      const fetchSeq = ++fetchSeqRef.current;
+
       messageService
         .getMessages(selectedItemId)
         .then((response) => {
-          // Prevent the in-flight POST from being overwritten by an older GET.
-          // This is the main reason for "flash then vanish".
+          // Drop stale GET responses that resolve out of order.
+          if (fetchSeq !== fetchSeqRef.current) return;
+
+          // Keep your existing POST guard.
           if (!isPostingRef.current) {
             setMessages(response.data);
           }
         })
         .catch((err) => {
+          // Drop stale errors too
+          if (fetchSeq !== fetchSeqRef.current) return;
+
           console.error('Failed to load messages:', err?.response?.data || err.message);
         })
         .finally(() => {
+          if (fetchSeq !== fetchSeqRef.current) return;
           setLoadingMessages(false);
         });
     }
