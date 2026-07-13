@@ -71,8 +71,13 @@ router.post('/requestPasswordReset', async (req, res) => {
       text: `You requested a password reset.\n\nUse this link to reset your password:\n${resetURL}\n\nThis link expires in 30 minutes.`,
       html: `
         <p>You requested a password reset.</p>
-        <p>Click this link to reset your password:</p>
-        <p><a href="${resetURL}">${resetURL}</a></p>
+        <p style="margin: 20px 0;">
+          <a href="${resetURL}" style="display: inline-block; padding: 12px 20px; background: #111827; color: #ffffff; text-decoration: none; border-radius: 6px;">
+            Change Password
+          </a>
+        </p>
+        <p>If the button doesn't work, copy and paste this link into your browser:</p>
+        <p>${resetURL}</p>
         <p>This link expires in 30 minutes.</p>
       `
     })
