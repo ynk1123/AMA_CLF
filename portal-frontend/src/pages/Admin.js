@@ -220,18 +220,26 @@ const getImageUrl = (url) => {
 
 
           {/* Desktop/tablet table */}
-          <Box sx={{ display: { xs: 'none', md: 'block' } }}>
+                  <Box sx={{ display: { xs: 'none', md: 'block' } }}>
             <TableContainer component={Paper}>
               <Table>
                 <TableHead>
-                  <TableRow sx={{ bgcolor: '#f5f5f5' }}>
-                    <TableCell><strong>ID</strong></TableCell>
-                    <TableCell><strong>Title</strong></TableCell>
-                    <TableCell><strong>Category</strong></TableCell>
-                    <TableCell><strong>Location</strong></TableCell>
-                    <TableCell><strong>Status</strong></TableCell>
-                    <TableCell><strong>By</strong></TableCell>
-                    <TableCell><strong>Actions</strong></TableCell>
+                  <TableRow
+                    sx={(theme) => ({
+                      bgcolor: theme.palette.background.default,
+                      '& th': {
+                        color: theme.palette.text.primary,
+                        fontWeight: 700,
+                      },
+                    })}
+                  >
+                    <TableCell sx={{ color: 'text.primary' }}><strong>ID</strong></TableCell>
+                    <TableCell sx={{ color: 'text.primary' }}><strong>Title</strong></TableCell>
+                    <TableCell sx={{ color: 'text.primary' }}><strong>Category</strong></TableCell>
+                    <TableCell sx={{ color: 'text.primary' }}><strong>Location</strong></TableCell>
+                    <TableCell sx={{ color: 'text.primary' }}><strong>Status</strong></TableCell>
+                    <TableCell sx={{ color: 'text.primary' }}><strong>By</strong></TableCell>
+                    <TableCell sx={{ color: 'text.primary' }}><strong>Actions</strong></TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -424,18 +432,26 @@ const getImageUrl = (url) => {
               {/* Desktop/tablet table */}
               <Box sx={{ display: { xs: 'none', md: 'block' } }}>
                 <TableContainer component={Paper}>
-                  <Table>
-                    <TableHead>
-                      <TableRow sx={{ bgcolor: '#f5f5f5' }}>
-                        <TableCell><strong>Claim ID</strong></TableCell>
-                        <TableCell><strong>Item</strong></TableCell>
-                        <TableCell><strong>Claimed By</strong></TableCell>
-                        <TableCell><strong>Answer</strong></TableCell>
-                        <TableCell><strong>Status</strong></TableCell>
-                        <TableCell><strong>Actions</strong></TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
+                <Table>
+                  <TableHead>
+                    <TableRow
+                      sx={(theme) => ({
+                        bgcolor: theme.palette.background.default,
+                        '& th': {
+                          color: theme.palette.text.primary,
+                          fontWeight: 700,
+                        },
+                      })}
+                    >
+                      <TableCell><strong>Claim ID</strong></TableCell>
+                      <TableCell><strong>Item</strong></TableCell>
+                      <TableCell><strong>Claimed By</strong></TableCell>
+                      <TableCell><strong>Answer</strong></TableCell>
+                      <TableCell><strong>Status</strong></TableCell>
+                      <TableCell><strong>Actions</strong></TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
                       {pendingClaims.map((claim) => (
                         <TableRow key={claim.id} hover>
                           <TableCell>{claim.id}</TableCell>
@@ -536,13 +552,21 @@ const getImageUrl = (url) => {
                   <TableContainer component={Paper}>
                     <Table>
                       <TableHead>
-                        <TableRow sx={{ bgcolor: '#e0e0e0' }}>
-                          <TableCell><strong>Claim ID</strong></TableCell>
-                          <TableCell><strong>Item</strong></TableCell>
-                          <TableCell><strong>Claimed By</strong></TableCell>
-                          <TableCell><strong>Answer</strong></TableCell>
-                          <TableCell><strong>Status</strong></TableCell>
-                          <TableCell><strong>Date</strong></TableCell>
+                        <TableRow
+                          sx={(theme) => ({
+                            bgcolor: theme.palette.background.default,
+                            '& th': {
+                              color: theme.palette.text.primary,
+                              fontWeight: 700,
+                            },
+                          })}
+                        >
+                          <TableCell sx={{ color: 'text.primary' }}><strong>Claim ID</strong></TableCell>
+                          <TableCell sx={{ color: 'text.primary' }}><strong>Item</strong></TableCell>
+                          <TableCell sx={{ color: 'text.primary' }}><strong>Claimed By</strong></TableCell>
+                          <TableCell sx={{ color: 'text.primary' }}><strong>Answer</strong></TableCell>
+                          <TableCell sx={{ color: 'text.primary' }}><strong>Status</strong></TableCell>
+                          <TableCell sx={{ color: 'text.primary' }}><strong>Date</strong></TableCell>
                         </TableRow>
                       </TableHead>
                       <TableBody>
@@ -640,7 +664,15 @@ const getImageUrl = (url) => {
                 <TableContainer component={Paper}>
                   <Table>
                     <TableHead>
-                      <TableRow sx={{ bgcolor: '#f5f5f5' }}>
+                      <TableRow
+                        sx={(theme) => ({
+                          bgcolor: theme.palette.background.default,
+                          '& th': {
+                            color: theme.palette.text.primary,
+                            fontWeight: 700,
+                          },
+                        })}
+                      >
                         <TableCell><strong>ID</strong></TableCell>
                         <TableCell><strong>Student ID</strong></TableCell>
                         <TableCell><strong>Name</strong></TableCell>
@@ -872,13 +904,21 @@ const getImageUrl = (url) => {
             <TableContainer component={Paper}>
               <Table>
                 <TableHead>
-                  <TableRow sx={{ bgcolor: '#f5f5f5' }}>
-                    <TableCell><strong>ID</strong></TableCell>
-                    <TableCell><strong>Date</strong></TableCell>
-                    <TableCell><strong>Time</strong></TableCell>
-                    <TableCell><strong>Location</strong></TableCell>
-                    <TableCell><strong>Status</strong></TableCell>
-                    <TableCell><strong>Actions</strong></TableCell>
+                  <TableRow
+                    sx={(theme) => ({
+                      bgcolor: theme.palette.background.default,
+                      '& th': {
+                        color: theme.palette.text.primary,
+                        fontWeight: 700,
+                      },
+                    })}
+                  >
+                    <TableCell sx={{ color: 'text.primary' }}><strong>ID</strong></TableCell>
+                    <TableCell sx={{ color: 'text.primary' }}><strong>Date</strong></TableCell>
+                    <TableCell sx={{ color: 'text.primary' }}><strong>Time</strong></TableCell>
+                    <TableCell sx={{ color: 'text.primary' }}><strong>Location</strong></TableCell>
+                    <TableCell sx={{ color: 'text.primary' }}><strong>Status</strong></TableCell>
+                    <TableCell sx={{ color: 'text.primary' }}><strong>Actions</strong></TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>

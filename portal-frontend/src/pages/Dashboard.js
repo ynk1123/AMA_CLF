@@ -793,16 +793,19 @@ return (
                     <Box component="img" src={getImageUrl(item.imageUrl)} alt={item.title} sx={itemImageStyles} />
                   )}
                   <Box
-                    sx={{
+                    sx={(theme) => ({
                       width: '100%',
-                      backgroundColor: '#ebe3e3',
+                      backgroundColor:
+                        theme.palette.mode === 'dark'
+                          ? 'rgba(255,255,255,0.05)'
+                          : 'rgba(0,0,0,0.03)',
                       borderRadius: 1,
                       py: 1,
                       px: 2,
                       mb: 1,
-                    }}
+                    })}
                   >
-                    <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                    <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'text.primary' }}>
                       DETAILS
                     </Typography>
                   </Box>
@@ -895,16 +898,19 @@ return (
                         <Box component="img" src={getImageUrl(item.imageUrl)} alt={item.title} sx={itemImageStyles} />
                       )}
                       <Box
-                        sx={{
+                        sx={(theme) => ({
                           width: '100%',
-                          backgroundColor: '#ebe3e3',
+                          backgroundColor:
+                            theme.palette.mode === 'dark'
+                              ? 'rgba(255, 255, 255, 0.05)'
+                              : 'rgba(0, 0, 0, 0.03)',
                           borderRadius: 1,
                           py: 1,
                           px: 2,
-                          mb: 1
-                        }}
+                          mb: 1,
+                        })}
                       >
-                        <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                        <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'text.primary' }}>
                           DETAILS
                         </Typography>
                       </Box>
@@ -1198,15 +1204,20 @@ return (
           </Box>
 
           <Typography variant="h6" sx={{ fontWeight: 600, mt: 2, px: 2 }}>Description</Typography>
-          <Box sx={{ 
-            px: 2, 
-            maxHeight: 150, 
-            overflow: 'auto',
-            backgroundColor: '#f5f5f5',
-            borderRadius: 1,
-            p: 1,
-            mb: 2
-          }}>
+          <Box
+            sx={(theme) => ({
+              px: 2,
+              maxHeight: 150,
+              overflow: 'auto',
+              backgroundColor:
+                theme.palette.mode === 'dark'
+                  ? 'rgba(255, 255, 255, 0.05)'
+                  : 'rgba(0, 0, 0, 0.03)',
+              borderRadius: 1,
+              p: 1,
+              mb: 2,
+            })}
+          >
             <Typography variant="body1" sx={{ px: 1, whiteSpace: 'pre-wrap' }}>
               {selectedItem.description || 'No description provided.'}
             </Typography>
