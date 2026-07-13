@@ -106,24 +106,57 @@ const Chat = () => {
     setSendingMessage(true);
     setJustSentMessageId(null);
 
-    // Optimistic message that will never disappear due to GET overwrite.
-    const optimisticId = `tmp-${Date.now()}-${Math.random().toString(16).slice(2)}`;
-    const optimisticMessage = {
-      id: optimisticId,
+    // MUST mirror JSX renderer keys exactly:
+    // - message.content
+    // - message.User.studentId
+    // - message.User.displayName
+    // - message.timestamp
+    // - message.id (used as key)
+    const tempId = Date.now().toString();
+    const nowIso = new Date().toISOString();
+
+    const optimisticMsg = {
+      id: tempId,
       content: trimmed,
       itemId: selectedItem.id,
-      timestamp: new Date().toISOString(),
-      User: user
-        ? { studentId: user.studentId, displayName: user.displayName }
-        : null
+      timestamp: nowIso,
+      User: {
+        studentId: user?.studentId,
+        displayName: user?.displayName
+      }
     };
 
-    // 1) Immediately show the message
-    setMessages((prev) => [...prev, optimisticMessage]);
+    // 1) EXACT payload being appended
+    console.log('🟦 Optimistic Message Appended:', optimisticMsg);
+    console.log('🟦 selectedItem.id sending:', selectedItem?.id);
+
+    // 2) Append using functional update, then log the resulting array
+    setMessages((prev) => {
+      const next = [...prev, optimisticMsg];
+
+      // EXACT array content immediately after append computation
+      console.log('🟨 State Array Content (immediately after append):', next);
+
+      // Helpful: show the fields your JSX render loop consumes
+      console.log(
+        '🧾 Render-loop keys snapshot (content + author fields):',
+        next.map((m) => ({
+          id: m?.id,
+          content: m?.content,
+          timestamp: m?.timestamp,
+          studentId: m?.User?.studentId,
+          displayName: m?.User?.displayName
+        }))
+      );
+
+      return next;
+    });
+
+    // 3) Clear input ONLY after state append call above
     setNewMessage('');
 
     try {
-      // 2) Send to backend
+      // 4) POST to backend
       const response = await messageService.createMessage({
         content: trimmed,
         itemId: selectedItem.id
@@ -131,14 +164,58 @@ const Chat = () => {
 
       const created = response?.data;
 
-      // 3) Replace optimistic with real server message
-      if (created && created.id != null) {
-        setMessages((prev) => prev.map((m) => (m.id === optimisticId ? created : m)));
-        setJustSentMessageId(created.id);
+      // 5) Compare backend response key structure vs JSX expectations
+      console.log('🧩 Backend POST response data:', created);
+      if (created) {
+        console.log('🧩 Backend fields for JSX:', {
+          id: created?.id,
+          content: created?.content,
+          timestamp: created?.timestamp,
+          studentId: created?.User?.studentId,
+          displayName: created?.User?.displayName,
+
+          // also log if backend used different key names (common mismatch checks)
+          possible_alt_content_keys: {
+            text: created?.text,
+            message_text: created?.message_text,
+            body: created?.body,
+            message: created?.message
+          }
+        });
       }
+
+      if (!created || created.id == null) return;
+
+      // 6) Replace optimistic with server response and log after replace
+      setMessages((prev) => {
+        const next = prev.map((m) => (m.id === tempId ? created : m));
+
+        console.log('🟩 State Array Content (after optimistic -> server replace):', next);
+        console.log(
+          '🧾 Render-loop keys snapshot (after replace):',
+          next.map((m) => ({
+            id: m?.id,
+            content: m?.content,
+            timestamp: m?.timestamp,
+            studentId: m?.User?.studentId,
+            displayName: m?.User?.displayName
+          }))
+        );
+
+        return next;
+      });
+
+      setJustSentMessageId(created.id ?? null);
     } catch (err) {
       // Revert optimistic on failure
-      setMessages((prev) => prev.filter((m) => m.id !== optimisticId));
+      console.log('🛑 Send failed, reverting optimistic tempId:', tempId);
+      setMessages((prev) => {
+        const next = prev.filter((m) => m.id !== tempId);
+
+        console.log('🧯 State Array Content (after revert):', next);
+        return next;
+      });
+
       console.error('Failed to send message:', err.response?.data || err.message);
       alert(`Failed to send message. ${err.response?.data?.message || err.message}`);
     } finally {
