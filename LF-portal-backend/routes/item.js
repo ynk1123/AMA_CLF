@@ -102,17 +102,36 @@ router.post('/', authenticate, upload.single('image'), async (req, res) => {
       // 2) Notify all admins
       const { Op } = require('sequelize');
 
-      // IMPORTANT: Users.role is a Postgres ENUM. It can only contain values present in the enum.
-      // The enum appears to be lowercase only ("admin"), so using "ADMIN" will crash the query.
-      // We still keep a case-insensitive match by filtering on lowercase and skipping invalid enum values.
-      const admins = await User.findAll({
+      // IMPORTANT: Users.role is a Postgres ENUM.
+      // Some existing rows may have inconsistent casing in stored data (e.g. 'ADMIN').
+      // To avoid invalid enum literals, we select admins by fetching all role='admin' rows
+      // and then also include any rows that are already persisted as 'ADMIN' (if the DB enum supports it).
+      // In practice: ENUM typically prevents 'ADMIN' inserts, but if your DB already contains it,
+      // we handle both by filtering in JS after retrieval.
+      const adminsFromEnum = await User.findAll({
         where: {
-          role: {
-            [Op.in]: ['admin']
-          }
+          role: { [Op.in]: ['admin'] }
         },
-        attributes: ['id']
+        attributes: ['id', 'role']
       });
+
+      // If there are truly stored 'ADMIN' rows, they won’t be returned by the enum-filtered query.
+      // So we fallback to a broader query using a raw SQL where clause.
+      let admins = adminsFromEnum;
+      try {
+        // This will work only if Postgres actually has 'ADMIN' rows and the enum permits it in comparisons.
+        const AdminUser = require('../models/user');
+        const sequelize = AdminUser.sequelize;
+        const [rows] = await sequelize.query(
+          `SELECT "id", "role" FROM "Users" WHERE "role" IN ('admin', 'ADMIN')`,
+          { type: sequelize.QueryTypes.SELECT }
+        );
+        admins = rows || adminsFromEnum;
+      } catch (e) {
+        // Safe fallback: rely on enum-supported rows only.
+        admins = adminsFromEnum;
+      }
+
       const adminIds = admins.map((a) => a.id);
 
       // Avoid double-inserting for the rare case where the creator is also an admin.
