@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 
-import { Box, Container, Typography, Grid, TextField, Button, List, ListItem, ListItemAvatar, Avatar, ListItemText, Divider, IconButton, Paper, useMediaQuery } from '@mui/material';
+import { Box, Container, Typography, Grid, TextField, Button, List, ListItem, ListItemAvatar, Avatar, ListItemText, Divider, IconButton, Paper, useMediaQuery, CircularProgress } from '@mui/material';
 import { useAuth } from '../context/AuthContext';
 import { useSearchParams } from 'react-router-dom';
 import { itemService, messageService } from '../services/api';
@@ -17,7 +17,8 @@ const Chat = () => {
   const [selectedItem, setSelectedItem] = useState(null);
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
-  const [loadingMessages, setLoadingMessages] = useState(false);
+  const [isMessagesLoading, setIsMessagesLoading] = useState(false);
+
   const messagesEndRef = useRef(null);
 
   const isMobile = useMediaQuery('(max-width:600px)');
@@ -61,7 +62,7 @@ const Chat = () => {
 
     if (lastSelectedItemIdRef.current !== selectedItemId) {
       lastSelectedItemIdRef.current = selectedItemId;
-      setLoadingMessages(true);
+      setIsMessagesLoading(true);
 
       // Request token: only apply the latest GET result.
       const fetchSeq = ++fetchSeqRef.current;
@@ -85,10 +86,11 @@ const Chat = () => {
         })
         .finally(() => {
           if (fetchSeq !== fetchSeqRef.current) return;
-          setLoadingMessages(false);
+          setIsMessagesLoading(false);
         });
     }
   }, [selectedItemId]);
+
 
   // Auto-scroll to center when messages are loaded/updated or item is clicked
   useEffect(() => {
@@ -96,7 +98,8 @@ const Chat = () => {
     requestAnimationFrame(() => {
       messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     });
-  }, [messages, selectedItemId, loadingMessages]);
+  }, [messages, selectedItemId, isMessagesLoading]);
+
 
   const loadItems = async () => {
     try {
@@ -362,7 +365,23 @@ const formatDateTime = (timestamp) => {
                       backgroundColor: theme.palette.background.default,
                     })}
                   >
-                    {messages.length === 0 ? (
+                    {isMessagesLoading ? (
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          height: '100%',
+                          gap: 2,
+                        }}
+                      >
+                        <CircularProgress size={40} sx={{ color: 'primary.main' }} />
+                        <Typography variant="body2" sx={{ color: 'text.secondary', fontStyle: 'italic' }}>
+                          Fetching conversation data...
+                        </Typography>
+                      </Box>
+                    ) : messages.length === 0 ? (
                       <Box sx={{ textAlign: 'center', mt: 4 }}>
                         <Typography variant="body1" sx={{ color: 'text.primary' }}>
                           No messages yet. Start the conversation!
@@ -370,6 +389,7 @@ const formatDateTime = (timestamp) => {
                       </Box>
                     ) : (
                       messages.map((message, index) => (
+
                         <Box
                           key={message.id || index}
                           sx={{ mb: 3, opacity: 1, display: 'block' }}
