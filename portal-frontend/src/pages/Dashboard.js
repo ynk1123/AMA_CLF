@@ -330,8 +330,13 @@ const Dashboard = () => {
         // Add all current notifications to dismissed list
         const notifIds = notifications.map(n => n.id);
         addToDismissedNotifications(notifIds);
+
         // Remove only current user's stored notifications to avoid cross-user leakage
         localStorage.removeItem(key('list'));
+
+        // Also clear viewed tracking so badge/count won't resurrect after refresh.
+        localStorage.removeItem(key('viewed'));
+        localStorage.removeItem(key('viewed_count'));
       } catch (err) {
         console.error('Failed to delete notifications', err);
       }
