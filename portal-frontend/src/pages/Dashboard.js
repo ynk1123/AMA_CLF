@@ -1151,17 +1151,17 @@ return (
   <DialogContent dividers>
     {selectedItem && (
       <Grid container spacing={3}>
-        <Grid item xs={12} md={6}>
-          {selectedItem.imageUrl && (
+        {selectedItem?.imageUrl && (
+          <Grid item xs={12} md={6}>
             <Box
               component="img"
               src={getImageUrl(selectedItem.imageUrl)}
               alt={selectedItem.title}
               sx={{ width: '100%', borderRadius: 2 }}
             />
-          )}
-        </Grid>
-        <Grid item xs={12} md={6}>
+          </Grid>
+        )}
+        <Grid item xs={12} md={selectedItem?.imageUrl ? 6 : 12} sx={{ display: 'flex', justifyContent: 'center' }}>
           <Box
             sx={(theme) => ({
               backgroundColor:
