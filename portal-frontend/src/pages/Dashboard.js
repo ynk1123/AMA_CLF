@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Box, Typography, Grid, Card, CardContent, Button, TextField, MenuItem, Dialog, DialogTitle, DialogContent, DialogActions, Chip, IconButton } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { itemService, messageService, appointmentService } from '../services/api';
+import { itemService, messageService, appointmentService, notificationService } from '../services/api';
+
 import CloseIcon from '@mui/icons-material/Close';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import MessageIcon from '@mui/icons-material/Message';
@@ -119,241 +120,39 @@ const Dashboard = () => {
       mb: 1.5
     };
 
-    // Notification state - real data from API
+    // Notification state - DB-driven notifications
     const [notifications, setNotifications] = useState([]);
     const [notificationCount, setNotificationCount] = useState(0);
     const [openNotificationDialog, setOpenNotificationDialog] = useState(false);
 
-    const [notificationsViewed, setNotificationsViewed] = useState(false);
-
-    const currentUserId = user?.id || user?.studentId;
-
-    const key = (suffix) => {
-      // Prevent leaking/mixing data if auth is not ready yet.
-      if (currentUserId == null) return `lf_notifications__anonymous_${suffix}`;
-      return `lf_notifications_${currentUserId}_${suffix}`;
-    };
-
-    const loadNotificationsViewedFromStorage = () => {
-      try {
-        return localStorage.getItem(key('viewed')) === 'true';
-      } catch (e) {
-        return false;
-      }
-    };
-
-    const setNotificationsViewedInStorage = (val) => {
-      try {
-        localStorage.setItem(key('viewed'), val ? 'true' : 'false');
-      } catch (e) {
-        // ignore
-      }
-    };
-
-    const loadNotificationsViewedCountFromStorage = () => {
-      try {
-        return parseInt(localStorage.getItem(key('viewed_count')), 10) || 0;
-      } catch (e) {
-        return 0;
-      }
-    };
-
-    const setNotificationsViewedCountInStorage = (count) => {
-      try {
-        localStorage.setItem(key('viewed_count'), String(count));
-      } catch (e) {
-        // ignore
-      }
-    };
-
-    // Dismissed notifications - persist across sessions
-    const loadDismissedNotificationsFromStorage = () => {
-      try {
-        const stored = localStorage.getItem(key('dismissed'));
-        return stored ? JSON.parse(stored) : [];
-      } catch (err) {
-        return [];
-      }
-    };
-
-    const saveDismissedNotificationsToStorage = (list) => {
-      try {
-        localStorage.setItem(key('dismissed'), JSON.stringify(list));
-      } catch (err) {
-        console.error('Failed to save dismissed notifications', err);
-      }
-    };
-
-    const addToDismissedNotifications = (notifIds) => {
-      const dismissed = loadDismissedNotificationsFromStorage();
-      const updated = [...new Set([...dismissed, ...notifIds])];
-      saveDismissedNotificationsToStorage(updated);
-    };
-
-    // Save notifications to localStorage
-    const saveNotificationsToStorage = (list) => {
-      try {
-        localStorage.setItem(key('list'), JSON.stringify(list));
-      } catch (err) {
-        console.error('Failed to save notifications', err);
-      }
-    };
-
-    // Load notifications from localStorage
-    const loadNotificationsFromStorage = () => {
-      try {
-        const stored = localStorage.getItem(key('list'));
-        return stored ? JSON.parse(stored) : [];
-      } catch (err) {
-        return [];
-      }
-    };
-
-
-    // Load notifications
     const loadNotifications = async () => {
       try {
-        const dismissedIds = loadDismissedNotificationsFromStorage();
-        const storedNotifs = loadNotificationsFromStorage();
-        const isAdmin = user?.role === 'admin';
-
-        let notifList = storedNotifs
-          .filter(n => !dismissedIds.includes(n.id))
-          .map(n => {
-            if ((n.type === 'item_pending' || n.type === 'item_posted') && n.id.startsWith('item-')) {
-              const message = isAdmin ? 'A user is waiting for approval' : 'Your item is waiting for admin approval';
-              return { ...n, type: isAdmin ? 'item_posted' : 'item_pending', message };
-            }
-            return n;
-          });
-
-        // Ironclad admin filtering: admin must never see student approval notifications.
-        if (isAdmin) {
-          notifList = notifList.filter(n => n.type !== 'item_approved');
-        }
-
-        // Fetch in parallel to reduce initial load time.
-        const [myPostedItemsRes, myClaimsRes, myAppointmentsRes] = await Promise.all([
-          itemService.getMyPostedItems(),
-          itemService.getMyClaims(),
-          appointmentService.getMyAppointments()
-        ]);
-
-        const myPostedItems = myPostedItemsRes.data || [];
-        const pendingItems = myPostedItems.filter(item => item.status === 'pending');
-        const existingPendingIds = notifList
-          .filter(n => n.type === 'item_pending' || n.type === 'item_posted')
-          .map(n => n.id);
-
-        pendingItems.forEach(item => {
-          const notifId = `item-${item.id}`;
-          if (!existingPendingIds.includes(notifId) && !dismissedIds.includes(notifId)) {
-            const message = isAdmin ? 'A user is waiting for approval' : 'Your item is waiting for admin approval';
-            notifList.push({
-              id: notifId,
-              type: isAdmin ? 'item_posted' : 'item_pending',
-              title: item.title,
-              message,
-              time: item.createdAt
-            });
-          }
-        });
-
-        if (!isAdmin) {
-          const approvedItems = myPostedItems.filter(item => item.status === 'lost' || item.status === 'found');
-          const existingApprovedIds = storedNotifs.filter(n => n.type === 'item_approved').map(n => n.id);
-          approvedItems.forEach(item => {
-            const notifId = `item-approved-${item.id}`;
-            if (!existingApprovedIds.includes(notifId) && !dismissedIds.includes(notifId)) {
-              notifList.push({
-                id: notifId,
-                type: 'item_approved',
-                title: item.title,
-                message: `Your item has been APPROVED! Status: ${item.status}`,
-                time: item.updatedAt
-              });
-            }
-          });
-        }
-
-        const myClaims = myClaimsRes.data || [];
-        const existingClaimIds = storedNotifs
-          .filter(n => n.type === 'claim_approved' || n.type === 'claim_rejected')
-          .map(n => n.id);
-
-        const processedClaims = myClaims.filter(claim =>
-          (claim.status === 'approved' || claim.status === 'rejected') &&
-          !existingClaimIds.includes(`claim-${claim.id}`) &&
-          !dismissedIds.includes(`claim-${claim.id}`)
-        );
-
-        processedClaims.forEach(claim => {
-          notifList.push({
-            id: `claim-${claim.id}`,
-            type: claim.status === 'approved' ? 'claim_approved' : 'claim_rejected',
-            title: claim.Item?.title || 'Your Claim',
-            message: claim.status === 'approved' ? 'Your claim has been APPROVED!' : 'Your claim has been REJECTED',
-            time: claim.updatedAt
-          });
-        });
-
-        const myAppointments = myAppointmentsRes.data || [];
-        const existingApptIds = storedNotifs.filter(n => n.type === 'appointment').map(n => n.id);
-
-        myAppointments.forEach(appt => {
-          const notifId = `appt-${appt.id}`;
-          if (!existingApptIds.includes(notifId) && !dismissedIds.includes(notifId)) {
-            notifList.push({
-              id: notifId,
-              type: 'appointment',
-              title: appt.Item?.title || 'CCTV Review',
-              message: `Appointment: ${appt.status} - ${appt.date} at ${appt.time}`,
-              time: appt.date
-            });
-          }
-        });
-
-        saveNotificationsToStorage(notifList);
-        setNotifications(notifList);
-
-        const viewed = loadNotificationsViewedFromStorage();
-        const viewedCount = loadNotificationsViewedCountFromStorage();
-        const count = viewed ? Math.max(0, notifList.length - viewedCount) : notifList.length;
-        setNotificationCount(count);
+        const res = await notificationService.getNotifications();
+        const list = res.data || [];
+        setNotifications(list);
+        setNotificationCount(list.filter((n) => !n.is_read).length);
       } catch (err) {
         console.error('Failed to load notifications', err);
       }
     };
 
-    const deleteAllNotifications = () => {
+    const markAllAsRead = async () => {
       try {
-        // Add all current notifications to dismissed list
-        const notifIds = notifications.map(n => n.id);
-        addToDismissedNotifications(notifIds);
-
-        // Remove only current user's stored notifications to avoid cross-user leakage
-        localStorage.removeItem(key('list'));
-
-        // Also clear viewed tracking so badge/count won't resurrect after refresh.
-        localStorage.removeItem(key('viewed'));
-        localStorage.removeItem(key('viewed_count'));
+        const unread = notifications.filter((n) => !n.is_read);
+        await Promise.all(unread.map((n) => notificationService.markAsRead(n.id)));
+        await loadNotifications();
       } catch (err) {
-        console.error('Failed to delete notifications', err);
+        console.error('Failed to mark notifications as read', err);
       }
-      setNotifications([]);
-      setNotificationCount(0);
-      setNotificationsViewedInStorage(false);
     };
 
-useEffect(() => {
-      // New page load => allow badge to show again until viewed
-      setNotificationsViewed(loadNotificationsViewedFromStorage());
+    useEffect(() => {
       loadItems();
       loadNotifications();
-    }, []);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [user?.id, user?.studentId]);
 
     const [postingItem, setPostingItem] = useState(false);
-
 
     const loadItems = async () => {
       try {
@@ -363,6 +162,7 @@ useEffect(() => {
         console.error('Failed to load items');
       }
     };
+
 
     const loadMessages = async (itemId) => {
       try {
@@ -590,11 +390,10 @@ return (
             color="primary"
             onClick={() => {
               setOpenNotificationDialog(true);
-              setNotificationsViewed(true);
-              setNotificationsViewedInStorage(true);
-              setNotificationsViewedCountInStorage(notifications.length);
-              setNotificationCount(0); // hide badge after viewing
+              // Persistently clear badge by marking all unread notifications as read.
+              markAllAsRead();
             }}
+
             sx={(theme) => {
               const isDark = theme.palette.mode === 'dark';
               return {
@@ -1475,9 +1274,10 @@ return (
                             </Typography>
                           ) : (
                             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                              {notifications.map((notif) => (
+              {notifications.map((notif) => (
                                 <Box
                                   key={notif.id}
+
                                   sx={(theme) => {
                                     const innerStatus = getNotificationInnerStatus(notif.type);
                                     const variant = innerStatus ? statusCardVariants[innerStatus] : null;
@@ -1522,19 +1322,12 @@ return (
                             </Box>
                           )}
                         </DialogContent>
-                                                <DialogActions sx={{ justifyContent: 'space-between' }}>
-                          <Button
-                            onClick={() => {
-                              deleteAllNotifications();
-                              setOpenNotificationDialog(false);
-                            }}
-                            color="error"
-                            disabled={notifications.length === 0}
-                          >
-                            Delete
+                                <DialogActions sx={{ justifyContent: 'space-between' }}>
+                          <Button onClick={() => setOpenNotificationDialog(false)} disabled={notifications.length === 0}>
+                            Done
                           </Button>
-                          <Button onClick={() => setOpenNotificationDialog(false)}>Close</Button>
                         </DialogActions>
+
                       </Dialog>
                     </Box>
                   );

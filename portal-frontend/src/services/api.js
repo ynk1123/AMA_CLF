@@ -80,7 +80,14 @@ export const appointmentService = {
   updateStatus: (id, status) => api.put(`/appointments/${id}/status`, { status })
 };
 
+export const notificationService = {
+  getNotifications: () => api.get('/notifications'),
+  markAsRead: (id) => api.put(`/notifications/${id}/read`),
+  deleteNotification: (id) => api.delete(`/notifications/${id}`)
+};
+
 export const adminService = {
+
   getAllItems: () => api.get('/admin/items'),
   getStats: () => api.get('/admin/stats'),
   getLocationStats: () => api.get('/admin/stats/locations'),

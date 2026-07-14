@@ -14,8 +14,10 @@ require('./models/claim');
 require('./models/appointment');
 require('./models/message');
 require('./models/contact');
+require('./models/notification');
 
 dotenv.config();
+
 
 const app = express();
 
@@ -91,8 +93,10 @@ app.use('/api/messages', require('./routes/message'));
 app.use('/api/appointments', require('./routes/appointment'));
 app.use('/api/admin', require('./routes/admin'));
 app.use('/api/contact', require('./routes/contact'));
+app.use('/api/notifications', require('./routes/notification'));
 
 // Serve frontend index.html for all non-API routes when build exists
+
 if (fs.existsSync(frontendBuildPath)) {
   // Use explicit route patterns to avoid Express/Path-to-RegExp issues with Node 24.
   app.get(/^\/(?!api\/)[\s\S]*$/, (req, res, next) => {

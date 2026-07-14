@@ -27,15 +27,34 @@ exports.approveItem = async (req, res) => {
   try {
     const item = await Item.findByPk(req.params.id);
     if (!item) return res.status(404).json({ message: 'Item not found' });
-    
+
     // Use the original type (lost/found) from itemType field when approving
     item.status = item.itemType || 'lost';
     await item.save();
+
+    // Persistent, DB-driven notifications (no localStorage).
+    const Notification = require('../models/notification');
+
+    // Crucial safeguard: if admin is approving their own item, skip notification creation.
+    // (req.user.id can be 0/undefined for some admin tokens; this check prevents spamming their own dashboards.)
+    if (req.user?.id != null && req.user.id === item.userId) {
+      return res.json(item);
+    }
+
+    await Notification.create({
+      user_id: item.userId,
+      title: item.title,
+      message: 'Your item has been APPROVED! Status: ' + item.status,
+      // is_read / is_deleted use defaults
+    });
+
     res.json(item);
   } catch (err) {
+    console.error('Failed to approve item:', err);
     res.status(400).json({ message: 'Failed to approve item' });
   }
 };
+
 
 exports.updateItemStatus = async (req, res) => {
   try {
