@@ -1314,8 +1314,8 @@ return (
                                   <Typography variant="body2" sx={{ mt: 0.5, color: 'inherit' }}>
                                     {notif.message}
                                   </Typography>
-                                  <Typography variant="caption" sx={{ color: 'text.secondary !important', mt: 1, display: 'block' }}>
-                                    {new Date(notif.time).toLocaleDateString()}
+                                    <Typography variant="caption" sx={{ color: 'text.secondary !important', mt: 1, display: 'block' }}>
+                                    {new Date(notif.created_at || notif.createdAt || notif.time).toLocaleDateString()}
                                   </Typography>
                                 </Box>
                               ))}
