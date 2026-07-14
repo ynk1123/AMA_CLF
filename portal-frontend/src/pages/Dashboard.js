@@ -1151,8 +1151,6 @@ return (
   <DialogContent dividers>
     {selectedItem && (
       <Grid container spacing={3}>
-        //{selectedItem?.imageUrl && (
-          //<Grid item xs={12} md={6}>
         <Grid item xs={12} md={6}>
           {selectedItem.imageUrl && ( 
             <Box
@@ -1161,12 +1159,10 @@ return (
               alt={selectedItem.title}
               sx={{ width: '100%', borderRadius: 2 }}
             />
-      //    </Grid>
-        //)}
-        //<Grid item xs={12} md={selectedItem?.imageUrl ? 6 : 12} sx={{ display: 'flex', justifyContent: 'center' }}>
-           )}
+           )}//this where i changed sh8
         </Grid>
-        <Grid item xs={12} md={6}>       
+        <Grid item xs={12} md={6}>     
+        )}
           <Box
             sx={(theme) => ({
               backgroundColor:
