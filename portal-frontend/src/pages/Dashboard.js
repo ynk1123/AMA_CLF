@@ -972,7 +972,7 @@ return (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px', width: '100%', padding: '4px' }}>
 
                 {claimedArchivedItems.map((item) => (
-                  <div
+                <div
                     key={item.id}
                     style={{
                       display: 'flex',
@@ -995,7 +995,11 @@ return (
 
                       {item.title}
                     </span>
+                    <span style={{ display: 'block', width: '100%', fontSize: '11px', textAlign: 'center', fontStyle: 'italic', color: 'rgba(0,0,0,0.6)', marginTop: '4px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      Posted: {getRelativePostTime(item.created_at || item.createdAt)}
+                    </span>
                   </div>
+
                 ))}
               </div>
             </Box>
@@ -1181,6 +1185,11 @@ return (
             <Typography variant="body1" sx={{ mb: 1 }}>
               <strong>Date:</strong> {new Date(selectedItem.date).toLocaleDateString()}
             </Typography>
+            <Typography variant="body1" sx={{ mb: 1 }}>
+              <strong>Posted:</strong> {getRelativePostTime(selectedItem.created_at || selectedItem.createdAt)}
+            </Typography>
+
+
             <Typography variant="body1" sx={{ mb: 1 }}>
               <strong>Posted by:</strong>{' '}
               {
