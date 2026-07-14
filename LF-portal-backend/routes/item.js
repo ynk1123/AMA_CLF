@@ -117,20 +117,24 @@ router.post('/', authenticate, upload.single('image'), async (req, res) => {
 
       // If there are truly stored 'ADMIN' rows, they won’t be returned by the enum-filtered query.
       // So we fallback to a broader query using a raw SQL where clause.
+      // Primary: enum-safe admins
       let admins = adminsFromEnum;
+
+      // Secondary: raw SQL fallback (do NOT include 'ADMIN' literal in enum comparisons).
+      // Your earlier error showed Postgres ENUM rejects 'ADMIN', so only query for 'admin'.
       try {
-        // This will work only if Postgres actually has 'ADMIN' rows and the enum permits it in comparisons.
         const AdminUser = require('../models/user');
         const sequelize = AdminUser.sequelize;
         const [rows] = await sequelize.query(
-          `SELECT "id", "role" FROM "Users" WHERE "role" IN ('admin', 'ADMIN')`,
+          `SELECT "id", "role" FROM "Users" WHERE "role" = 'admin'`,
           { type: sequelize.QueryTypes.SELECT }
         );
         admins = rows || adminsFromEnum;
       } catch (e) {
-        // Safe fallback: rely on enum-supported rows only.
+        // Keep enum-safe results
         admins = adminsFromEnum;
       }
+
 
       const adminIds = admins.map((a) => a.id);
 
