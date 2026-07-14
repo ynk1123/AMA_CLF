@@ -85,6 +85,40 @@ router.post('/', authenticate, upload.single('image'), async (req, res) => {
       userId: req.user.id,
     });
 
+    // DB-driven notifications for submissions waiting on approval.
+    // - Student: notify themselves that their post is pending approval
+    // - Admins: notify admins that a new post needs approval
+    if (itemStatus === 'pending') {
+      const Notification = require('../models/notification');
+      const User = require('../models/user');
+
+      // 1) Notify the item owner
+      await Notification.create({
+        user_id: req.user.id,
+        title: item.title,
+        message: 'Your post is waiting for approval. Status: pending',
+      });
+
+      // 2) Notify all admins
+      const admins = await User.findAll({ where: { role: 'admin' }, attributes: ['id'] });
+      const adminIds = admins.map((a) => a.id);
+
+      // Avoid double-inserting for the rare case where the creator is also an admin.
+      const distinctAdminIds = [...new Set(adminIds)].filter((id) => id !== req.user.id);
+
+      if (distinctAdminIds.length > 0) {
+        await Promise.all(
+          distinctAdminIds.map((adminId) =>
+            Notification.create({
+              user_id: adminId,
+              title: 'New Approval Required',
+              message: `A user has posted "${item.title}". It is waiting for your approval.`,
+            })
+          )
+        );
+      }
+    }
+
     res.status(201).json(item);
   } catch (err) {
     console.error('Error creating item:', err);
