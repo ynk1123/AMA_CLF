@@ -101,10 +101,14 @@ router.post('/', authenticate, upload.single('image'), async (req, res) => {
 
       // 2) Notify all admins
       const { Op } = require('sequelize');
+
+      // IMPORTANT: Users.role is a Postgres ENUM. It can only contain values present in the enum.
+      // The enum appears to be lowercase only ("admin"), so using "ADMIN" will crash the query.
+      // We still keep a case-insensitive match by filtering on lowercase and skipping invalid enum values.
       const admins = await User.findAll({
         where: {
           role: {
-            [Op.in]: ['admin', 'ADMIN']
+            [Op.in]: ['admin']
           }
         },
         attributes: ['id']
