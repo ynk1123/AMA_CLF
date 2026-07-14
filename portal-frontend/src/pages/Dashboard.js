@@ -1159,6 +1159,7 @@ return (
               alt={selectedItem.title}
               sx={{ width: '100%', borderRadius: 2 }}
             />
+           )}       
         </Grid>
         <Grid item xs={12} md={6}>     
         )}
