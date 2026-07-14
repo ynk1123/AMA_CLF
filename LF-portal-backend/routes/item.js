@@ -100,7 +100,15 @@ router.post('/', authenticate, upload.single('image'), async (req, res) => {
       });
 
       // 2) Notify all admins
-      const admins = await User.findAll({ where: { role: 'admin' }, attributes: ['id'] });
+      const { Op } = require('sequelize');
+      const admins = await User.findAll({
+        where: {
+          role: {
+            [Op.in]: ['admin', 'ADMIN']
+          }
+        },
+        attributes: ['id']
+      });
       const adminIds = admins.map((a) => a.id);
 
       // Avoid double-inserting for the rare case where the creator is also an admin.
