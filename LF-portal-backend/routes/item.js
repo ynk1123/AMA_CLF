@@ -118,6 +118,10 @@ router.post('/', authenticate, upload.single('image'), async (req, res) => {
       // Avoid double-inserting for the rare case where the creator is also an admin.
       const distinctAdminIds = [...new Set(adminIds)].filter((id) => id !== req.user.id);
 
+      // NOTE: This notification should hit all admins (role='admin')
+      // including when the item creator is an admin account.
+
+
       if (distinctAdminIds.length > 0) {
         await Promise.all(
           distinctAdminIds.map((adminId) =>
