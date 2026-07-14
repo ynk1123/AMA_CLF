@@ -1159,7 +1159,6 @@ return (
               alt={selectedItem.title}
               sx={{ width: '100%', borderRadius: 2 }}
             />
-           )}//this where i changed sh8
         </Grid>
         <Grid item xs={12} md={6}>     
         )}
