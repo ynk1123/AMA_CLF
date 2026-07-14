@@ -126,9 +126,17 @@ const Dashboard = () => {
 
     const [notificationsViewed, setNotificationsViewed] = useState(false);
 
+    const currentUserId = user?.id || user?.studentId;
+
+    const key = (suffix) => {
+      // Prevent leaking/mixing data if auth is not ready yet.
+      if (currentUserId == null) return `lf_notifications__anonymous_${suffix}`;
+      return `lf_notifications_${currentUserId}_${suffix}`;
+    };
+
     const loadNotificationsViewedFromStorage = () => {
       try {
-        return localStorage.getItem('lf_notifications_viewed') === 'true';
+        return localStorage.getItem(key('viewed')) === 'true';
       } catch (e) {
         return false;
       }
@@ -136,15 +144,15 @@ const Dashboard = () => {
 
     const setNotificationsViewedInStorage = (val) => {
       try {
-        localStorage.setItem('lf_notifications_viewed', val ? 'true' : 'false');
+        localStorage.setItem(key('viewed'), val ? 'true' : 'false');
       } catch (e) {
         // ignore
       }
-    }
+    };
 
     const loadNotificationsViewedCountFromStorage = () => {
       try {
-        return parseInt(localStorage.getItem('lf_notifications_viewed_count'), 10) || 0;
+        return parseInt(localStorage.getItem(key('viewed_count')), 10) || 0;
       } catch (e) {
         return 0;
       }
@@ -152,7 +160,7 @@ const Dashboard = () => {
 
     const setNotificationsViewedCountInStorage = (count) => {
       try {
-        localStorage.setItem('lf_notifications_viewed_count', String(count));
+        localStorage.setItem(key('viewed_count'), String(count));
       } catch (e) {
         // ignore
       }
@@ -161,7 +169,7 @@ const Dashboard = () => {
     // Dismissed notifications - persist across sessions
     const loadDismissedNotificationsFromStorage = () => {
       try {
-        const stored = localStorage.getItem('lf_notifications_dismissed');
+        const stored = localStorage.getItem(key('dismissed'));
         return stored ? JSON.parse(stored) : [];
       } catch (err) {
         return [];
@@ -170,7 +178,7 @@ const Dashboard = () => {
 
     const saveDismissedNotificationsToStorage = (list) => {
       try {
-        localStorage.setItem('lf_notifications_dismissed', JSON.stringify(list));
+        localStorage.setItem(key('dismissed'), JSON.stringify(list));
       } catch (err) {
         console.error('Failed to save dismissed notifications', err);
       }
@@ -182,10 +190,10 @@ const Dashboard = () => {
       saveDismissedNotificationsToStorage(updated);
     };
 
-// Save notifications to localStorage
+    // Save notifications to localStorage
     const saveNotificationsToStorage = (list) => {
       try {
-        localStorage.setItem('lf_notifications', JSON.stringify(list));
+        localStorage.setItem(key('list'), JSON.stringify(list));
       } catch (err) {
         console.error('Failed to save notifications', err);
       }
@@ -194,12 +202,13 @@ const Dashboard = () => {
     // Load notifications from localStorage
     const loadNotificationsFromStorage = () => {
       try {
-        const stored = localStorage.getItem('lf_notifications');
+        const stored = localStorage.getItem(key('list'));
         return stored ? JSON.parse(stored) : [];
       } catch (err) {
         return [];
       }
     };
+
 
     // Load notifications
     const loadNotifications = async () => {
@@ -217,6 +226,11 @@ const Dashboard = () => {
             }
             return n;
           });
+
+        // Ironclad admin filtering: admin must never see student approval notifications.
+        if (isAdmin) {
+          notifList = notifList.filter(n => n.type !== 'item_approved');
+        }
 
         // Fetch in parallel to reduce initial load time.
         const [myPostedItemsRes, myClaimsRes, myAppointmentsRes] = await Promise.all([
@@ -316,7 +330,8 @@ const Dashboard = () => {
         // Add all current notifications to dismissed list
         const notifIds = notifications.map(n => n.id);
         addToDismissedNotifications(notifIds);
-        localStorage.removeItem('lf_notifications');
+        // Remove only current user's stored notifications to avoid cross-user leakage
+        localStorage.removeItem(key('list'));
       } catch (err) {
         console.error('Failed to delete notifications', err);
       }
