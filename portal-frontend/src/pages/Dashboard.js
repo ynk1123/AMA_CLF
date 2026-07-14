@@ -882,11 +882,13 @@ return (
                 }}
                 onClick={() => handleItemClick(item)}
               >
-<img
-                  src={item.imageUrl ? getImageUrl(item.imageUrl) : item.image}
-                  alt={item.title}
-                  style={{ width: '100%', aspectRatio: '1/1', objectFit: 'cover', borderRadius: '8px', display: 'block' }}
-                />
+{item.imageUrl && item.imageUrl.trim() !== "" && (
+                  <img
+                    src={getImageUrl(item.imageUrl)}
+                    alt={item.title}
+                    style={{ width: '100%', aspectRatio: '1/1', objectFit: 'cover', borderRadius: '8px', display: 'block' }}
+                  />
+                )}
                     <span style={{ display: 'block', width: '100%', fontSize: '13px', textAlign: 'center', marginTop: '6px', fontWeight: '500', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                       {item.title}
                     </span>
@@ -991,11 +993,13 @@ return (
                     }}
                     onClick={() => handleItemClick(item)}
                   >
-                    <img
-                      src={item.imageUrl ? getImageUrl(item.imageUrl) : item.image}
-                      alt={item.title}
-                      style={{ width: '100%', aspectRatio: '1/1', objectFit: 'cover', borderRadius: '8px', display: 'block' }}
-                    />
+                    {item.imageUrl && item.imageUrl.trim() !== "" && (
+                      <img
+                        src={getImageUrl(item.imageUrl)}
+                        alt={item.title}
+                        style={{ width: '100%', aspectRatio: '1/1', objectFit: 'cover', borderRadius: '8px', display: 'block' }}
+                      />
+                    )}
                     <span style={{ display: 'block', width: '100%', fontSize: '13px', textAlign: 'center', marginTop: '6px', fontWeight: '500', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
 
                       {item.title}
