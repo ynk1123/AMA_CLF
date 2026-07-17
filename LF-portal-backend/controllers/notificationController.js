@@ -10,7 +10,17 @@ exports.getNotifications = async (req, res) => {
       order: [['created_at', 'DESC']],
     });
 
-    res.json(notifications);
+    // Normalize fields so frontend is consistent even if DB rows are missing columns.
+    const normalized = notifications.map((n) => {
+      const obj = n.toJSON ? n.toJSON() : n;
+      return {
+        ...obj,
+        is_read: obj.is_read === true,
+        created_at: obj.created_at || obj.createdAt || obj.time || null,
+      };
+    });
+
+    res.json(normalized);
   } catch (err) {
     console.error('getNotifications error:', err);
     res.status(400).json({ message: 'Failed to fetch notifications', error: err.message });
