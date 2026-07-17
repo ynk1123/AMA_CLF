@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, Grid, Card, CardContent, Button, TextField, MenuItem, Dialog, DialogTitle, DialogContent, DialogActions, Chip, IconButton } from '@mui/material';
+import { Box, Typography, Grid, Card, CardContent, Button, TextField, MenuItem, Dialog, DialogTitle, DialogContent, DialogActions, Chip, IconButton, CircularProgress } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { itemService, messageService, appointmentService, notificationService } from '../services/api';
@@ -14,6 +14,7 @@ const Dashboard = () => {
     const { user } = useAuth();
     const navigate = useNavigate();
     const [items, setItems] = useState([]);
+    const [loadingItems, setLoadingItems] = useState(false);
     const [openDialog, setOpenDialog] = useState(false);
     const [openItemDialog, setOpenItemDialog] = useState(false);
     const [openClaimDialog, setOpenClaimDialog] = useState(false);
@@ -155,11 +156,14 @@ const Dashboard = () => {
     const [postingItem, setPostingItem] = useState(false);
 
     const loadItems = async () => {
+      setLoadingItems(true);
       try {
         const response = await itemService.getItems();
         setItems(response.data);
       } catch (err) {
         console.error('Failed to load items');
+      } finally {
+        setLoadingItems(false);
       }
     };
 
@@ -579,6 +583,25 @@ return (
           Lost and Found Items ({activeItems.length})
         </Typography>
 
+        {loadingItems && (
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              py: 3,
+              width: '100%',
+            }}
+          >
+            <Box sx={{ textAlign: 'center' }}>
+              <CircularProgress size={28} sx={{ mb: 1 }} />
+              <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 500 }}>
+                Fetching items...
+              </Typography>
+            </Box>
+          </Box>
+        )}
+
 
 
 
@@ -586,7 +609,7 @@ return (
         <Grid
           container
           spacing={2}
-          sx={{ display: { xs: 'none', md: 'flex' } }}
+          sx={{ display: { xs: 'none', md: 'flex' }, opacity: loadingItems ? 0.35 : 1 }}
         >
           {activeItems.map((item) => (
             <Grid
@@ -662,6 +685,7 @@ return (
           sx={{
             display: 'none',
             '@media (max-width:600px)': { display: 'block' },
+            opacity: loadingItems ? 0.35 : 1,
           }}
         >
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px', width: '100%', padding: '4px' }}>
