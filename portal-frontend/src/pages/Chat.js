@@ -327,7 +327,7 @@ const formatDateTime = (timestamp) => {
           {(!isMobile || selectedItem) && (
             <Grid item xs={12} md={8}>
               {selectedItem ? (
-                <Paper className="card-hover fade-in" sx={{ borderRadius: 2, overflow: 'hidden', display: 'flex', flexDirection: 'column', height: 700, border: '2px solid #FEE2E2' }}>
+<Paper className="card-hover fade-in" sx={(theme) => ({ borderRadius: 2, overflow: 'hidden', display: 'flex', flexDirection: 'column', height: 700, border: '1px solid', borderColor: theme.palette.mode === 'dark' ? theme.palette.divider : '#FEE2E2' })}>
                   {/* Chat Header */}
                   <Box sx={{ p: 2, backgroundColor: '#DC2626', borderBottom: '2px solid #B91C1C' }}>
                     {/* Mobile Back Button */}
@@ -512,7 +512,8 @@ const formatDateTime = (timestamp) => {
                     flexDirection: 'column',
                     justifyContent: 'center',
                     alignItems: 'center',
-                    border: '2px solid #FEE2E2',
+border: '1px solid',
+                    borderColor: (theme) => (theme.palette.mode === 'dark' ? theme.palette.divider : '#FEE2E2'),
                   }}
                 >
                   <ForumIcon sx={{ fontSize: 80, color: '#DC2626', mb: 2 }} />
