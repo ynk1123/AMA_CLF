@@ -651,7 +651,8 @@ const getImageUrl = (url) => {
           <Typography variant="h5" gutterBottom>All Users</Typography>
           {usersLoading ? (
             <Paper sx={{ p: 4, textAlign: 'center' }}>
-              <Typography variant="body1">Loading users...</Typography>
+              <CircularProgress size={28} sx={{ mb: 1 }} />
+              <Typography variant="body1" color="text.secondary">Loading users...</Typography>
             </Paper>
           ) : usersError ? (
             <Paper sx={{ p: 4, textAlign: 'center', bgcolor: '#ffebee' }}>
