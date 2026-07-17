@@ -92,13 +92,18 @@ const Chat = () => {
   }, [selectedItemId]);
 
 
-  // Auto-scroll to center when messages are loaded/updated or item is clicked
+  // Auto-scroll to bottom when messages are loaded/updated or item is clicked
   useEffect(() => {
     if (!messagesEndRef.current) return;
-    requestAnimationFrame(() => {
-      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    });
+
+    // Wait until after paint so the DOM/layout is settled
+    const t = setTimeout(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    }, 0);
+
+    return () => clearTimeout(t);
   }, [messages, selectedItemId, isMessagesLoading]);
+
 
 
   const loadItems = async () => {
