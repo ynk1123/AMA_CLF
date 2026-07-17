@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, Grid, Card, CardContent, TextField, MenuItem, Chip, IconButton, Dialog, DialogTitle, DialogContent, DialogActions, Alert, Button } from '@mui/material';
+import { Box, Typography, Grid, Card, CardContent, TextField, MenuItem, Chip, IconButton, Dialog, DialogTitle, DialogContent, DialogActions, Alert, Button, CircularProgress } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { itemService } from '../services/api';
@@ -289,17 +289,29 @@ const Browse = () => {
           </Grid>
         </Box>
 
-        <Typography
-          variant="h6"
-          sx={{
-            fontWeight: 700,
-            color: 'text.primary',
-            mt: { xs: 1.5, sm: 2, md: 3 },
-            mb: { xs: 1.5, sm: 2, md: 2 },
-          }}
-        >
-          {filteredItems.length} Items Found
-        </Typography>
+        {loadingItems ? (
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', py: 6 }}>
+            <Box sx={{ textAlign: 'center' }}>
+              <CircularProgress size={28} sx={{ mb: 1 }} />
+              <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 500 }}>
+                Fetching items...
+              </Typography>
+            </Box>
+          </Box>
+        ) : (
+          <Typography
+            variant="h6"
+            sx={{
+              fontWeight: 700,
+              color: 'text.primary',
+              mt: { xs: 1.5, sm: 2, md: 3 },
+              mb: { xs: 1.5, sm: 2, md: 2 },
+            }}
+          >
+            {filteredItems.length} Items Found
+          </Typography>
+        )}
+
 
         {/* Desktop/tablet cards */}
         <Grid
