@@ -1,6 +1,23 @@
 import React, { useState, useEffect, useRef } from 'react';
 
-import { Box, Container, Typography, Grid, TextField, Button, List, ListItem, ListItemAvatar, Avatar, ListItemText, Divider, IconButton, Paper, useMediaQuery, CircularProgress } from '@mui/material';
+import {
+  Box,
+  Container,
+  Typography,
+  Grid,
+  TextField,
+  Button,
+  List,
+  ListItem,
+  ListItemAvatar,
+  Avatar,
+  ListItemText,
+  Divider,
+  IconButton,
+  Paper,
+  useMediaQuery,
+  CircularProgress,
+} from '@mui/material';
 import { useAuth } from '../context/AuthContext';
 import { useSearchParams } from 'react-router-dom';
 import { itemService, messageService } from '../services/api';
@@ -13,18 +30,21 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 const Chat = () => {
   const { user } = useAuth();
   const [searchParams] = useSearchParams();
+
   const [items, setItems] = useState([]);
+  const [isItemsLoading, setIsItemsLoading] = useState(false);
+
   const [selectedItem, setSelectedItem] = useState(null);
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
   const [isMessagesLoading, setIsMessagesLoading] = useState(false);
 
   const messagesEndRef = useRef(null);
-
   const isMobile = useMediaQuery('(max-width:600px)');
 
   useEffect(() => {
     loadItems();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Auto-select item from URL parameter
@@ -32,17 +52,13 @@ const Chat = () => {
     if (items.length > 0) {
       const itemIdFromUrl = searchParams.get('itemId');
       if (itemIdFromUrl) {
-        const item = items.find(i => i.id === parseInt(itemIdFromUrl));
-        if (item) {
-          setSelectedItem(item);
-        }
+        const item = items.find((i) => i.id === parseInt(itemIdFromUrl));
+        if (item) setSelectedItem(item);
       }
     }
   }, [items, searchParams]);
 
   const selectedItemId = selectedItem?.id ?? null;
-
-  // (no debug logging in production)
 
   // IMPORTANT:
   // - Only fetch on item switch
@@ -52,9 +68,10 @@ const Chat = () => {
   const lastSelectedItemIdRef = useRef(null);
   const fetchSeqRef = useRef(0);
 
+  const isPostingRef = useRef(false);
+
   useEffect(() => {
     // Do NOT clear messages when selectedItemId is temporarily null.
-    // Clearing here is what causes the brief vanish.
     if (selectedItemId == null) {
       lastSelectedItemIdRef.current = null;
       return;
@@ -70,18 +87,14 @@ const Chat = () => {
       messageService
         .getMessages(selectedItemId)
         .then((response) => {
-          // Drop stale GET responses that resolve out of order.
           if (fetchSeq !== fetchSeqRef.current) return;
 
-          // Keep your existing POST guard.
           if (!isPostingRef.current) {
             setMessages(response.data);
           }
         })
         .catch((err) => {
-          // Drop stale errors too
           if (fetchSeq !== fetchSeqRef.current) return;
-
           console.error('Failed to load messages.');
         })
         .finally(() => {
@@ -91,34 +104,29 @@ const Chat = () => {
     }
   }, [selectedItemId]);
 
-
   // Auto-scroll to bottom when messages are loaded/updated or item is clicked
   useEffect(() => {
     if (!messagesEndRef.current) return;
-
-    // Wait until after paint so the DOM/layout is settled
     const t = setTimeout(() => {
       messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
     }, 0);
-
     return () => clearTimeout(t);
   }, [messages, selectedItemId, isMessagesLoading]);
 
-
-
   const loadItems = async () => {
+    setIsItemsLoading(true);
     try {
       const response = await itemService.getItems();
       setItems(response.data);
     } catch (err) {
       console.error('Failed to load items');
+    } finally {
+      setIsItemsLoading(false);
     }
   };
 
   const [sendingMessage, setSendingMessage] = useState(false);
   const [justSentMessageId, setJustSentMessageId] = useState(null);
-
-  const isPostingRef = useRef(false);
 
   const handleSendMessage = async () => {
     const trimmed = newMessage.trim();
@@ -127,15 +135,6 @@ const Chat = () => {
     isPostingRef.current = true;
     setSendingMessage(true);
     setJustSentMessageId(null);
-
-    // MUST mirror JSX renderer keys exactly:
-    // - message.content
-    // - message.User.studentId
-    // - message.User.displayName
-    // - message.timestamp
-    // - message.id (used as key)
-    // For admin, backend returns studentId/displayName nowhere (admin login returns only studentId:'ADMIN', role:'admin').
-    // So we hardcode a stable admin displayName to avoid brief “Unknown” flicker.
 
     const tempId = Date.now().toString();
     const nowIso = new Date().toISOString();
@@ -147,80 +146,33 @@ const Chat = () => {
       timestamp: nowIso,
       User: {
         studentId: user?.studentId,
-        displayName: user?.displayName
-      }
+        displayName: user?.displayName,
+      },
     };
 
-    // Append using functional update
     setMessages((prev) => {
       const next = [...prev, optimisticMsg];
       return next;
     });
 
-    // 3) Clear input ONLY after state append call above
     setNewMessage('');
 
     try {
-      // 4) POST to backend
       const response = await messageService.createMessage({
         content: trimmed,
-        itemId: selectedItem.id
+        itemId: selectedItem.id,
       });
 
       const created = response?.data;
 
-      // 5) Compare backend response key structure vs JSX expectations
-      console.log('🧩 Backend POST response data:', created);
-      if (created) {
-        console.log('🧩 Backend fields for JSX:', {
-          id: created?.id,
-          content: created?.content,
-          timestamp: created?.timestamp,
-          studentId: created?.User?.studentId,
-          displayName: created?.User?.displayName,
-
-          // also log if backend used different key names (common mismatch checks)
-          possible_alt_content_keys: {
-            text: created?.text,
-            message_text: created?.message_text,
-            body: created?.body,
-            message: created?.message
-          }
-        });
+      // Replace optimistic with server response
+      if (created && created.id != null) {
+        setMessages((prev) => prev.map((m) => (m.id === tempId ? created : m)));
+        setJustSentMessageId(created.id ?? null);
       }
-
-      if (!created || created.id == null) return;
-
-      // 6) Replace optimistic with server response and log after replace
-      setMessages((prev) => {
-        const next = prev.map((m) => (m.id === tempId ? created : m));
-
-        console.log('🟩 State Array Content (after optimistic -> server replace):', next);
-        console.log(
-          '🧾 Render-loop keys snapshot (after replace):',
-          next.map((m) => ({
-            id: m?.id,
-            content: m?.content,
-            timestamp: m?.timestamp,
-            studentId: m?.User?.studentId,
-            displayName: m?.User?.displayName
-          }))
-        );
-
-        return next;
-      });
-
-      setJustSentMessageId(created.id ?? null);
     } catch (err) {
       // Revert optimistic on failure
-      console.log('🛑 Send failed, reverting optimistic tempId:', tempId);
-      setMessages((prev) => {
-        const next = prev.filter((m) => m.id !== tempId);
-
-        console.log('🧯 State Array Content (after revert):', next);
-        return next;
-      });
-
+      setMessages((prev) => prev.filter((m) => m.id !== tempId));
       console.error('Failed to send message:', err.response?.data || err.message);
       alert(`Failed to send message. ${err.response?.data?.message || err.message}`);
     } finally {
@@ -231,18 +183,15 @@ const Chat = () => {
 
   const handleDeleteMessage = async (messageId) => {
     if (user.role !== 'admin') return;
-
     try {
       await messageService.deleteMessage(messageId);
-
-      // Immediate local state sync (no refresh needed)
       setMessages((current) => current.filter((msg) => msg.id !== messageId));
     } catch (err) {
       console.error('Failed to delete message:', err?.response?.data || err.message);
     }
   };
 
-const formatDateTime = (timestamp) => {
+  const formatDateTime = (timestamp) => {
     const date = new Date(timestamp);
     const month = (date.getMonth() + 1).toString().padStart(2, '0');
     const day = date.getDate().toString().padStart(2, '0');
@@ -255,7 +204,6 @@ const formatDateTime = (timestamp) => {
   return (
     <Box sx={{ minHeight: '100vh', backgroundColor: 'background.default' }}>
       <Container maxWidth="xl" sx={{ py: 4, '@media (max-width:600px)': { py: 2 } }}>
-
         <Box className="fade-in" sx={{ mb: 4 }}>
           <Typography variant="h4" sx={{ color: '#DC2626', mb: 1, fontWeight: 700 }}>
             <ForumIcon sx={{ mr: 2, verticalAlign: 'middle', color: '#DC2626' }} />
@@ -285,44 +233,70 @@ const formatDateTime = (timestamp) => {
                     Items
                   </Typography>
                 </Box>
-                <List sx={(theme) => ({ maxHeight: 600, overflow: 'auto', bgcolor: theme.palette.background.paper })}>
-                  {items.map((item, index) => (
-                    <React.Fragment key={item.id}>
-                      <ListItem
-                        button
-                        onClick={() => setSelectedItem(item)}
-                        className={`card-hover fade-in stagger-${Math.min(index + 1, 4)}`}
-                        sx={(theme) => ({
-                          backgroundColor:
-                            selectedItem?.id === item.id
-                              ? theme.palette.action.selected
-                              : 'transparent',
-                          '&:hover': { backgroundColor: theme.palette.action.hover },
-                          py: 2,
-                          cursor: 'pointer',
-                        })}
-                      >
-                        <ListItemAvatar>
-                          <Avatar sx={{ backgroundColor: '#DC2626', fontWeight: 700 }}>
-                            {item.title.charAt(0)}
-                          </Avatar>
-                        </ListItemAvatar>
-                        <ListItemText
-                          primary={
-                            <Typography variant="subtitle1" sx={{ color: 'text.primary', fontWeight: 600 }}>
-                              {item.title}
-                            </Typography>
-                          }
-                          secondary={
-                            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                              {item.category} • {item.location}
-                            </Typography>
-                          }
-                        />
-                      </ListItem>
-                      <Divider sx={{ backgroundColor: 'divider' }} />
-                    </React.Fragment>
-                  ))}
+
+                <List
+                  sx={(theme) => ({
+                    maxHeight: 600,
+                    overflow: 'auto',
+                    bgcolor: theme.palette.background.paper,
+                  })}
+                >
+                  {isItemsLoading ? (
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        height: 240,
+                        gap: 2,
+                        px: 2,
+                      }}
+                    >
+                      <CircularProgress size={32} sx={{ color: 'primary.main' }} />
+                      <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic' }}>
+                        Fetching items...
+                      </Typography>
+                    </Box>
+                  ) : (
+                    items.map((item, index) => (
+                      <React.Fragment key={item.id}>
+                        <ListItem
+                          button
+                          onClick={() => setSelectedItem(item)}
+                          className={`card-hover fade-in stagger-${Math.min(index + 1, 4)}`}
+                          sx={(theme) => ({
+                            backgroundColor:
+                              selectedItem?.id === item.id
+                                ? theme.palette.action.selected
+                                : 'transparent',
+                            '&:hover': { backgroundColor: theme.palette.action.hover },
+                            py: 2,
+                            cursor: 'pointer',
+                          })}
+                        >
+                          <ListItemAvatar>
+                            <Avatar sx={{ backgroundColor: '#DC2626', fontWeight: 700 }}>
+                              {item.title.charAt(0)}
+                            </Avatar>
+                          </ListItemAvatar>
+                          <ListItemText
+                            primary={
+                              <Typography variant="subtitle1" sx={{ color: 'text.primary', fontWeight: 600 }}>
+                                {item.title}
+                              </Typography>
+                            }
+                            secondary={
+                              <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                                {item.category} • {item.location}
+                              </Typography>
+                            }
+                          />
+                        </ListItem>
+                        <Divider sx={{ backgroundColor: 'divider' }} />
+                      </React.Fragment>
+                    ))
+                  )}
                 </List>
               </Paper>
             </Grid>
@@ -332,7 +306,19 @@ const formatDateTime = (timestamp) => {
           {(!isMobile || selectedItem) && (
             <Grid item xs={12} md={8}>
               {selectedItem ? (
-<Paper className="card-hover fade-in" sx={(theme) => ({ borderRadius: 2, overflow: 'hidden', display: 'flex', flexDirection: 'column', height: 700, border: '1px solid', borderColor: theme.palette.mode === 'dark' ? theme.palette.divider : '#FEE2E2' })}>
+                <Paper
+                  className="card-hover fade-in"
+                  sx={(theme) => ({
+                    borderRadius: 2,
+                    overflow: 'hidden',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    height: 700,
+                    border: '1px solid',
+                    borderColor:
+                      theme.palette.mode === 'dark' ? theme.palette.divider : '#FEE2E2',
+                  })}
+                >
                   {/* Chat Header */}
                   <Box sx={{ p: 2, backgroundColor: '#DC2626', borderBottom: '2px solid #B91C1C' }}>
                     {/* Mobile Back Button */}
@@ -394,14 +380,17 @@ const formatDateTime = (timestamp) => {
                       </Box>
                     ) : (
                       messages.map((message, index) => (
-
-                        <Box
-                          key={message.id || index}
-                          sx={{ mb: 3, opacity: 1, display: 'block' }}
-                        >
-
+                        <Box key={message.id || index} sx={{ mb: 3, opacity: 1, display: 'block' }}>
                           <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
-                            <Avatar sx={{ backgroundColor: '#DC2626', mr: 2, width: 40, height: 40, fontWeight: 700 }}>
+                            <Avatar
+                              sx={{
+                                backgroundColor: '#DC2626',
+                                mr: 2,
+                                width: 40,
+                                height: 40,
+                                fontWeight: 700,
+                              }}
+                            >
                               {(message.User?.displayName?.trim()?.charAt(0) ||
                                 message.User?.studentId?.trim()?.charAt(0) ||
                                 '?').toUpperCase()}
@@ -428,6 +417,7 @@ const formatDateTime = (timestamp) => {
                                   </IconButton>
                                 )}
                               </Box>
+
                               <Typography
                                 variant="body1"
                                 sx={{
@@ -438,7 +428,6 @@ const formatDateTime = (timestamp) => {
                               >
                                 {message.content}
                               </Typography>
-
                             </Box>
                           </Box>
                         </Box>
@@ -461,26 +450,22 @@ const formatDateTime = (timestamp) => {
                         fullWidth
                         placeholder={sendingMessage ? 'Sending...' : `Message about ${selectedItem.title}...`}
                         value={newMessage}
-
                         onChange={(e) => setNewMessage(e.target.value)}
-                        onPaste={(e) => {
-                          // keep default paste behavior; bugfix placeholder to avoid interfering events
-                        }}
+                        variant="outlined"
+                        size="small"
+                        disabled={sendingMessage}
                         onKeyDown={(e) => {
                           if (e.key === 'Enter' && !e.shiftKey) {
                             e.preventDefault();
                             handleSendMessage();
                           }
                         }}
-                        variant="outlined"
-                        size="small"
-                        disabled={sendingMessage}
                         sx={{
                           '& .MuiOutlinedInput-root': {
                             backgroundColor: 'background.paper',
                             '& fieldset': { borderColor: 'divider' },
                             '&:hover fieldset': { borderColor: 'text.secondary' },
-                            '&.Mui-focused fieldset': { borderColor: 'primary.main' }
+                            '&.Mui-focused fieldset': { borderColor: 'primary.main' },
                           },
                           '& .MuiInputBase-input': {
                             color: 'text.primary !important',
@@ -489,7 +474,7 @@ const formatDateTime = (timestamp) => {
                           '& .MuiInputBase-input::placeholder': {
                             color: 'text.secondary !important',
                             opacity: 1,
-                          }
+                          },
                         }}
                       />
                       <Button
@@ -517,15 +502,12 @@ const formatDateTime = (timestamp) => {
                     flexDirection: 'column',
                     justifyContent: 'center',
                     alignItems: 'center',
-border: '1px solid',
+                    border: '1px solid',
                     borderColor: (theme) => (theme.palette.mode === 'dark' ? theme.palette.divider : '#FEE2E2'),
                   }}
                 >
                   <ForumIcon sx={{ fontSize: 80, color: '#DC2626', mb: 2 }} />
-                  <Typography
-                    variant="h5"
-                    sx={{ color: 'text.primary', fontWeight: 600, mb: 2 }}
-                  >
+                  <Typography variant="h5" sx={{ color: 'text.primary', fontWeight: 600, mb: 2 }}>
                     Welcome to Inquiry & Chat
                   </Typography>
                   <Typography variant="body1" sx={{ color: 'text.secondary' }}>
@@ -542,3 +524,4 @@ border: '1px solid',
 };
 
 export default Chat;
+
