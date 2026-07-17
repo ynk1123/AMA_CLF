@@ -397,7 +397,9 @@ const formatDateTime = (timestamp) => {
 
                           <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
                             <Avatar sx={{ backgroundColor: '#DC2626', mr: 2, width: 40, height: 40, fontWeight: 700 }}>
-                              {message.User?.studentId?.charAt(0) || '?'}
+                              {(message.User?.displayName?.trim()?.charAt(0) ||
+                                message.User?.studentId?.trim()?.charAt(0) ||
+                                '?').toUpperCase()}
                             </Avatar>
                             <Box sx={{ flexGrow: 1 }}>
                               <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
