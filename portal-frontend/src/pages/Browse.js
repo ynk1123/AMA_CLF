@@ -158,13 +158,15 @@ const Browse = () => {
 
         {/* Filters */}
         <Box
-          sx={{
+          sx={(theme) => ({
             mb: { xs: 1, sm: 1.5, md: 4 },
             p: 3,
-            backgroundColor: '#fff',
+            backgroundColor:
+              theme.palette.mode === 'dark' ? theme.palette.background.paper : '#fff',
+            color: theme.palette.text.primary,
             borderRadius: 2,
             border: '2px solid #FEE2E2',
-          }}
+          })}
         >
           <Typography
             variant="h6"
