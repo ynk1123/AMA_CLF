@@ -548,15 +548,11 @@ return (
                 onChange={(e) => setFilterStatus(e.target.value)}
                 size="small"
                 sx={{
-                  color: 'text.primary',
-                  '& .MuiOutlinedInput-notchedOutline': { borderColor: 'divider' },
-                  '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'text.secondary' },
-                  '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: 'primary.main' },
-                  '& .MuiSvgIcon-root': { color: 'text.secondary' },
                   '@media (max-width:600px)': {
                     '& .MuiInputBase-root': { minHeight: 34 },
                     '& .MuiInputLabel-root': { fontSize: 14 },
                     '& .MuiSelect-select': { fontSize: 14, py: '6px' },
+                    '& .MuiSvgIcon-root': { fontSize: 18 },
                   },
                 }}
               >
