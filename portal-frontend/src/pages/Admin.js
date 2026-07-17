@@ -14,6 +14,7 @@ const [pendingClaims, setPendingClaims] = useState([]);
 const [users, setUsers] = useState([]);
   const [tabValue, setTabValue] = useState(0);
   const [itemsLoading, setItemsLoading] = useState(false);
+  const [claimsLoading, setClaimsLoading] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
   const [openItemDialog, setOpenItemDialog] = useState(false);
   const [usersLoading, setUsersLoading] = useState(false);
@@ -49,7 +50,7 @@ useEffect(() => { if (tabValue === 1) loadPendingClaims(); }, [tabValue]);
   };
 
 const loadPendingClaims = async () => {
-    // keep spinner consistent with the UI flag
+    setClaimsLoading(true);
     try {
       // Fetch pending claims
       const response = await adminService.getAllPendingClaims();
@@ -61,11 +62,7 @@ const loadPendingClaims = async () => {
     } catch (err) { 
       console.error('Error loading claims:', err); 
     } finally {
-      // Stop "Loading claims..." spinner after the DB/data is received/failed
-      setTimeout(() => {
-        const el = document.querySelector('[data-admin-claims-loading]');
-        if (el) el.removeAttribute('data-admin-claims-loading');
-      }, 0);
+      setClaimsLoading(false);
     }
   };
 
@@ -447,10 +444,14 @@ const getImageUrl = (url) => {
         <>
           <Typography variant="h5" gutterBottom>Pending Claims</Typography>
 
-          {pendingClaims.length === 0 ? (
+          {claimsLoading ? (
             <Paper sx={{ p: 4, textAlign: 'center' }}>
               <CircularProgress size={28} sx={{ mb: 1 }} />
               <Typography variant="body1" color="text.secondary">Loading claims...</Typography>
+            </Paper>
+          ) : pendingClaims.length === 0 ? (
+            <Paper sx={{ p: 4, textAlign: 'center' }}>
+              <Typography variant="body1" color="text.secondary">No pending claims</Typography>
             </Paper>
           ) : (
             <>
