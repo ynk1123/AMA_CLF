@@ -12,6 +12,7 @@ const Browse = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [items, setItems] = useState([]);
+  const [loadingItems, setLoadingItems] = useState(false);
   const [openItemDialog, setOpenItemDialog] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
