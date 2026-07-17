@@ -165,7 +165,7 @@ const Browse = () => {
               theme.palette.mode === 'dark' ? theme.palette.background.paper : '#fff',
             color: theme.palette.text.primary,
             borderRadius: 2,
-            border: '2px solid #FEE2E2',
+            border: 'none',
           })}
         >
           <Typography
