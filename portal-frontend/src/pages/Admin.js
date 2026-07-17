@@ -439,7 +439,8 @@ const getImageUrl = (url) => {
 
           {pendingClaims.length === 0 ? (
             <Paper sx={{ p: 4, textAlign: 'center' }}>
-              <Typography variant="body1" color="text.secondary">No pending claims</Typography>
+              <CircularProgress size={28} sx={{ mb: 1 }} />
+              <Typography variant="body1" color="text.secondary">Loading claims...</Typography>
             </Paper>
           ) : (
             <>
