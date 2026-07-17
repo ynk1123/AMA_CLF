@@ -49,14 +49,24 @@ useEffect(() => { if (tabValue === 1) loadPendingClaims(); }, [tabValue]);
   };
 
 const loadPendingClaims = async () => {
+    // keep spinner consistent with the UI flag
     try {
       // Fetch pending claims
       const response = await adminService.getAllPendingClaims();
       setPendingClaims(response.data);
+
       // Fetch ALL claims (including approved/rejected)
       const allResponse = await adminService.getAllClaims();
       setAllClaims(allResponse.data);
-    } catch (err) { console.error('Error loading claims:', err); }
+    } catch (err) { 
+      console.error('Error loading claims:', err); 
+    } finally {
+      // Stop "Loading claims..." spinner after the DB/data is received/failed
+      setTimeout(() => {
+        const el = document.querySelector('[data-admin-claims-loading]');
+        if (el) el.removeAttribute('data-admin-claims-loading');
+      }, 0);
+    }
   };
 
 const loadUsers = async () => {
