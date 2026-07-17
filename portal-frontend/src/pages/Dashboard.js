@@ -1108,23 +1108,23 @@ return (
       },
     }}
   >
-    <Box
-      sx={{
+        <Box
+                      sx={{
         display: 'flex',
-        gap: 1,
-        '@media (max-width:600px)': {
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '8px',
-          width: '100%',
-        },
-      }}
-    >
+          gap: 1,
+          '@media (max-width:600px)': {
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '8px',
+            width: '100%',
+          },
+        }}
+      >
       <Button
         variant="outlined"
         startIcon={<MessageIcon />}
         onClick={handleMessageClick}
-        disabled={selectedItem?.status === 'claimed'}
+        disabled={selectedItem?.status === 'claimed' || selectedItem?.status === 'archived'}
         sx={{
           width: { xs: '100%', sm: 'auto' },
           minHeight: '44px',
