@@ -532,9 +532,20 @@ fontSize: '13px',
                 <Typography variant="h6" sx={{ fontWeight: 700, mt: 2, mb: 1 }}>
                   Description
                 </Typography>
-                  <Box sx={{ p: 2, backgroundColor: '#FEE2E2', borderRadius: 1 }}>
-                  <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap' }}>{selectedItem.description || 'No description provided.'}</Typography>
-                </Box>
+                  <Box
+                    sx={(theme) => ({
+                      p: 2,
+                      borderRadius: 1,
+                      backgroundColor:
+                        theme.palette.mode === 'dark'
+                          ? 'rgba(255, 255, 255, 0.05)'
+                          : '#FEE2E2',
+                    })}
+                  >
+                    <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap', color: 'text.primary' }}>
+                      {selectedItem.description || 'No description provided.'}
+                    </Typography>
+                  </Box>
               </Grid>
             </Grid>
           )}
