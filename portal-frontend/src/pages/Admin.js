@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Typography, Grid, Card, CardContent, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Chip, Box, Tabs, Tab, Dialog, DialogTitle, DialogContent, DialogActions, IconButton } from '@mui/material';
+import { Container, Typography, Grid, Card, CardContent, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Chip, Box, Tabs, Tab, Dialog, DialogTitle, DialogContent, DialogActions, IconButton, CircularProgress } from '@mui/material';
 import { adminService, appointmentService } from '../services/api';
 import DeleteIcon from '@mui/icons-material/Delete';
 import VisibilityIcon from '@mui/icons-material/Visibility';
@@ -13,6 +13,7 @@ const [pendingClaims, setPendingClaims] = useState([]);
   const [allClaims, setAllClaims] = useState([]);
 const [users, setUsers] = useState([]);
   const [tabValue, setTabValue] = useState(0);
+  const [itemsLoading, setItemsLoading] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
   const [openItemDialog, setOpenItemDialog] = useState(false);
   const [usersLoading, setUsersLoading] = useState(false);
@@ -30,6 +31,7 @@ useEffect(() => { if (tabValue === 1) loadPendingClaims(); }, [tabValue]);
   // Appointments data is loaded with loadData() which runs on initial mount
 
   const loadData = async () => {
+    setItemsLoading(true);
     try {
       const itemsRes = await adminService.getAllItems();
       setItems(itemsRes.data);
@@ -39,7 +41,11 @@ useEffect(() => { if (tabValue === 1) loadPendingClaims(); }, [tabValue]);
       setLocationStats(locationRes.data);
       const appointmentRes = await appointmentService.getAppointments();
       setAppointments(appointmentRes.data);
-    } catch (err) { console.error('Error:', err); }
+    } catch (err) { 
+      console.error('Error:', err); 
+    } finally {
+      setItemsLoading(false);
+    }
   };
 
 const loadPendingClaims = async () => {
@@ -218,7 +224,13 @@ const getImageUrl = (url) => {
         <>
           <Typography variant="h5" gutterBottom>All Items</Typography>
 
-
+          {itemsLoading ? (
+            <Paper sx={{ p: 4, textAlign: 'center' }}>
+              <CircularProgress size={28} sx={{ mb: 1 }} />
+              <Typography variant="body1" color="text.secondary">Loading items...</Typography>
+            </Paper>
+          ) : (
+            <>
           {/* Desktop/tablet table */}
                   <Box sx={{ display: { xs: 'none', md: 'block' } }}>
             <TableContainer component={Paper}>
@@ -416,6 +428,8 @@ const getImageUrl = (url) => {
               );
             })}
           </Box>
+            </>
+          )}
         </>
       )}
 
