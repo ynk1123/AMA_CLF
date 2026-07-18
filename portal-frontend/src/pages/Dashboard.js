@@ -1033,7 +1033,7 @@ return (
             </Typography>
 
 
-            <Typography variant="body1" sx={{ mb: 1 }}>
+                    <Typography variant="body1" sx={{ mb: 1 }}>
               <strong>Posted by:</strong>{' '}
               {
                 (() => {
@@ -1058,20 +1058,6 @@ return (
                   // If name includes Unknown, treat as admin.
                   if (postedByStr.toLowerCase().includes('unknown')) {
                     return 'Admin';
-                  }
-
-                  const studentId =
-                    selectedItem?.studentId ??
-                    selectedItem?.User?.studentId;
-
-
-                  const studentIdStr =
-                    studentId === null || studentId === undefined
-                      ? ''
-                      : String(studentId).trim();
-
-                  if (studentIdStr) {
-                    return `${postedByStr} (${studentIdStr})`;
                   }
 
                   return postedByStr;

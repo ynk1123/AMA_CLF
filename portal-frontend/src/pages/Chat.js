@@ -392,7 +392,6 @@ const Chat = () => {
                               }}
                             >
                               {(message.User?.displayName?.trim()?.charAt(0) ||
-                                message.User?.studentId?.trim()?.charAt(0) ||
                                 '?').toUpperCase()}
                             </Avatar>
                             <Box sx={{ flexGrow: 1 }}>
@@ -400,9 +399,7 @@ const Chat = () => {
                                 <Typography variant="subtitle1" sx={{ color: 'text.primary', fontWeight: 700, mr: 1 }}>
                                   {message.User?.displayName || user?.displayName || 'Unknown'}
                                 </Typography>
-                                <Typography variant="caption" sx={{ color: 'text.secondary', mr: 2, fontWeight: 500 }}>
-                                  ({message.User?.studentId || '?'})
-                                </Typography>
+
                                 <Typography variant="caption" sx={{ color: 'text.secondary' }}>
                                   {formatDateTime(message.timestamp)}
                                 </Typography>
