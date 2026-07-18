@@ -65,4 +65,18 @@ router.put('/:id/status', authenticate, authorizeAdmin, async (req, res) => {
   }
 });
 
+// Delete appointment (admin only)
+router.delete('/:id', authenticate, authorizeAdmin, async (req, res) => {
+  try {
+    const appointment = await Appointment.findByPk(req.params.id);
+    if (!appointment) return res.status(404).json({ message: 'Appointment not found' });
+
+    await appointment.destroy();
+    res.json({ message: 'Appointment deleted' });
+  } catch (err) {
+    console.error('Error deleting appointment:', err);
+    res.status(400).json({ message: 'Failed to delete appointment', error: err.message });
+  }
+});
+
 module.exports = router;

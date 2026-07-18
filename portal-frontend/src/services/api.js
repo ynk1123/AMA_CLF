@@ -77,8 +77,10 @@ export const appointmentService = {
   createAppointment: (data) => api.post('/appointments', data),
   getAppointments: () => api.get('/appointments'),
   getMyAppointments: () => api.get('/appointments/my-appointments'),
-  updateStatus: (id, status) => api.put(`/appointments/${id}/status`, { status })
+  updateStatus: (id, status) => api.put(`/appointments/${id}/status`, { status }),
+  deleteAppointment: (id) => api.delete(`/appointments/${id}`)
 };
+
 
 export const notificationService = {
   getNotifications: () => api.get('/notifications'),

@@ -90,11 +90,18 @@ const handleApprove = async (id) => { await adminService.approveItem(id); loadDa
 const handleClaimApproval = async (claimId, status) => { await adminService.approveOrRejectClaim(claimId, status); loadPendingClaims(); };
   const handleViewItem = (item) => { setSelectedItem(item); setOpenItemDialog(true); };
   const handleAppointmentStatusChange = async (id, status) => { await appointmentService.updateStatus(id, status); loadData(); };
+  const handleDeleteAppointment = async (id) => {
+    const ok = window.confirm('Delete this appointment?');
+    if (!ok) return;
+    await appointmentService.deleteAppointment(id);
+    loadData();
+  };
   
   // User management handlers
   const handleSuspendUser = async (id) => { await adminService.suspendUser(id); loadUsers(); };
   const handleReactivateUser = async (id) => { await adminService.reactivateUser(id); loadUsers(); };
   const handleDeleteUser = async (id) => { await adminService.deleteUser(id); loadUsers(); };
+
 
 const getStatusColor = (status) => {
     const colors = { lost: 'warning', found: 'warning', pending: 'default', under_verification: 'warning', claimed: 'info', archived: 'default' };
@@ -1010,7 +1017,16 @@ const getImageUrl = (url) => {
                         {apt.status === 'approved' && (
                           <Button size="small" onClick={() => handleAppointmentStatusChange(apt.id, 'completed')}>Complete</Button>
                         )}
+                        <Button
+                          size="small"
+                          onClick={() => handleDeleteAppointment(apt.id)}
+                          color="error"
+                          sx={{ ml: 1 }}
+                        >
+                          Delete
+                        </Button>
                       </TableCell>
+
                     </TableRow>
                   ))}
                 </TableBody>
@@ -1102,8 +1118,21 @@ const getImageUrl = (url) => {
                           </Button>
                         </Grid>
                       )}
+                      <Grid item xs={12}>
+                        <Button
+                          fullWidth
+                          size="large"
+                          variant="outlined"
+                          color="error"
+                          onClick={() => handleDeleteAppointment(apt.id)}
+                          sx={{ minHeight: 44, justifyContent: 'center' }}
+                        >
+                          Delete
+                        </Button>
+                      </Grid>
                     </Grid>
                   </Box>
+
                 </Card>
               );
             })}
