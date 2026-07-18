@@ -9,6 +9,7 @@ import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import MessageIcon from '@mui/icons-material/Message';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import Badge from '@mui/material/Badge';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 const Dashboard = () => {
     const { user } = useAuth();
@@ -144,6 +145,15 @@ const Dashboard = () => {
         await loadNotifications();
       } catch (err) {
         console.error('Failed to mark notifications as read', err);
+      }
+    };
+
+    const deleteNotification = async (notificationId) => {
+      try {
+        await notificationService.deleteNotification(notificationId);
+        await loadNotifications();
+      } catch (err) {
+        console.error('Failed to delete notification', err);
       }
     };
 
@@ -1325,16 +1335,39 @@ return (
                                       '& .MuiTypography-root': { color: 'inherit' },
                                       // subtle separation, responsive to theme mode
                                       boxShadow: innerStatus ? theme.shadows[0] : 'none',
+                                      display: 'flex',
+                                      flexDirection: 'column',
+                                      gap: 0.5,
                                     };
                                   }}
                                 >
-                                  <Typography variant="subtitle1" sx={{ fontWeight: 600, color: 'inherit' }}>
-                                    {notif.title}
-                                  </Typography>
+                                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 1 }}>
+                                    <Typography variant="subtitle1" sx={{ fontWeight: 600, color: 'inherit' }}>
+                                      {notif.title}
+                                    </Typography>
+
+                                    <IconButton
+                                      aria-label="delete notification"
+                                      size="small"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        deleteNotification(notif.id);
+                                      }}
+                                      sx={(theme) => ({
+                                        mt: -0.25,
+                                        color: theme.palette.text.primary,
+                                        '&:hover': { backgroundColor: 'rgba(255,255,255,0.12)' },
+                                      })}
+                                    >
+                                      <DeleteIcon fontSize="small" />
+                                    </IconButton>
+                                  </Box>
+
                                   <Typography variant="body2" sx={{ mt: 0.5, color: 'inherit' }}>
                                     {notif.message}
                                   </Typography>
-                                    <Typography variant="caption" sx={{ color: 'text.secondary !important', mt: 1, display: 'block' }}>
+
+                                  <Typography variant="caption" sx={{ color: 'text.secondary !important', mt: 1, display: 'block' }}>
                                     {new Date(notif.created_at || notif.createdAt || notif.time).toLocaleDateString()}
                                   </Typography>
                                 </Box>
