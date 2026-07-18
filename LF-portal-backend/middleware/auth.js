@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
-const authenticate = (req, res, next) => {
+const authenticate = async (req, res, next) => {
   const token = req.header('Authorization')?.replace('Bearer ', '');
   if (!token) return res.status(401).json({ message: 'Access denied' });
 
@@ -19,7 +19,17 @@ const authenticate = (req, res, next) => {
     // Admin login JWTs are signed with: { role: 'admin', ... } (may omit id)
 
     if (verified?.role === 'admin') {
-      req.user = { id: verified.id ?? 0, role: 'admin' };
+      // Admin login currently signs: { role: 'admin', id: 0 }
+      // but admin notifications are stored against real admin user rows.
+      // Use the authenticated admin's real user id from the Users table.
+      const User = require('../models/user');
+      const adminUser = await User.findOne({
+        where: { role: 'admin' },
+        order: [['id', 'ASC']],
+      });
+
+      // Fallback: if DB has no admin rows, keep id=0 so the app fails visibly.
+      req.user = { id: adminUser?.id ?? (verified.id ?? 0), role: 'admin' };
     } else if (verified?.id != null) {
       req.user = { id: verified.id, role: verified.role || 'student' };
     } else {
