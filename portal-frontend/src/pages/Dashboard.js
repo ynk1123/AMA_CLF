@@ -1375,7 +1375,24 @@ return (
                             </Box>
                           )}
                         </DialogContent>
-                                <DialogActions sx={{ justifyContent: 'space-between' }}>
+
+                        <Box sx={{ position: 'absolute', right: 18, bottom: 18 }}>
+                          <Button
+                            variant="outlined"
+                            color="error"
+                            onClick={async () => {
+                              const ids = notifications.map((n) => n.id);
+                              await Promise.all(ids.map((id) => notificationService.deleteNotification(id)));
+                              await loadNotifications();
+                            }}
+                            disabled={notifications.length === 0}
+                            sx={{ borderRadius: 999 }}
+                          >
+                            Delete all
+                          </Button>
+                        </Box>
+
+                        <DialogActions sx={{ justifyContent: 'space-between' }}>
                           <Button onClick={() => setOpenNotificationDialog(false)} disabled={notifications.length === 0}>
                             Done
                           </Button>
