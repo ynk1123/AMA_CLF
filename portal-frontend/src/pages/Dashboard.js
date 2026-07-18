@@ -1396,26 +1396,31 @@ return (
                           )}
                         </DialogContent>
 
-                        <Box sx={{ position: 'absolute', right: 18, bottom: 18 }}>
-                          <Button
-                            variant="outlined"
-                            color="error"
-                            onClick={async () => {
-                              const ids = notifications.map((n) => n.id);
-                              await Promise.all(ids.map((id) => notificationService.deleteNotification(id)));
-                              await loadNotifications();
-                            }}
-                            disabled={notifications.length === 0}
-                            sx={{ borderRadius: 999 }}
-                          >
-                            Delete all
-                          </Button>
-                        </Box>
-
-                        <DialogActions sx={{ justifyContent: 'space-between' }}>
-                          <Button onClick={() => setOpenNotificationDialog(false)} disabled={notifications.length === 0}>
-                            Done
-                          </Button>
+                        <DialogActions
+                          sx={{
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            pr: 3,
+                          }}
+                        >
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <Button onClick={() => setOpenNotificationDialog(false)} disabled={notifications.length === 0}>
+                              Done
+                            </Button>
+                            <Button
+                              variant="outlined"
+                              color="error"
+                              onClick={async () => {
+                                const ids = notifications.map((n) => n.id);
+                                await Promise.all(ids.map((id) => notificationService.deleteNotification(id)));
+                                await loadNotifications();
+                              }}
+                              disabled={notifications.length === 0}
+                              sx={{ borderRadius: 999 }}
+                            >
+                              Delete all
+                            </Button>
+                          </Box>
                         </DialogActions>
 
                       </Dialog>
