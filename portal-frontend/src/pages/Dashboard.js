@@ -127,7 +127,10 @@ const Dashboard = () => {
     const [notificationCount, setNotificationCount] = useState(0);
     const [openNotificationDialog, setOpenNotificationDialog] = useState(false);
 
+    const [loadingNotifications, setLoadingNotifications] = useState(false);
+
     const loadNotifications = async () => {
+      setLoadingNotifications(true);
       try {
         const res = await notificationService.getNotifications();
         const list = res.data || [];
@@ -135,6 +138,8 @@ const Dashboard = () => {
         setNotificationCount(list.filter((n) => !n.is_read).length);
       } catch (err) {
         console.error('Failed to load notifications', err);
+      } finally {
+        setLoadingNotifications(false);
       }
     };
 
@@ -1291,7 +1296,22 @@ return (
                           </IconButton>
                         </DialogTitle>
                         <DialogContent dividers>
-                          {notifications.length === 0 ? (
+                          {loadingNotifications ? (
+                            <Box
+                              sx={{
+                                py: 2,
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: 1,
+                              }}
+                            >
+                              <CircularProgress size={22} />
+                              <Typography variant="body2" sx={{ color: 'text.secondary !important' }}>
+                                Fetching notifications...
+                              </Typography>
+                            </Box>
+                          ) : notifications.length === 0 ? (
                             <Typography
                               variant="body1"
                               sx={{
