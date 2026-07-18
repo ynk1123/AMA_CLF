@@ -5,26 +5,27 @@ import { authService } from '../services/api';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 
-
-
-
-
 const Register = () => {
   const [formData, setFormData] = useState({
     studentId: '',
     displayName: '',
     email: '',
-    password: ''
+    password: '',
+    confirmPassword: ''
   });
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = React.useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = React.useState(false);
+
   const handleClickShowPassword = () => setShowPassword((show) => !show);
+  const handleClickShowConfirmPassword = () => setShowConfirmPassword((show) => !show);
+
   const handleMouseDownPassword = (event) => event.preventDefault();
+  const handleMouseDownConfirmPassword = (event) => event.preventDefault();
+
   const navigate = useNavigate();
-
-
 
   const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
@@ -32,6 +33,12 @@ const Register = () => {
     e.preventDefault();
     setError('');
     setSuccess('');
+
+    if (formData.password !== formData.confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       await authService.register(formData);
@@ -133,6 +140,34 @@ const Register = () => {
                     sx={{ color: 'text.secondary' }}
                   >
                     {showPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
+          />
+
+          <TextField
+            fullWidth
+            label="Confirm Password"
+            name="confirmPassword"
+            type={showConfirmPassword ? 'text' : 'password'}
+            value={formData.confirmPassword}
+            onChange={handleChange}
+            margin="normal"
+            required
+            sx={{ mb: 2 }}
+            disabled={isSubmitting}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    aria-label="toggle confirm password visibility"
+                    onClick={handleClickShowConfirmPassword}
+                    onMouseDown={handleMouseDownConfirmPassword}
+                    edge="end"
+                    sx={{ color: 'text.secondary' }}
+                  >
+                    {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
                   </IconButton>
                 </InputAdornment>
               ),
