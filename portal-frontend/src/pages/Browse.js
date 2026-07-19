@@ -42,6 +42,7 @@ const Browse = () => {
     'Hallway',
     'Restroom',
     'Clinic',
+    'Other',
   ];
 
   const [filterStatus, setFilterStatus] = useState('');
@@ -521,7 +522,7 @@ fontSize: '13px',
                       border: '1px dashed #d1d5db',
                     }}
                   >
-                    <Typography sx={{ fontWeight: 600 }}>No Image Available</Typography>
+                    <Typography sx={{ fontWeight: 600 }}>No Photo</Typography>
                   </Box>
                 )}
               </Grid>
@@ -555,23 +556,6 @@ fontSize: '13px',
 
                       if (!postedByStr || postedByStr.toLowerCase() === 'unknown') {
                         return 'Admin';
-                      }
-
-                      // If backend provides username-like name + studentId fields separately,
-                      // prefer formatting: username (studentId)
-                      const studentId =
-                        selectedItem?.studentId ??
-                        selectedItem?.User?.studentId;
-
-                      const studentIdStr =
-                        studentId === null || studentId === undefined
-                          ? ''
-                          : String(studentId).trim();
-
-                      if (studentIdStr && postedByStr && postedByStr.toLowerCase() !== 'admin') {
-                        // Blur the ID part visually: keep length by replacing digits with bullets
-                        const studentIdBlurred = String(studentIdStr).replace(/\d/g, '•');
-                        return `${postedByStr} (${studentIdBlurred})`;
                       }
 
                       return postedByStr;

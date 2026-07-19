@@ -224,7 +224,8 @@ const Dashboard = () => {
       'Emergency Stairs',
       'Hallway',
       'Restroom',
-      'Clinic'
+      'Clinic',
+      'Other'
     ];
 
     const handleSubmit = async (e) => {
@@ -1046,7 +1047,7 @@ return (
                       border: '1px dashed #d1d5db',
                     }}
                   >
-                    <Typography sx={{ fontWeight: 600 }}>No Image Available</Typography>
+                    <Typography sx={{ fontWeight: 600 }}>No Photo</Typography>
                   </Box>
                 )}
               </Grid>
