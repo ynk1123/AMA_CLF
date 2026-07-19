@@ -622,73 +622,93 @@ return (
           spacing={2}
           sx={{ display: { xs: 'none', md: 'flex' }, opacity: loadingItems ? 0.35 : 1 }}
         >
-          {activeItems.map((item) => (
-            <Grid
-              item
-              xs={12}
-              sm={6}
-              md={2.4}
-              key={item.id}
-            >
-              <Card
-                className="card-hover"
-                sx={{
-                  ...itemCardStyles,
-                  opacity: isGhostItem(item.status) ? 0.5 : 1,
-                  filter: isGhostItem(item.status) ? 'grayscale(80%)' : 'none',
-                  '@media (max-width:600px)': {
-                    display: 'none',
-                  },
-                }}
-                onClick={() => handleItemClick(item)}
-              >
-                <CardContent sx={{ p: 1.5 }}>
-                  <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 600, fontSize: '0.9rem' }}>
-                    {item.title}
-                  </Typography>
-                  <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mb: 1, fontStyle: 'italic' }}>
-                    Posted: {getRelativePostTime(item.created_at || item.createdAt)}
-                  </Typography>
-
-                  {item.imageUrl && (
-                    <Box component="img" src={getImageUrl(item.imageUrl)} alt={item.title} sx={itemImageStyles} />
-                  )}
-                  <Box
-                    sx={(theme) => ({
-                      width: '100%',
-                      backgroundColor:
-                        theme.palette.mode === 'dark'
-                          ? 'rgba(255,255,255,0.05)'
-                          : 'rgba(0,0,0,0.03)',
-                      borderRadius: 1,
-                      py: 1,
-                      px: 2,
-                      mb: 1,
-                    })}
+                {activeItems.map((item) => (
+                  <Grid
+                    item
+                    xs={12}
+                    sm={6}
+                    md={2.4}
+                    key={item.id}
                   >
-                    <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'text.primary' }}>
-                      DETAILS
-                    </Typography>
-                  </Box>
-                  <Box sx={{ px: 2 }}>
-                    <Typography variant="body2" sx={{ mb: 1 }}>
-                      <strong>Category:</strong> {item.category}
-                    </Typography>
-                    <Typography variant="body2" sx={{ mb: 1 }}>
-                      <strong>Location:</strong> {item.location}
-                    </Typography>
-                    <Typography variant="body2" sx={{ mb: 1 }}>
-                      <strong>Date:</strong> {item.date ? new Date(item.date).toLocaleDateString() : ''}
-                    </Typography>
-                    <Typography variant="body2">
-                      <strong>Status:</strong>{' '}
-                      <Chip label={item.status} color={getStatusColor(item.status)} size="small" />
-                    </Typography>
-                  </Box>
-                </CardContent>
-              </Card>
-            </Grid>
-          ))}
+                    <Card
+                      className="card-hover"
+                      sx={{
+                        ...itemCardStyles,
+                        opacity: isGhostItem(item.status) ? 0.5 : 1,
+                        filter: isGhostItem(item.status) ? 'grayscale(80%)' : 'none',
+                        '@media (max-width:600px)': {
+                          display: 'none',
+                        },
+                      }}
+                      onClick={() => handleItemClick(item)}
+                    >
+                      <CardContent sx={{ p: 1.5 }}>
+                        <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 600, fontSize: '0.9rem' }}>
+                          {item.title}
+                        </Typography>
+                        <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mb: 1, fontStyle: 'italic' }}>
+                          Posted: {getRelativePostTime(item.created_at || item.createdAt)}
+                        </Typography>
+
+                        {item.imageUrl && (
+                          <Box component="img" src={getImageUrl(item.imageUrl)} alt={item.title} sx={itemImageStyles} />
+                        )}
+
+                        {!item.imageUrl && (
+                          <Box
+                            sx={{
+                              width: '100%',
+                              height: 120,
+                              bgcolor: '#f3f4f6',
+                              borderRadius: 2,
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              color: '#9ca3af',
+                              fontWeight: 600,
+                              mb: 1.5,
+                            }}
+                          >
+                            No Photo
+                          </Box>
+                        )}
+
+                        <Box
+                          sx={(theme) => ({
+                            width: '100%',
+                            backgroundColor:
+                              theme.palette.mode === 'dark'
+                                ? 'rgba(255,255,255,0.05)'
+                                : 'rgba(0,0,0,0.03)',
+                            borderRadius: 1,
+                            py: 1,
+                            px: 2,
+                            mb: 1,
+                          })}
+                        >
+                          <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'text.primary' }}>
+                            DETAILS
+                          </Typography>
+                        </Box>
+                        <Box sx={{ px: 2 }}>
+                          <Typography variant="body2" sx={{ mb: 1 }}>
+                            <strong>Category:</strong> {item.category}
+                          </Typography>
+                          <Typography variant="body2" sx={{ mb: 1 }}>
+                            <strong>Location:</strong> {item.location}
+                          </Typography>
+                          <Typography variant="body2" sx={{ mb: 1 }}>
+                            <strong>Date:</strong> {item.date ? new Date(item.date).toLocaleDateString() : ''}
+                          </Typography>
+                          <Typography variant="body2">
+                            <strong>Status:</strong>{' '}
+                            <Chip label={item.status} color={getStatusColor(item.status)} size="small" />
+                          </Typography>
+                        </Box>
+                      </CardContent>
+                    </Card>
+                  </Grid>
+                ))}
         </Grid>
 
         {/* Mobile strict 2-column grid cards */}
@@ -701,7 +721,7 @@ return (
         >
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px', width: '100%', padding: '4px' }}>
 
-            {activeItems.map((item) => (
+{activeItems.map((item) => (
               <div
                 key={item.id}
                 style={{
@@ -716,12 +736,28 @@ return (
                 }}
                 onClick={() => handleItemClick(item)}
               >
-{item.imageUrl && item.imageUrl.trim() !== "" && (
+                {item.imageUrl && item.imageUrl.trim() !== "" ? (
                   <img
                     src={getImageUrl(item.imageUrl)}
                     alt={item.title}
                     style={{ width: '100%', aspectRatio: '1/1', objectFit: 'cover', borderRadius: '8px', display: 'block' }}
                   />
+                ) : (
+                  <div
+                    style={{
+                      width: '100%',
+                      aspectRatio: '1/1',
+                      backgroundColor: '#f3f4f6',
+                      borderRadius: '8px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: '#9ca3af',
+                      fontWeight: 600,
+                    }}
+                  >
+                    No Photo
+                  </div>
                 )}
                     <span style={{ display: 'block', width: '100%', fontSize: '13px', textAlign: 'center', marginTop: '6px', fontWeight: '500', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                       {item.title}
