@@ -79,11 +79,14 @@ const Browse = () => {
   }, []);
 
   const loadItems = async () => {
+    setLoadingItems(true);
     try {
       const response = await itemService.getItems();
       setItems(response.data || []);
     } catch (err) {
       console.error('Failed to load items', err);
+    } finally {
+      setLoadingItems(false);
     }
   };
 
@@ -451,7 +454,7 @@ fontSize: '13px',
           </div>
         </Box>
 
-        {filteredItems.length === 0 && (
+        {!loadingItems && filteredItems.length === 0 && (
           <Box className="fade-in" sx={{ textAlign: 'center', py: 8 }}>
             <Typography variant="h5" color="text.secondary">
               No items found
