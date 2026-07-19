@@ -351,7 +351,7 @@ const handleAppointmentSubmit = async () => {
     });
 
     // Separate items into two groups: Active vs Claimed/Archived
-    const activeStatuses = ['pending', 'lost', 'found', 'under_verification'];
+    const activeStatuses = ['pending', 'lost', 'found'];
     const claimedArchivedStatuses = ['claimed', 'archived'];
 
     // Apply search/filter to active items only
@@ -362,7 +362,6 @@ const getStatusColor = (status) => {
       switch (status) {
         case 'lost': return 'warning';
         case 'found': return 'warning';
-        case 'under_verification': return 'error';
         case 'claimed': return 'info';
         case 'archived': return 'default';
         default: return 'default';
@@ -575,7 +574,6 @@ return (
                 <MenuItem value="">All</MenuItem>
                 <MenuItem value="lost">Lost</MenuItem>
                 <MenuItem value="found">Found</MenuItem>
-                <MenuItem value="under_verification">Under Verification</MenuItem>
                 <MenuItem value="claimed">Claimed</MenuItem>
                 <MenuItem value="archived">Archived</MenuItem>
               </TextField>
