@@ -1019,19 +1019,39 @@ return (
     </IconButton>
   </DialogTitle>
   <DialogContent dividers>
-    {selectedItem && (
-      <Grid container spacing={3}>
-        <Grid item xs={12} md={6}>
-          {selectedItem.imageUrl && ( 
-            <Box
-              component="img"
-              src={getImageUrl(selectedItem.imageUrl)}
-              alt={selectedItem.title}
-              sx={{ width: '100%', borderRadius: 2 }}
-            />
-           )}
-        </Grid>
-        <Grid item xs={12} md={6}>     
+          {selectedItem && (
+            <Grid container spacing={3}>
+              <Grid item xs={12} md={6}>
+                {(selectedItem.imageUrl || selectedItem.image || selectedItem.photo) ? (
+                  <Box
+                    component="img"
+                    src={getImageUrl(selectedItem.imageUrl || selectedItem.image || selectedItem.photo)}
+                    alt={selectedItem.title}
+                    sx={{ width: '100%', borderRadius: 2, height: '100%', objectFit: 'cover' }}
+                  />
+                ) : (
+                  <Box
+                    sx={{
+                      width: '100%',
+                      height: '100%',
+                      minHeight: '260px',
+                      backgroundColor: '#f3f4f6',
+                      borderRadius: '8px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '8px',
+                      color: '#9ca3af',
+                      border: '1px dashed #d1d5db',
+                    }}
+                  >
+                    <Typography sx={{ fontWeight: 600 }}>No Image Available</Typography>
+                  </Box>
+                )}
+              </Grid>
+              <Grid item xs={12} md={6}>     
+
           <Box
             sx={(theme) => ({
               backgroundColor:
