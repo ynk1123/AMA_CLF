@@ -15,6 +15,7 @@ const [users, setUsers] = useState([]);
   const [tabValue, setTabValue] = useState(0);
   const [itemsLoading, setItemsLoading] = useState(false);
   const [claimsLoading, setClaimsLoading] = useState(false);
+  const [appointmentsLoading, setAppointmentsLoading] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
   const [openItemDialog, setOpenItemDialog] = useState(false);
   const [usersLoading, setUsersLoading] = useState(false);
@@ -33,6 +34,7 @@ useEffect(() => { if (tabValue === 1) loadPendingClaims(); }, [tabValue]);
 
   const loadData = async () => {
     setItemsLoading(true);
+    setAppointmentsLoading(true);
     try {
       const itemsRes = await adminService.getAllItems();
       setItems(itemsRes.data);
@@ -46,6 +48,7 @@ useEffect(() => { if (tabValue === 1) loadPendingClaims(); }, [tabValue]);
       console.error('Error:', err); 
     } finally {
       setItemsLoading(false);
+      setAppointmentsLoading(false);
     }
   };
 
@@ -975,168 +978,177 @@ const getImageUrl = (url) => {
         <>
           <Typography variant="h5" gutterBottom>CCTV Review Appointments</Typography>
 
-          {/* Desktop/tablet table */}
-          <Box sx={{ display: { xs: 'none', md: 'block' } }}>
-            <TableContainer component={Paper}>
-              <Table>
-                <TableHead>
-                  <TableRow
-                    sx={(theme) => ({
-                      bgcolor: theme.palette.background.default,
-                      '& th': {
-                        color: theme.palette.text.primary,
-                        fontWeight: 700,
-                      },
-                    })}
-                  >
-                    <TableCell sx={{ color: 'text.primary' }}><strong>ID</strong></TableCell>
-                    <TableCell sx={{ color: 'text.primary' }}><strong>Date</strong></TableCell>
-                    <TableCell sx={{ color: 'text.primary' }}><strong>Time</strong></TableCell>
-                    <TableCell sx={{ color: 'text.primary' }}><strong>Location</strong></TableCell>
-                    <TableCell sx={{ color: 'text.primary' }}><strong>Status</strong></TableCell>
-                    <TableCell sx={{ color: 'text.primary' }}><strong>Actions</strong></TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {appointments.map((apt) => (
-                    <TableRow key={apt.id} hover>
-                      <TableCell>{apt.id}</TableCell>
-                      <TableCell>{new Date(apt.date).toLocaleDateString()}</TableCell>
-                      <TableCell>{apt.time}</TableCell>
-                      <TableCell>{apt.location}</TableCell>
-                      <TableCell>
-                        <Chip label={apt.status} color={getAppointmentStatusColor(apt.status)} size="small" />
-                      </TableCell>
-                      <TableCell>
-                        {apt.status === 'pending' && (
-                          <>
-                            <Button size="small" onClick={() => handleAppointmentStatusChange(apt.id, 'approved')}>Approve</Button>
-                            <Button size="small" onClick={() => handleAppointmentStatusChange(apt.id, 'cancelled')}>Cancel</Button>
-                          </>
-                        )}
-                        {apt.status === 'approved' && (
-                          <Button size="small" onClick={() => handleAppointmentStatusChange(apt.id, 'completed')}>Complete</Button>
-                        )}
-                        <Button
-                          size="small"
-                          onClick={() => handleDeleteAppointment(apt.id)}
-                          color="error"
-                          sx={{ ml: 1 }}
-                        >
-                          Delete
-                        </Button>
-                      </TableCell>
-
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </Box>
-
-          {/* Mobile cards */}
-          <Box sx={{ display: { xs: 'block', md: 'none' } }}>
-            {appointments.map((apt) => {
-              const cardStatusColor = getAppointmentStatusColor(apt.status);
-              const dateText = apt.date ? new Date(apt.date).toLocaleDateString() : '-';
-
-              return (
-                <Card
-                  key={apt.id}
-                  sx={{
-                    mb: 2,
-                    p: 1.5,
-                    border: '1px solid rgba(0,0,0,0.06)',
-                    boxShadow: '0 1px 8px rgba(0,0,0,0.06)',
-                    borderRadius: 2,
-                  }}
-                >
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 1 }}>
-                    <Box sx={{ minWidth: 0 }}>
-                      <Typography variant="subtitle1" sx={{ fontWeight: 800, fontSize: 16, lineHeight: 1.15 }}>
-                        Appointment #{apt.id}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 700, fontSize: 14, mt: 0.5 }}>
-                        Date: {dateText}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 700, fontSize: 14, mt: 0.5 }}>
-                        Time: {apt.time}
-                      </Typography>
-                    </Box>
-                    <Chip label={apt.status} color={cardStatusColor} size="small" />
-                  </Box>
-
-                  <Box sx={{ mt: 1 }}>
-                    <Typography variant="body2" sx={{ fontSize: 14, fontWeight: 700 }}>
-                      Location: <Typography component="span" variant="body2" sx={{ fontWeight: 600 }}>
-                        {apt.location}
-                      </Typography>
-                    </Typography>
-                  </Box>
-
-                  <Box sx={{ mt: 1 }}>
-                    <Grid container spacing={1}>
-                      {apt.status === 'pending' && (
-                        <>
-                          <Grid item xs={6}>
+          {appointmentsLoading ? (
+            <Paper sx={{ p: 4, textAlign: 'center' }}>
+              <CircularProgress size={28} sx={{ mb: 1 }} />
+              <Typography variant="body1" color="text.secondary">Fetching appointments...</Typography>
+            </Paper>
+          ) : (
+            <>
+              {/* Desktop/tablet table */}
+              <Box sx={{ display: { xs: 'none', md: 'block' } }}>
+                <TableContainer component={Paper}>
+                  <Table>
+                    <TableHead>
+                      <TableRow
+                        sx={(theme) => ({
+                          bgcolor: theme.palette.background.default,
+                          '& th': {
+                            color: theme.palette.text.primary,
+                            fontWeight: 700,
+                          },
+                        })}
+                      >
+                        <TableCell sx={{ color: 'text.primary' }}><strong>ID</strong></TableCell>
+                        <TableCell sx={{ color: 'text.primary' }}><strong>Date</strong></TableCell>
+                        <TableCell sx={{ color: 'text.primary' }}><strong>Time</strong></TableCell>
+                        <TableCell sx={{ color: 'text.primary' }}><strong>Location</strong></TableCell>
+                        <TableCell sx={{ color: 'text.primary' }}><strong>Status</strong></TableCell>
+                        <TableCell sx={{ color: 'text.primary' }}><strong>Actions</strong></TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {appointments.map((apt) => (
+                        <TableRow key={apt.id} hover>
+                          <TableCell>{apt.id}</TableCell>
+                          <TableCell>{new Date(apt.date).toLocaleDateString()}</TableCell>
+                          <TableCell>{apt.time}</TableCell>
+                          <TableCell>{apt.location}</TableCell>
+                          <TableCell>
+                            <Chip label={apt.status} color={getAppointmentStatusColor(apt.status)} size="small" />
+                          </TableCell>
+                          <TableCell>
+                            {apt.status === 'pending' && (
+                              <>
+                                <Button size="small" onClick={() => handleAppointmentStatusChange(apt.id, 'approved')}>Approve</Button>
+                                <Button size="small" onClick={() => handleAppointmentStatusChange(apt.id, 'cancelled')}>Cancel</Button>
+                              </>
+                            )}
+                            {apt.status === 'approved' && (
+                              <Button size="small" onClick={() => handleAppointmentStatusChange(apt.id, 'completed')}>Complete</Button>
+                            )}
                             <Button
-                              fullWidth
-                              size="large"
-                              variant="contained"
-                              color="success"
-                              onClick={() => handleAppointmentStatusChange(apt.id, 'approved')}
-                              sx={{ minHeight: 44, justifyContent: 'center' }}
+                              size="small"
+                              onClick={() => handleDeleteAppointment(apt.id)}
+                              color="error"
+                              sx={{ ml: 1 }}
                             >
-                              Approve
+                              Delete
                             </Button>
-                          </Grid>
-                          <Grid item xs={6}>
+                          </TableCell>
+
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              </Box>
+
+              {/* Mobile cards */}
+              <Box sx={{ display: { xs: 'block', md: 'none' } }}>
+                {appointments.map((apt) => {
+                  const cardStatusColor = getAppointmentStatusColor(apt.status);
+                  const dateText = apt.date ? new Date(apt.date).toLocaleDateString() : '-';
+
+                  return (
+                    <Card
+                      key={apt.id}
+                      sx={{
+                        mb: 2,
+                        p: 1.5,
+                        border: '1px solid rgba(0,0,0,0.06)',
+                        boxShadow: '0 1px 8px rgba(0,0,0,0.06)',
+                        borderRadius: 2,
+                      }}
+                    >
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 1 }}>
+                        <Box sx={{ minWidth: 0 }}>
+                          <Typography variant="subtitle1" sx={{ fontWeight: 800, fontSize: 16, lineHeight: 1.15 }}>
+                            Appointment #{apt.id}
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 700, fontSize: 14, mt: 0.5 }}>
+                            Date: {dateText}
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 700, fontSize: 14, mt: 0.5 }}>
+                            Time: {apt.time}
+                          </Typography>
+                        </Box>
+                        <Chip label={apt.status} color={cardStatusColor} size="small" />
+                      </Box>
+
+                      <Box sx={{ mt: 1 }}>
+                        <Typography variant="body2" sx={{ fontSize: 14, fontWeight: 700 }}>
+                          Location: <Typography component="span" variant="body2" sx={{ fontWeight: 600 }}>
+                            {apt.location}
+                          </Typography>
+                        </Typography>
+                      </Box>
+
+                      <Box sx={{ mt: 1 }}>
+                        <Grid container spacing={1}>
+                          {apt.status === 'pending' && (
+                            <>
+                              <Grid item xs={6}>
+                                <Button
+                                  fullWidth
+                                  size="large"
+                                  variant="contained"
+                                  color="success"
+                                  onClick={() => handleAppointmentStatusChange(apt.id, 'approved')}
+                                  sx={{ minHeight: 44, justifyContent: 'center' }}
+                                >
+                                  Approve
+                                </Button>
+                              </Grid>
+                              <Grid item xs={6}>
+                                <Button
+                                  fullWidth
+                                  size="large"
+                                  variant="outlined"
+                                  color="error"
+                                  onClick={() => handleAppointmentStatusChange(apt.id, 'cancelled')}
+                                  sx={{ minHeight: 44, justifyContent: 'center' }}
+                                >
+                                  Cancel
+                                </Button>
+                              </Grid>
+                            </>
+                          )}
+                          {apt.status === 'approved' && (
+                            <Grid item xs={12}>
+                              <Button
+                                fullWidth
+                                size="large"
+                                variant="contained"
+                                color="primary"
+                                onClick={() => handleAppointmentStatusChange(apt.id, 'completed')}
+                                sx={{ minHeight: 44, justifyContent: 'center' }}
+                              >
+                                Complete
+                              </Button>
+                            </Grid>
+                          )}
+                          <Grid item xs={12}>
                             <Button
                               fullWidth
                               size="large"
                               variant="outlined"
                               color="error"
-                              onClick={() => handleAppointmentStatusChange(apt.id, 'cancelled')}
+                              onClick={() => handleDeleteAppointment(apt.id)}
                               sx={{ minHeight: 44, justifyContent: 'center' }}
                             >
-                              Cancel
+                              Delete
                             </Button>
                           </Grid>
-                        </>
-                      )}
-                      {apt.status === 'approved' && (
-                        <Grid item xs={12}>
-                          <Button
-                            fullWidth
-                            size="large"
-                            variant="contained"
-                            color="primary"
-                            onClick={() => handleAppointmentStatusChange(apt.id, 'completed')}
-                            sx={{ minHeight: 44, justifyContent: 'center' }}
-                          >
-                            Complete
-                          </Button>
                         </Grid>
-                      )}
-                      <Grid item xs={12}>
-                        <Button
-                          fullWidth
-                          size="large"
-                          variant="outlined"
-                          color="error"
-                          onClick={() => handleDeleteAppointment(apt.id)}
-                          sx={{ minHeight: 44, justifyContent: 'center' }}
-                        >
-                          Delete
-                        </Button>
-                      </Grid>
-                    </Grid>
-                  </Box>
+                      </Box>
 
-                </Card>
-              );
-            })}
-          </Box>
+                    </Card>
+                  );
+                })}
+              </Box>
+            </>
+          )}
         </>
       )}
 
