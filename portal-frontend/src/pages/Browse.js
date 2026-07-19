@@ -285,7 +285,6 @@ const Browse = () => {
                 <MenuItem value="">All</MenuItem>
                 <MenuItem value="lost">Lost</MenuItem>
                 <MenuItem value="found">Found</MenuItem>
-                <MenuItem value="under_verification">Under Verification</MenuItem>
                 <MenuItem value="claimed">Claimed</MenuItem>
                 <MenuItem value="archived">Archived</MenuItem>
               </TextField>
