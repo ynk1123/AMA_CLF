@@ -423,17 +423,35 @@ display: 'grid',
                 }}
                 onClick={() => handleItemClick(item)}
               >
-                <img
-                  src={item.imageUrl ? getImageUrl(item.imageUrl) : item.image}
-                  alt={item.title}
-style={{
-                    width: '100%',
-                    aspectRatio: '1/1',
-                    objectFit: 'cover',
-                    borderRadius: '8px',
-                    display: 'block',
-                  }}
-                />
+                {item.imageUrl || item.image ? (
+                  <img
+                    src={item.imageUrl ? getImageUrl(item.imageUrl) : item.image}
+                    alt={item.title}
+                    style={{
+                      width: '100%',
+                      aspectRatio: '1/1',
+                      objectFit: 'cover',
+                      borderRadius: '8px',
+                      display: 'block',
+                    }}
+                  />
+                ) : (
+                  <div
+                    style={{
+                      width: '100%',
+                      aspectRatio: '1/1',
+                      backgroundColor: '#f3f4f6',
+                      borderRadius: '8px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: '#9ca3af',
+                      fontWeight: 600,
+                    }}
+                  >
+                    No Photo
+                  </div>
+                )}
                 <span
                   style={{
                     display: 'block',
