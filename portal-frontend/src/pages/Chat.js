@@ -382,7 +382,7 @@ const Chat = () => {
                       messages.map((message, index) => (
                         <Box key={message.id || index} sx={{ mb: 3, opacity: 1, display: 'block' }}>
                           <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
-                            <Avatar
+                              <Avatar
                               sx={{
                                 backgroundColor: '#DC2626',
                                 mr: 2,
@@ -391,13 +391,17 @@ const Chat = () => {
                                 fontWeight: 700,
                               }}
                             >
-                              {(message.User?.displayName?.trim()?.charAt(0) ||
-                                '?').toUpperCase()}
+                              {(
+                                message.User?.displayName?.trim()?.charAt(0) ||
+                                message.User?.studentId?.charAt(0) ||
+                                user?.displayName?.trim()?.charAt(0) ||
+                                (user?.role === 'admin' ? 'A' : '?')
+                              ).toUpperCase()}
                             </Avatar>
                             <Box sx={{ flexGrow: 1 }}>
                               <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
                                 <Typography variant="subtitle1" sx={{ color: 'text.primary', fontWeight: 700, mr: 1 }}>
-                                  {message.User?.displayName || user?.displayName || 'Unknown'}
+                                  {message.User?.displayName || message.User?.studentId || user?.displayName || (user?.role === 'admin' ? 'Admin' : 'Unknown')}
                                 </Typography>
 
                                 <Typography variant="caption" sx={{ color: 'text.secondary' }}>
