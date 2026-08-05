@@ -370,7 +370,7 @@ router.post('/admin-login', async (req, res) => {
     }
 
     const token = jwt.sign({ role: 'admin', id: 0 }, JWT_SECRET, { expiresIn: '7d' });
-    res.json({ token, user: { studentId: 'ADMIN', role: 'admin' } });
+    res.json({ token, user: { studentId: 'ADMIN', role: 'admin', displayName: 'Admin' } });
   } catch (err) {
     res.status(400).json({ message: 'Admin login failed' });
   }

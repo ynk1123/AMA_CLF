@@ -58,7 +58,7 @@ const Login = () => {
     e.preventDefault();
     try {
       const response = await authService.adminLogin({ username: formData.studentId, password: formData.password });
-      login({ studentId: 'ADMIN', role: 'admin' }, response.data.token);
+      login({ studentId: 'ADMIN', role: 'admin', displayName: 'Admin' }, response.data.token);
       navigate('/admin');
     } catch (err) { setError('Invalid Admin Credentials'); }
   };
