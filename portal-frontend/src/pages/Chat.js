@@ -117,7 +117,18 @@ const Chat = () => {
     setIsItemsLoading(true);
     try {
       const response = await itemService.getItems();
-      setItems(response.data);
+      // Exclude archived or already-claimed items from the chat items list
+      const visible = (response.data || []).filter(
+        (it) => !['archived', 'claimed'].includes((it.status || '').toString().toLowerCase())
+      );
+      setItems(visible);
+
+      // If the currently selected item is now hidden (archived/claimed), deselect it
+      if (selectedItem?.id && !visible.find((i) => i.id === selectedItem.id)) {
+        setSelectedItem(null);
+        setMessages([]);
+        setNewMessage('');
+      }
     } catch (err) {
       console.error('Failed to load items');
     } finally {
