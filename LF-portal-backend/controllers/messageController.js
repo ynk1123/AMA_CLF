@@ -23,7 +23,7 @@ exports.createMessage = async (req, res) => {
   try {
     const { content, itemId } = req.body;
 
-    // req.user is normalized in middleware/auth.js
+// req.user is normalized in middleware/auth.js
     const resolvedUserId = req.user?.role === 'admin' ? 0 : req.user?.id;
 
     // Validate inputs explicitly so frontend gets a clear error (not just 400)
@@ -37,6 +37,12 @@ exports.createMessage = async (req, res) => {
       return res.status(400).json({ message: 'Missing itemId' });
     }
 
+    // Anti-spam: cap message length to prevent huge/buffer-overflow payloads.
+    const trimmedContent = content.trim();
+    if (trimmedContent.length > 2000) {
+      return res.status(400).json({ message: 'Message is too long (max 2000 characters).' });
+    }
+
     // For admin messages we use userId = 0, but DB has FK constraint to Users.
     // Ensure we attach to a real admin user row (role='admin') if available.
     let finalUserId = resolvedUserId;
@@ -45,8 +51,23 @@ exports.createMessage = async (req, res) => {
       if (adminUser) finalUserId = adminUser.id;
     }
 
+    // Anti-spam: prevent duplicate spam — block a user sending the exact same
+    // message to the same item repeatedly within a short window.
+    const nowMinus = new Date(Date.now() - 60 * 1000);
+    const recentDuplicate = await Message.findOne({
+      where: {
+        itemId,
+        userId: finalUserId,
+        content: trimmedContent,
+        timestamp: { [require('sequelize').Op.gte]: nowMinus }
+      }
+    });
+    if (recentDuplicate) {
+      return res.status(429).json({ message: 'You just sent that message. Please wait a moment.' });
+    }
+
     const message = await Message.create({
-      content: content.trim(),
+      content: trimmedContent,
       itemId,
       userId: finalUserId,
       timestamp: new Date()
