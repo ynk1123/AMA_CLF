@@ -1,5 +1,9 @@
-- [x] Update Browse.js “Posted by” display to remove studentId
-- [x] Remove “Under Verification” option from Browse.js status filter
-- [x] Remove “Under Verification” option from Dashboard.js status filter
+# TODO: Add password visibility toggles to Reset Password page
 
-
+## Steps
+- [x] Add imports (InputAdornment, IconButton, Visibility, VisibilityOff)
+- [x] Add state variables (showPassword, showConfirmPassword)
+- [x] Add toggle handlers
+- [x] Add eye toggle to "New Password" field
+- [x] Add eye toggle to "Confirm Password" field
+- [x] Verified build compiles successfully
